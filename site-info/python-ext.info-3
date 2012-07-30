@@ -1,0 +1,1114 @@
+This is python-ext.info, produced by makeinfo version 4.3 from
+python-ext.texi.
+
+October 3, 2003
+
+
+File: python-ext.info,  Node: Type-specific Attribute Management,  Prev: Generic Attribute Management,  Up: Attribute Management
+
+Type-specific Attribute Management
+..................................
+
+For simplicity, only the `char*' version will be demonstrated here; the
+type of the name parameter is the only difference between the `char*'
+and `PyObject*' flavors of the interface.  This example effectively
+does the same thing as the generic example above, but does not use the
+generic support added in Python 2.2.  The value in showing this is
+two-fold: it demonstrates how basic attribute management can be done in
+a way that is portable to older versions of Python, and explains how
+the handler functions are called, so that if you do need to extend
+their functionality, you'll understand what needs to be done.
+
+The `tp_getattr' handler is called when the object requires an
+attribute look-up.  It is called in the same situations where the
+`__getattr__()' method of a class would be called.
+
+A likely way to handle this is (1) to implement a set of functions
+(such as `newdatatype_getSize()' and `newdatatype_setSize()' in the
+example below), (2) provide a method table listing these functions, and
+(3) provide a getattr function that returns the result of a lookup in
+that table.  The method table uses the same structure as the
+`tp_methods' field of the type object.
+
+Here is an example:
+
+     static PyMethodDef newdatatype_methods[] = {
+         {"getSize", (PyCFunction)newdatatype_getSize, METH_VARARGS,
+          "Return the current size."},
+         {"setSize", (PyCFunction)newdatatype_setSize, METH_VARARGS,
+          "Set the size."},
+         {NULL, NULL, 0, NULL}           /* sentinel */
+     };
+     
+     static PyObject *
+     newdatatype_getattr(newdatatypeobject *obj, char *name)
+     {
+         return Py_FindMethod(newdatatype_methods, (PyObject *)obj, name);
+     }
+
+The `tp_setattr' handler is called when the `__setattr__()' or
+`__delattr__()' method of a class instance would be called.  When an
+attribute should be deleted, the third parameter will be `NULL'.  Here
+is an example that simply raises an exception; if this were really all
+you wanted, the `tp_setattr' handler should be set to `NULL'.
+
+     static int
+     newdatatype_setattr(newdatatypeobject *obj, char *name, PyObject *v)
+     {
+         (void)PyErr_Format(PyExc_RuntimeError, "Read-only attribute: \%s", name);
+         return -1;
+     }
+
+
+File: python-ext.info,  Node: Object Comparison,  Next: Abstract Protocol Support,  Prev: Attribute Management,  Up: Type Methods
+
+Object Comparison
+-----------------
+
+         cmpfunc tp_compare;
+
+The `tp_compare' handler is called when comparisons are needed and the
+object does not implement the specific rich comparison method which
+matches the requested comparison.  (It is always used if defined and
+the `PyObject_Compare()' or `PyObject_Cmp()' functions are used, or if
+`cmp()' is used from Python.)  It is analogous to the `__cmp__()'
+method.  This function should return `-1' if OBJ1 is less than OBJ2,
+`0' if they are equal, and `1' if OBJ1 is greater than OBJ2.  (It was
+previously allowed to return arbitrary negative or positive integers
+for less than and greater than, respectively; as of Python 2.2, this is
+no longer allowed.  In the future, other return values may be assigned
+a different meaning.)
+
+A `tp_compare' handler may raise an exception.  In this case it should
+return a negative value.  The caller has to test for the exception
+using `PyErr_Occurred()'.
+
+Here is a sample implementation:
+
+     static int
+     newdatatype_compare(newdatatypeobject * obj1, newdatatypeobject * obj2)
+     {
+         long result;
+     
+         if (obj1->obj_UnderlyingDatatypePtr->size <
+             obj2->obj_UnderlyingDatatypePtr->size) {
+             result = -1;
+         }
+         else if (obj1->obj_UnderlyingDatatypePtr->size >
+                  obj2->obj_UnderlyingDatatypePtr->size) {
+             result = 1;
+         }
+         else {
+             result = 0;
+         }
+         return result;
+     }
+
+
+File: python-ext.info,  Node: Abstract Protocol Support,  Next: More Suggestions,  Prev: Object Comparison,  Up: Type Methods
+
+Abstract Protocol Support
+-------------------------
+
+Python supports a variety of _abstract_ `protocols;' the specific
+interfaces provided to use these interfaces are documented in the  in
+the chapter "Abstract Objects Layer."
+
+A number of these abstract interfaces were defined early in the
+development of the Python implementation.  In particular, the number,
+mapping, and sequence protocols have been part of Python since the
+beginning.  Other protocols have been added over time.  For protocols
+which depend on several handler routines from the type implementation,
+the older protocols have been defined as optional blocks of handlers
+referenced by the type object.  For newer protocols there are
+additional slots in the main type object, with a flag bit being set to
+indicate that the slots are present and should be checked by the
+interpreter.  (The flag bit does not indicate that the slot values are
+non-`NULL'. The flag may be set to indicate the presense of a slot, but
+a slot may still be unfilled.)
+
+         PyNumberMethods   tp_as_number;
+         PySequenceMethods tp_as_sequence;
+         PyMappingMethods  tp_as_mapping;
+
+If you wish your object to be able to act like a number, a sequence, or
+a mapping object, then you place the address of a structure that
+implements the C type `PyNumberMethods', `PySequenceMethods', or
+`PyMappingMethods', respectively.  It is up to you to fill in this
+structure with appropriate values. You can find examples of the use of
+each of these in the `Objects' directory of the Python source
+distribution.
+
+         hashfunc tp_hash;
+
+This function, if you choose to provide it, should return a hash number
+for an instance of your datatype. Here is a moderately pointless
+example:
+
+     static long
+     newdatatype_hash(newdatatypeobject *obj)
+     {
+         long result;
+         result = obj->obj_UnderlyingDatatypePtr->size;
+         result = result * 3;
+         return result;
+     }
+
+         ternaryfunc tp_call;
+
+This function is called when an instance of your datatype is "called",
+for example, if `obj1' is an instance of your datatype and the Python
+script contains `obj1('hello')', the `tp_call' handler is invoked.
+
+This function takes three arguments:
+
+  1. ARG1 is the instance of the datatype which is the subject of the
+     call. If the call is `obj1('hello')', then ARG1 is `obj1'.
+
+  2. ARG2 is a tuple containing the arguments to the call.  You can use
+     `PyArg_ParseTuple()' to extract the arguments.
+
+  3. ARG3 is a dictionary of keyword arguments that were passed.  If
+     this is non-`NULL' and you support keyword arguments, use
+     `PyArg_ParseTupleAndKeywords()' to extract the arguments.  If you
+     do not want to support keyword arguments and this is non-`NULL',
+     raise a `TypeError' with a message saying that keyword arguments
+     are not supported.
+
+Here is a desultory example of the implementation of the call function.
+
+     /* Implement the call function.
+      *    obj1 is the instance receiving the call.
+      *    obj2 is a tuple containing the arguments to the call, in this
+      *         case 3 strings.
+      */
+     static PyObject *
+     newdatatype_call(newdatatypeobject *obj, PyObject *args, PyObject *other)
+     {
+         PyObject *result;
+         char *arg1;
+         char *arg2;
+         char *arg3;
+     
+         if (!PyArg_ParseTuple(args, "sss:call", &arg1, &arg2, &arg3)) {
+             return NULL;
+         }
+         result = PyString_FromFormat(
+             "Returning -- value: [\%d] arg1: [\%s] arg2: [\%s] arg3: [\%s]\n",
+             obj->obj_UnderlyingDatatypePtr->size,
+             arg1, arg2, arg3);
+         printf("\%s", PyString_AS_STRING(result));
+         return result;
+     }
+
+XXX some fields need to be added here...
+
+         /* Added in release 2.2 */
+         /* Iterators */
+         getiterfunc tp_iter;
+         iternextfunc tp_iternext;
+
+These functions provide support for the iterator protocol.  Any object
+which wishes to support iteration over its contents (which may be
+generated during iteration) must implement the `tp_iter' handler.
+Objects which are returned by a `tp_iter' handler must implement both
+the `tp_iter' and `tp_iternext' handlers.  Both handlers take exactly
+one parameter, the instance for which they are being called, and return
+a new reference.  In the case of an error, they should set an exception
+and return `NULL'.
+
+For an object which represents an iterable collection, the `tp_iter'
+handler must return an iterator object.  The iterator object is
+responsible for maintaining the state of the iteration.  For
+collections which can support multiple iterators which do not interfere
+with each other (as lists and tuples do), a new iterator should be
+created and returned.  Objects which can only be iterated over once
+(usually due to side effects of iteration) should implement this
+handler by returning a new reference to themselves, and should also
+implement the `tp_iternext' handler.  File objects are an example of
+such an iterator.
+
+Iterator objects should implement both handlers.  The `tp_iter' handler
+should return a new reference to the iterator (this is the same as the
+`tp_iter' handler for objects which can only be iterated over
+destructively).  The `tp_iternext' handler should return a new
+reference to the next object in the iteration if there is one.  If the
+iteration has reached the end, it may return `NULL' without setting an
+exception or it may set `StopIteration'; avoiding the exception can
+yield slightly better performance.  If an actual error occurs, it
+should set an exception and return `NULL'.
+
+
+File: python-ext.info,  Node: More Suggestions,  Prev: Abstract Protocol Support,  Up: Type Methods
+
+More Suggestions
+----------------
+
+Remember that you can omit most of these functions, in which case you
+provide `0' as a value.  There are type definitions for each of the
+functions you must provide.  They are in `object.h' in the Python
+include directory that comes with the source distribution of Python.
+
+In order to learn how to implement any specific method for your new
+datatype, do the following: Download and unpack the Python source
+distribution.  Go the `Objects' directory, then search the C source
+files for `tp_' plus the function you want (for example, `tp_print' or
+`tp_compare').  You will find examples of the function you want to
+implement.
+
+When you need to verify that an object is an instance of the type you
+are implementing, use the `PyObject_TypeCheck' function.  A sample of
+its use might be something like the following:
+
+         if (! PyObject_TypeCheck(some_object, &MyType)) {
+             PyErr_SetString(PyExc_TypeError, "arg #1 not a mything");
+             return NULL;
+         }
+
+
+File: python-ext.info,  Node: Building C and C++ Extensions with distutils,  Next: Building C and C++ Extensions on Windows,  Prev: Defining New Types,  Up: Top
+
+Building C and C++ Extensions with distutils
+********************************************
+
+Starting in Python 1.4, Python provides, on UNIX, a special make file
+for building make files for building dynamically-linked extensions and
+custom interpreters.  Starting with Python 2.0, this mechanism (known
+as related to Makefile.pre.in, and Setup files) is no longer supported.
+Building custom interpreters was rarely used, and extension modules can
+be built using distutils.
+
+Building an extension module using distutils requires that distutils is
+installed on the build machine, which is included in Python 2.x and
+available separately for Python 1.5. Since distutils also supports
+creation of binary packages, users don't necessarily need a compiler
+and distutils to install the extension.
+
+A distutils package contains a driver script, `setup.py'. This is a
+plain Python file, which, in the most simple case, could look like this:
+
+     from distutils.core import setup, Extension
+     
+     module1 = Extension('demo',
+                         sources = ['demo.c'])
+     
+     setup (name = 'PackageName',
+            version = '1.0',
+            description = 'This is a demo package',
+            ext_modules = [module1])
+
+With this `setup.py', and a file `demo.c', running
+
+     python setup.py build
+
+will compile `demo.c', and produce an extension module named `demo' in
+the `build' directory. Depending on the system, the module file will
+end up in a subdirectory `build/lib.system', and may have a name like
+`demo.so' or `demo.pyd'.
+
+In the `setup.py', all execution is performed by calling the `setup'
+function. This takes a variable number of keyword arguments, of which
+the example above uses only a subset. Specifically, the example
+specifies meta-information to build packages, and it specifies the
+contents of the package.  Normally, a package will contain of addition
+modules, like Python source modules, documentation, subpackages, etc.
+Please refer to the distutils documentation in  to learn more about the
+features of distutils; this section explains building extension modules
+only.
+
+It is common to pre-compute arguments to `setup', to better structure
+the driver script. In the example above, the`ext_modules' argument to
+`setup' is a list of extension modules, each of which is an instance of
+the `Extension'. In the example, the instance defines an extension
+named `demo' which is build by compiling a single source file, `demo.c'.
+
+In many cases, building an extension is more complex, since additional
+preprocessor defines and libraries may be needed. This is demonstrated
+in the example below.
+
+     from distutils.core import setup, Extension
+     
+     module1 = Extension('demo',
+                         define_macros = [('MAJOR_VERSION', '1'),
+                                          ('MINOR_VERSION', '0')],
+                         include_dirs = ['/usr/local/include'],
+                         libraries = ['tcl83'],
+                         library_dirs = ['/usr/local/lib'],
+                         sources = ['demo.c'])
+     
+     setup (name = 'PackageName',
+            version = '1.0',
+            description = 'This is a demo package',
+            author = 'Martin v. Loewis',
+            author_email = 'martin@v.loewis.de',
+            url = 'http://www.python.org/doc/current/ext/building.html',
+            long_description = '''
+     This is really just a demo package.
+     ''',
+            ext_modules = [module1])
+
+In this example, `setup' is called with additional meta-information,
+which is recommended when distribution packages have to be built. For
+the extension itself, it specifies preprocessor defines, include
+directories, library directories, and libraries.  Depending on the
+compiler, distutils passes this information in different ways to the
+compiler. For example, on UNIX, this may result in the compilation
+commands
+
+     gcc -DNDEBUG -g -O3 -Wall -Wstrict-prototypes -fPIC -DMAJOR_VERSION=1 -DMINOR_VERSION=0 -I/usr/local/include -I/usr/local/include/python2.2 -c demo.c -o build/temp.linux-i686-2.2/demo.o
+     
+     gcc -shared build/temp.linux-i686-2.2/demo.o -L/usr/local/lib -ltcl83 -o build/lib.linux-i686-2.2/demo.so
+
+These lines are for demonstration purposes only; distutils users should
+trust that distutils gets the invocations right.
+
+* Menu:
+
+* Distributing your extension modules::
+
+
+File: python-ext.info,  Node: Distributing your extension modules,  Prev: Building C and C++ Extensions with distutils,  Up: Building C and C++ Extensions with distutils
+
+Distributing your extension modules
+===================================
+
+When an extension has been successfully build, there are three ways to
+use it.
+
+End-users will typically want to install the module, they do so by
+running
+
+     python setup.py install
+
+Module maintainers should produce source packages; to do so, they run
+
+     python setup.py sdist
+
+In some cases, additional files need to be included in a source
+distribution; this is done through a `MANIFEST.in' file; see the
+distutils documentation for details.
+
+If the source distribution has been build successfully, maintainers can
+also create binary distributions. Depending on the platform, one of the
+following commands can be used to do so.
+
+     python setup.py bdist_wininst
+     python setup.py bdist_rpm
+     python setup.py bdist_dumb
+
+
+File: python-ext.info,  Node: Building C and C++ Extensions on Windows,  Next: Embedding Python in Another Application,  Prev: Building C and C++ Extensions with distutils,  Up: Top
+
+Building C and C++ Extensions on Windows
+****************************************
+
+This chapter briefly explains how to create a Windows extension module
+for Python using Microsoft Visual C++, and follows with more detailed
+background information on how it works.  The explanatory material is
+useful for both the Windows programmer learning to build Python
+extensions and the UNIX programmer interested in producing software
+which can be successfully built on both UNIX and Windows.
+
+Module authors are encouraged to use the distutils approach for
+building extension modules, instead of the one described in this
+section. You will still need the C compiler that was used to build
+Python; typically Microsoft Visual C++.
+
+_Notice:_ This chapter mentions a number of filenames that include an
+encoded Python version number.  These filenames are represented with the
+version number shown as `XY'; in practive, `X' will be the major
+version number and `Y' will be the minor version number of the Python
+release you're working with.  For example, if you are using Python
+2.2.1, `XY' will actually be `22'.
+
+* Menu:
+
+* A Cookbook Approach::
+* Differences Between UNIX and Windows::
+* Using DLLs in Practice::
+
+
+File: python-ext.info,  Node: A Cookbook Approach,  Next: Differences Between UNIX and Windows,  Prev: Building C and C++ Extensions on Windows,  Up: Building C and C++ Extensions on Windows
+
+A Cookbook Approach
+===================
+
+There are two approaches to building extension modules on Windows, just
+as there are on UNIX: use the `distutils' package to control the build
+process, or do things manually.  The distutils approach works well for
+most extensions; documentation on using `distutils' to build and
+package extension modules is available in .  This section describes the
+manual approach to building Python extensions written in C or C++.
+
+To build extensions using these instructions, you need to have a copy
+of the Python sources of the same version as your installed Python.
+You will need Microsoft Visual C++ "Developer Studio"; project files
+are supplied for VC++ version 6, but you can use older versions of
+VC++.  The example files described here are distributed with the Python
+sources in the `PC\example_nt\' directory.
+
+  1. *Copy the example files*\ The `example_nt' directory is a
+     subdirectory of the `PC' directory, in order to keep all the
+     PC-specific files under the same directory in the source
+     distribution.  However, the `example_nt' directory can't actually
+     be used from this location.  You first need to copy or move it up
+     one level, so that `example_nt' is a sibling of the `PC' and
+     `Include' directories.  Do all your work from within this new
+     location.
+
+  2. *Open the project*\ From VC++, use the `File /Open Workspace'
+     dialog (not `File /Open'!).  Navigate to and select the file
+     `example.dsw', in the _copy_ of the `example_nt' directory you
+     made above.  Click Open.
+
+  3. *Build the example DLL*\ In order to check that everything is set
+     up right, try building:
+
+       1. Select a configuration.  This step is optional.  Choose
+          `Build /Select Active Configuration' and select either
+          "example - Win32 Release" or "example - Win32 Debug."  If you
+          skip this step, VC++ will use the Debug configuration by
+          default.
+
+       2. Build the DLL.  Choose `Build /Build example_d.dll' in Debug
+          mode, or `Build /Build example.dll' in Release mode.  This
+          creates all intermediate and result files in a subdirectory
+          called either `Debug' or `Release', depending on which
+          configuration you selected in the preceding step.
+
+  4. *Testing the debug-mode DLL*\ Once the Debug build has succeeded,
+     bring up a DOS box, and change to the `example_nt\Debug'
+     directory.  You should now be able to repeat the following session
+     (`C>' is the DOS prompt, `>`>'>' is the Python prompt; note that
+     build information and various debug output from Python may not
+     match this screen dump exactly):
+
+          C>..\..\PCbuild\python_d
+          Adding parser accelerators ...
+          Done.
+          Python 2.2 (#28, Dec 19 2001, 23:26:37) [MSC 32 bit (Intel)] on win32
+          Type "copyright", "credits" or "license" for more information.
+          >>> import example
+          [4897 refs]
+          >>> example.foo()
+          Hello, world
+          [4903 refs]
+          >>>
+
+     Congratulations!  You've successfully built your first Python
+     extension module.
+
+  5. *Creating your own project*\ Choose a name and create a directory
+     for it.  Copy your C sources into it.  Note that the module source
+     file name does not necessarily have to match the module name, but
+     the name of the initialization function should match the module
+     name -- you can only import a module `spam' if its initialization
+     function is called `initspam()', and it should call
+     `Py_InitModule()' with the string `"spam"' as its first argument
+     (use the minimal `example.c' in this directory as a guide).  By
+     convention, it lives in a file called `spam.c' or `spammodule.c'.
+     The output file should be called `spam.dll' or `spam.pyd' (the
+     latter is supported to avoid confusion with a system library
+     `spam.dll' to which your module could be a Python interface) in
+     Release mode, or `spam_d.dll' or `spam_d.pyd' in Debug mode.
+
+     Now your options are:
+
+       1. Copy `example.dsw' and `example.dsp', rename them to
+          `spam.*', and edit them by hand, or
+
+       2. Create a brand new project; instructions are below.
+
+     In either case, copy `example_nt\example.def' to `spam\spam.def',
+     and edit the new `spam.def' so its second line contains the string
+     ``initspam''.  If you created a new project yourself, add the file
+     `spam.def' to the project now.  (This is an annoying little file
+     with only two lines.  An alternative approach is to forget about
+     the `.def' file, and add the option `/export:initspam' somewhere
+     to the Link settings, by manually editing the setting in Project
+     Options dialog).
+
+  6. *Creating a brand new project*\ Use the `File /New /Projects'
+     dialog to create a new Project Workspace.  Select "Win32
+     Dynamic-Link Library," enter the name (`spam'), and make sure the
+     Location is set to the `spam' directory you have created (which
+     should be a direct subdirectory of the Python build tree, a
+     sibling of `Include' and `PC').  Select Win32 as the platform (in
+     my version, this is the only choice).  Make sure the Create new
+     workspace radio button is selected.  Click OK.
+
+     Now open the `Project /Settings' dialog.  You only need to change
+     a few settings.  Make sure All Configurations is selected from the
+     Settings for: dropdown list.  Select the C/C++ tab.  Choose the
+     Preprocessor category in the popup menu at the top.  Type the
+     following text in the entry box labeled Addditional include
+     directories:
+
+          ..\Include,..\PC
+
+     Then, choose the Input category in the Link tab, and enter
+
+          ..\PCbuild
+
+     in the text box labelled "Additional library path."
+
+     Now you need to add some mode-specific settings:
+
+     Select "Win32 Release" in the "Settings for" dropdown list.  Click
+     the Link tab, choose the Input Category, and append `pythonXY.lib'
+     to the list in the "Object/library modules" box.
+
+     Select "Win32 Debug" in the "Settings for" dropdown list, and
+     append `pythonXY_d.lib' to the list in the "Object/library
+     modules" box.  Then click the C/C++ tab, select "Code Generation"
+     from the Category dropdown list, and select "Debug Multithreaded
+     DLL" from the "Use run-time library" dropdown list.
+
+     Select "Win32 Release" again from the "Settings for" dropdown
+     list.  Select "Multithreaded DLL" from the "Use run-time library:"
+     dropdown list.
+
+     You should now create the file `spam.def' as instructed in the
+     previous section.  Then chose the `Insert /Files into Project'
+     dialog.  Set the pattern to `*.*' and select both `spam.c' and
+     `spam.def' and click OK.  (Inserting them one by one is fine too.)
+
+If your module creates a new type, you may have trouble with this line:
+
+         PyObject_HEAD_INIT(&PyType_Type)
+
+Change it to:
+
+         PyObject_HEAD_INIT(NULL)
+
+and add the following to the module initialization function:
+
+         MyObject_Type.ob_type = &PyType_Type;
+
+Refer to section~3 of the  for details on why you must do this.
+
+
+File: python-ext.info,  Node: Differences Between UNIX and Windows,  Next: Using DLLs in Practice,  Prev: A Cookbook Approach,  Up: Building C and C++ Extensions on Windows
+
+Differences Between UNIX and Windows
+====================================
+
+UNIX and Windows use completely different paradigms for run-time
+loading of code.  Before you try to build a module that can be
+dynamically loaded, be aware of how your system works.
+
+In UNIX, a shared object (`.so') file contains code to be used by the
+program, and also the names of functions and data that it expects to
+find in the program.  When the file is joined to the program, all
+references to those functions and data in the file's code are changed
+to point to the actual locations in the program where the functions and
+data are placed in memory.  This is basically a link operation.
+
+In Windows, a dynamic-link library (`.dll') file has no dangling
+references.  Instead, an access to functions or data goes through a
+lookup table.  So the DLL code does not have to be fixed up at runtime
+to refer to the program's memory; instead, the code already uses the
+DLL's lookup table, and the lookup table is modified at runtime to
+point to the functions and data.
+
+In UNIX, there is only one type of library file (`.a') which contains
+code from several object files (`.o').  During the link step to create
+a shared object file (`.so'), the linker may find that it doesn't know
+where an identifier is defined.  The linker will look for it in the
+object files in the libraries; if it finds it, it will include all the
+code from that object file.
+
+In Windows, there are two types of library, a static library and an
+import library (both called `.lib').  A static library is like a UNIX
+`.a' file; it contains code to be included as necessary.  An import
+library is basically used only to reassure the linker that a certain
+identifier is legal, and will be present in the program when the DLL is
+loaded.  So the linker uses the information from the import library to
+build the lookup table for using identifiers that are not included in
+the DLL.  When an application or a DLL is linked, an import library may
+be generated, which will need to be used for all future DLLs that
+depend on the symbols in the application or DLL.
+
+Suppose you are building two dynamic-load modules, B and C, which should
+share another block of code A.  On UNIX, you would _not_ pass `A.a' to
+the linker for `B.so' and `C.so'; that would cause it to be included
+twice, so that B and C would each have their own copy.  In Windows,
+building `A.dll' will also build `A.lib'.  You _do_ pass `A.lib' to the
+linker for B and C.  `A.lib' does not contain code; it just contains
+information which will be used at runtime to access A's code.
+
+In Windows, using an import library is sort of like using `import
+spam'; it gives you access to spam's names, but does not create a
+separate copy.  On UNIX, linking with a library is more like `from spam
+import *'; it does create a separate copy.
+
+
+File: python-ext.info,  Node: Using DLLs in Practice,  Prev: Differences Between UNIX and Windows,  Up: Building C and C++ Extensions on Windows
+
+Using DLLs in Practice
+======================
+
+Windows Python is built in Microsoft Visual C++; using other compilers
+may or may not work (though Borland seems to).  The rest of this
+section is MSVC++ specific.
+
+When creating DLLs in Windows, you must pass `pythonXY.lib' to the
+linker.  To build two DLLs, spam and ni (which uses C functions found
+in spam), you could use these commands:
+
+     cl /LD /I/python/include spam.c ../libs/pythonXY.lib
+     cl /LD /I/python/include ni.c spam.lib ../libs/pythonXY.lib
+
+The first command created three files: `spam.obj', `spam.dll' and
+`spam.lib'.  `Spam.dll' does not contain any Python functions (such as
+`PyArg_ParseTuple()'), but it does know how to find the Python code
+thanks to `pythonXY.lib'.
+
+The second command created `ni.dll' (and `.obj' and `.lib'), which
+knows how to find the necessary functions from spam, and also from the
+Python executable.
+
+Not every identifier is exported to the lookup table.  If you want any
+other modules (including Python) to be able to see your identifiers,
+you have to say `_declspec(dllexport)', as in `void
+_declspec(dllexport) initspam(void)' or `PyObject _declspec(dllexport)
+*NiGetSpamData(void)'.
+
+Developer Studio will throw in a lot of import libraries that you do
+not really need, adding about 100K to your executable.  To get rid of
+them, use the Project Settings dialog, Link tab, to specify _ignore
+default libraries_.  Add the correct `msvcrtXX.lib' to the list of
+libraries.
+
+
+File: python-ext.info,  Node: Embedding Python in Another Application,  Next: Reporting Bugs,  Prev: Building C and C++ Extensions on Windows,  Up: Top
+
+Embedding Python in Another Application
+***************************************
+
+The previous chapters discussed how to extend Python, that is, how to
+extend the functionality of Python by attaching a library of C
+functions to it.  It is also possible to do it the other way around:
+enrich your C/C++ application by embedding Python in it.  Embedding
+provides your application with the ability to implement some of the
+functionality of your application in Python rather than C or C++.  This
+can be used for many purposes; one example would be to allow users to
+tailor the application to their needs by writing some scripts in
+Python.  You can also use it yourself if some of the functionality can
+be written in Python more easily.
+
+Embedding Python is similar to extending it, but not quite.  The
+difference is that when you extend Python, the main program of the
+application is still the Python interpreter, while if you embed Python,
+the main program may have nothing to do with Python -- instead, some
+parts of the application occasionally call the Python interpreter to
+run some Python code.
+
+So if you are embedding Python, you are providing your own main
+program.  One of the things this main program has to do is initialize
+the Python interpreter.  At the very least, you have to call the
+function `Py_Initialize()' (on Mac OS, call `PyMac_Initialize()'
+instead).  There are optional calls to pass command line arguments to
+Python.  Then later you can call the interpreter from any part of the
+application.
+
+There are several different ways to call the interpreter: you can pass
+a string containing Python statements to `PyRun_SimpleString()', or you
+can pass a stdio file pointer and a file name (for identification in
+error messages only) to `PyRun_SimpleFile()'.  You can also call the
+lower-level operations described in the previous chapters to construct
+and use Python objects.
+
+A simple demo of embedding Python can be found in the directory
+`Demo/embed/' of the source distribution.
+
+See also:
+     `Python/C API Reference Manual'{The details of Python's C
+     interface are given in this manual. A great deal of necessary
+     information can be found here.}
+
+* Menu:
+
+* Very High Level Embedding::
+* Beyond Very High Level Embedding An overview::
+* Pure Embedding::
+* Extending Embedded Python::
+* Embedding Python in C++::
+* Linking Requirements::
+
+
+File: python-ext.info,  Node: Very High Level Embedding,  Next: Beyond Very High Level Embedding An overview,  Prev: Embedding Python in Another Application,  Up: Embedding Python in Another Application
+
+Very High Level Embedding
+=========================
+
+The simplest form of embedding Python is the use of the very high level
+interface. This interface is intended to execute a Python script
+without needing to interact with the application directly. This can for
+example be used to perform some operation on a file.
+
+     #include <Python.h>
+     
+     int
+     main(int argc, char *argv[])
+     {
+       Py_Initialize();
+       PyRun_SimpleString("from time import time,ctime\n"
+                          "print 'Today is',ctime(time())\n");
+       Py_Finalize();
+       return 0;
+     }
+
+The above code first initializes the Python interpreter with
+`Py_Initialize()', followed by the execution of a hard-coded Python
+script that print the date and time.  Afterwards, the `Py_Finalize()'
+call shuts the interpreter down, followed by the end of the program.
+In a real program, you may want to get the Python script from another
+source, perhaps a text-editor routine, a file, or a database.  Getting
+the Python code from a file can better be done by using the
+`PyRun_SimpleFile()' function, which saves you the trouble of
+allocating memory space and loading the file contents.
+
+
+File: python-ext.info,  Node: Beyond Very High Level Embedding An overview,  Next: Pure Embedding,  Prev: Very High Level Embedding,  Up: Embedding Python in Another Application
+
+Beyond Very High Level Embedding: An overview
+=============================================
+
+The high level interface gives you the ability to execute arbitrary
+pieces of Python code from your application, but exchanging data values
+is quite cumbersome to say the least. If you want that, you should use
+lower level calls. At the cost of having to write more C code, you can
+achieve almost anything.
+
+It should be noted that extending Python and embedding Python is quite
+the same activity, despite the different intent. Most topics discussed
+in the previous chapters are still valid. To show this, consider what
+the extension code from Python to C really does:
+
+  1. Convert data values from Python to C,
+
+  2. Perform a function call to a C routine using the converted values,
+     and
+
+  3. Convert the data values from the call from C to Python.
+
+When embedding Python, the interface code does:
+
+  1. Convert data values from C to Python,
+
+  2. Perform a function call to a Python interface routine using the
+     converted values, and
+
+  3. Convert the data values from the call from Python to C.
+
+As you can see, the data conversion steps are simply swapped to
+accomodate the different direction of the cross-language transfer.  The
+only difference is the routine that you call between both data
+conversions. When extending, you call a C routine, when embedding, you
+call a Python routine.
+
+This chapter will not discuss how to convert data from Python to C and
+vice versa.  Also, proper use of references and dealing with errors is
+assumed to be understood.  Since these aspects do not differ from
+extending the interpreter, you can refer to earlier chapters for the
+required information.
+
+
+File: python-ext.info,  Node: Pure Embedding,  Next: Extending Embedded Python,  Prev: Beyond Very High Level Embedding An overview,  Up: Embedding Python in Another Application
+
+Pure Embedding
+==============
+
+The first program aims to execute a function in a Python script. Like
+in the section about the very high level interface, the Python
+interpreter does not directly interact with the application (but that
+will change in th next section).
+
+The code to run a function defined in a Python script is:
+
+`run-func.c'
+
+This code loads a Python script using `argv[1]', and calls the function
+named in `argv[2]'.  Its integer arguments are the other values of the
+`argv' array.  If you compile and link this program (let's call the
+finished executable `call'), and use it to execute a Python script,
+such as:
+
+     def multiply(a,b):
+         print "Will compute", a, "times", b
+         c = 0
+         for i in range(0, a):
+             c = c + b
+         return c
+
+then the result should be:
+
+     $ call multiply multiply 3 2
+     Will compute 3 times 2
+     Result of call: 6
+
+Although the program is quite large for its functionality, most of the
+code is for data conversion between Python and C, and for error
+reporting.  The interesting part with respect to embedding Python
+starts with
+
+         Py_Initialize();
+         pName = PyString_FromString(argv[1]);
+         /* Error checking of pName left out */
+         pModule = PyImport_Import(pName);
+
+After initializing the interpreter, the script is loaded using
+`PyImport_Import()'.  This routine needs a Python string as its
+argument, which is constructed using the `PyString_FromString()' data
+conversion routine.
+
+         pFunc = PyObject_GetAttrString(pModule, argv[2]);
+         /* pFunc is a new reference */
+     
+         if (pFunc && PyCallable_Check(pFunc)) {
+             ...
+         }
+         Py_XDECREF(pFunc);
+
+Once the script is loaded, the name we're looking for is retrieved
+using `PyObject_GetAttrString()'.  If the name exists, and the object
+returned is callable, you can safely assume that it is a function.  The
+program then proceeds by constructing a tuple of arguments as normal.
+The call to the Python function is then made with:
+
+         pValue = PyObject_CallObject(pFunc, pArgs);
+
+Upon return of the function, `pValue' is either `NULL' or it contains a
+reference to the return value of the function.  Be sure to release the
+reference after examining the value.
+
+
+File: python-ext.info,  Node: Extending Embedded Python,  Next: Embedding Python in C++,  Prev: Pure Embedding,  Up: Embedding Python in Another Application
+
+Extending Embedded Python
+=========================
+
+Until now, the embedded Python interpreter had no access to
+functionality from the application itself.  The Python API allows this
+by extending the embedded interpreter.  That is, the embedded
+interpreter gets extended with routines provided by the application.
+While it sounds complex, it is not so bad.  Simply forget for a while
+that the application starts the Python interpreter.  Instead, consider
+the application to be a set of subroutines, and write some glue code
+that gives Python access to those routines, just like you would write a
+normal Python extension.  For example:
+
+     static int numargs=0;
+     
+     /* Return the number of arguments of the application command line */
+     static PyObject*
+     emb_numargs(PyObject *self, PyObject *args)
+     {
+         if(!PyArg_ParseTuple(args, ":numargs"))
+             return NULL;
+         return Py_BuildValue("i", numargs);
+     }
+     
+     static PyMethodDef EmbMethods[] = {
+         {"numargs", emb_numargs, METH_VARARGS,
+          "Return the number of arguments received by the process."},
+         {NULL, NULL, 0, NULL}
+     };
+
+Insert the above code just above the `main()' function.  Also, insert
+the following two statements directly after `Py_Initialize()':
+
+         numargs = argc;
+         Py_InitModule("emb", EmbMethods);
+
+These two lines initialize the `numargs' variable, and make the
+`emb.numargs()' function accessible to the embedded Python interpreter.
+With these extensions, the Python script can do things like
+
+     import emb
+     print "Number of arguments", emb.numargs()
+
+In a real application, the methods will expose an API of the
+application to Python.
+
+
+File: python-ext.info,  Node: Embedding Python in C++,  Next: Linking Requirements,  Prev: Extending Embedded Python,  Up: Embedding Python in Another Application
+
+Embedding Python in C++
+=======================
+
+It is also possible to embed Python in a C++ program; precisely how this
+is done will depend on the details of the C++ system used; in general
+you will need to write the main program in C++, and use the C++ compiler
+to compile and link your program.  There is no need to recompile Python
+itself using C++.
+
+
+File: python-ext.info,  Node: Linking Requirements,  Prev: Embedding Python in C++,  Up: Embedding Python in Another Application
+
+Linking Requirements
+====================
+
+While the `configure' script shipped with the Python sources will
+correctly build Python to export the symbols needed by dynamically
+linked extensions, this is not automatically inherited by applications
+which embed the Python library statically, at least on UNIX.  This is
+an issue when the application is linked to the static runtime library
+(`libpython.a') and needs to load dynamic extensions (implemented as
+`.so' files).
+
+The problem is that some entry points are defined by the Python runtime
+solely for extension modules to use.  If the embedding application does
+not use any of these entry points, some linkers will not include those
+entries in the symbol table of the finished executable.  Some
+additional options are needed to inform the linker not to remove these
+symbols.
+
+Determining the right options to use for any given platform can be
+quite difficult, but fortunately the Python configuration already has
+those values.  To retrieve them from an installed Python interpreter,
+start an interactive interpreter and have a short session like this:
+
+     >>> import distutils.sysconfig
+     >>> distutils.sysconfig.get_config_var('LINKFORSHARED')
+     '-Xlinker -export-dynamic'
+
+The contents of the string presented will be the options that should be
+used.  If the string is empty, there's no need to add any additional
+options.  The `LINKFORSHARED' definition corresponds to the variable of
+the same name in Python's top-level `Makefile'.
+
+
+File: python-ext.info,  Node: Reporting Bugs,  Next: History and License,  Prev: Embedding Python in Another Application,  Up: Top
+
+Reporting Bugs
+**************
+
+Python is a mature programming language which has established a
+reputation for stability.  In order to maintain this reputation, the
+developers would like to know of any deficiencies you find in Python or
+its documentation.
+
+Before submitting a report, you will be required to log into
+SourceForge; this will make it possible for the developers to contact
+you for additional information if needed.  It is not possible to submit
+a bug report anonymously.
+
+All bug reports should be submitted via the Python Bug Tracker on
+SourceForge (<http://sourceforge.net/bugs/?group_id=5470>).  The bug
+tracker offers a Web form which allows pertinent information to be
+entered and submitted to the developers.
+
+The first step in filing a report is to determine whether the problem
+has already been reported.  The advantage in doing so, aside from
+saving the developers time, is that you learn what has been done to fix
+it; it may be that the problem has already been fixed for the next
+release, or additional information is needed (in which case you are
+welcome to provide it if you can!).  To do this, search the bug
+database using the search box near the bottom of the page.
+
+If the problem you're reporting is not already in the bug tracker, go
+back to the Python Bug Tracker
+(<http://sourceforge.net/bugs/?group_id=5470>).  Select the "Submit a
+Bug" link at the top of the page to open the bug reporting form.
+
+The submission form has a number of fields.  The only fields that are
+required are the "Summary" and "Details" fields.  For the summary,
+enter a _very_ short description of the problem; less than ten words is
+good.  In the Details field, describe the problem in detail, including
+what you expected to happen and what did happen.  Be sure to include
+the version of Python you used, whether any extension modules were
+involved, and what hardware and software platform you were using
+(including version information as appropriate).
+
+The only other field that you may want to set is the "Category" field,
+which allows you to place the bug report into a broad category (such as
+"Documentation" or "Library").
+
+Each bug report will be assigned to a developer who will determine what
+needs to be done to correct the problem.  You will receive an update
+each time action is taken on the bug.
+
+See also:
+     `How to Report Bugs Effectively'{Article which goes into some
+     detail about how to create a useful bug report.  This describes
+     what kind of information is useful and why it is useful.}
+
+     `Bug Writing Guidelines'{Information about writing a good bug
+     report.  Some of this is specific to the Mozilla project, but
+     describes general good practices.}
+
+
+File: python-ext.info,  Node: History and License,  Next: Module Index,  Prev: Reporting Bugs,  Up: Top
+
+History and License
+*******************
+
+* Menu:
+
+* History of the software::
+* Terms and conditions for accessing or otherwise using Python::
+
+
+File: python-ext.info,  Node: History of the software,  Next: Terms and conditions for accessing or otherwise using Python,  Prev: History and License,  Up: History and License
+
+History of the software
+=======================
+
+Python was created in the early 1990s by Guido van Rossum at Stichting
+Mathematisch Centrum (CWI, see <http://www.cwi.nl/>) in the Netherlands
+as a successor of a language called ABC.  Guido remains Python's
+principal author, although it includes many contributions from others.
+
+In 1995, Guido continued his work on Python at the Corporation for
+National Research Initiatives (CNRI, see
+<http://www.cnri.reston.va.us/>) in Reston, Virginia where he released
+several versions of the software.
+
+In May 2000, Guido and the Python core development team moved to
+BeOpen.com to form the BeOpen PythonLabs team.  In October of the same
+year, the PythonLabs team moved to Digital Creations (now Zope
+Corporation; see <http://www.zope.com/>).  In 2001, the Python Software
+Foundation (PSF, see <http://www.python.org/psf/>) was formed, a
+non-profit organization created specifically to own Python-related
+Intellectual Property.  Zope Corporation is a sponsoring member of the
+PSF.
+
+All Python releases are Open Source (see <http://www.opensource.org/>
+for the Open Source Definition).  Historically, most, but not all,
+Python releases have also been GPL-compatible; the table below
+summarizes the various releases.
+
+Release        Derived from   Year           Owner          GPL
+                                                            compatible?
+------         ------         ------         ------         ------
+0.9.0 thru     n/a            1991-1995      CWI            yes
+1.2                                                         
+1.3 thru       1.2            1995-1999      CNRI           yes
+1.5.2                                                       
+1.6            1.5.2          2000           CNRI           no
+2.0            1.6            2000           BeOpen.com     no
+1.6.1          1.6            2001           CNRI           no
+2.1            2.0+1.6.1      2001           PSF            no
+2.0.1          2.0+1.6.1      2001           PSF            yes
+2.1.1          2.1+2.0.1      2001           PSF            yes
+2.2            2.1.1          2001           PSF            yes
+2.1.2          2.1.1          2002           PSF            yes
+2.1.3          2.1.2          2002           PSF            yes
+2.2.1          2.2            2002           PSF            yes
+2.2.2          2.2.1          2002           PSF            yes
+2.2.3          2.2.2          2002-2003      PSF            yes
+2.3            2.2.2          2002-2003      PSF            yes
+2.3.1          2.3            2002-2003      PSF            yes
+2.3.2          2.3.1          2003           PSF            yes
+
+_Note:_ GPL-compatible doesn't mean that we're distributing Python
+under the GPL.  All Python licenses, unlike the GPL, let you distribute
+a modified version without making your changes open source. The
+GPL-compatible licenses make it possible to combine Python with other
+software that is released under the GPL; the others don't.
+
+Thanks to the many outside volunteers who have worked under Guido's
+direction to make these releases possible.
+

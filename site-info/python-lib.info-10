@@ -1,0 +1,1260 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: Examples 2,  Prev: Match Objects,  Up: re
+
+Examples
+--------
+
+*Simulating `scanf()'*
+
+Python does not currently have an equivalent to `scanf()'.  Regular
+expressions are generally more powerful, though also more verbose, than
+`scanf()' format strings.  The table below offers some more-or-less
+equivalent mappings between `scanf()' format tokens and regular
+expressions.
+
+`scanf()' Token                      Regular Expression
+------                               -----
+`%c'                                 "."
+`%5c'                                ".{5}"
+`%d'                                 "[-+]?\d+"
+`%e', `%E', `%f', `%g'               "[-+]?(\d+(\.\d*)?|\d*\.\d+)([eE][-+]?\d+)?"
+`%i'                                 "[-+]?(0[xX][\dA-Fa-f]+|0[0-7]*|\d+)"
+`%o'                                 "0[0-7]*"
+`%s'                                 "\S+"
+`%u'                                 "\d+"
+`%x', `%X'                           "0[xX][\dA-Fa-f]+"
+
+To extract the filename and numbers from a string like
+
+         /usr/sbin/sendmail - 0 errors, 4 warnings
+
+you would use a `scanf()' format like
+
+         %s - %d errors, %d warnings
+
+The equivalent regular expression would be
+
+         (\S+) - (\d+) errors, (\d+) warnings
+
+*Avoiding recursion*
+
+If you create regular expressions that require the engine to perform a
+lot of recursion, you may encounter a RuntimeError exception with the
+message `maximum recursion limit' exceeded. For example,
+
+     >>> import re
+     >>> s = 'Begin ' + 1000*'a very long string ' + 'end'
+     >>> re.match('Begin (\w| )*? end', s).end()
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+       File "/usr/local/lib/python2.3/sre.py", line 132, in match
+         return _compile(pattern, flags).match(string)
+     RuntimeError: maximum recursion limit exceeded
+
+You can often restructure your regular expression to avoid recursion.
+
+Starting with Python 2.3, simple uses of the "*?" pattern are
+special-cased to avoid recursion.  Thus, the above regular expression
+can avoid recursion by being recast as "Begin [a-zA-Z0-9_ ]*?end".  As
+a further benefit, such regular expressions will run faster than their
+recursive equivalents.
+
+
+File: python-lib.info,  Node: struct,  Next: difflib,  Prev: re,  Up: String Services
+
+Interpret strings as packed binary data
+=======================================
+
+Interpret strings as packed binary data.
+
+This module performs conversions between Python values and C structs
+represented as Python strings.  It uses "format strings" (explained
+below) as compact descriptions of the lay-out of the C structs and the
+intended conversion to/from Python values.  This can be used in
+handling binary data stored in files or from network connections, among
+other sources.
+
+The module defines the following exception and functions:
+
+`error'
+     Exception raised on various occasions; argument is a string
+     describing what is wrong.
+
+`pack(fmt, v1, v2, ...)'
+     Return a string containing the values `V1, V2, ...' packed
+     according to the given format.  The arguments must match the
+     values required by the format exactly.
+
+`unpack(fmt, string)'
+     Unpack the string (presumably packed by `pack(FMT, ...)')
+     according to the given format.  The result is a tuple even if it
+     contains exactly one item.  The string must contain exactly the
+     amount of data required by the format (`len(STRING)' must equal
+     `calcsize(FMT)').
+
+`calcsize(fmt)'
+     Return the size of the struct (and hence of the string)
+     corresponding to the given format.
+
+Format characters have the following meaning; the conversion between C
+and Python values should be obvious given their types:
+
+Format             C Type             Python             Notes
+------             ------             ------             ------
+x                  pad byte           no value           
+c                  `char'             string of length   
+                                      1                  
+b                  `signed char'      integer            
+B                  `unsigned char'    integer            
+h                  `short'            integer            
+H                  `unsigned short'   integer            
+i                  `int'              integer            
+I                  `unsigned int'     long               
+l                  `long'             integer            
+L                  `unsigned long'    long               
+q                  `long long'        long               (1)
+Q                  `unsigned long     long               (1)
+                   long'                                 
+f                  `float'            float              
+d                  `double'           float              
+s                  `char[]'           string             
+p                  `char[]'           string             
+P                  `void *'           integer            
+
+Notes:
+
+`(1)'
+     The `q' and `Q' conversion codes are available in native mode only
+     if the platform C compiler supports C `long long', or, on Windows,
+     `__int64'.  They are always available in standard modes.  _Added
+     in Python version 2.2_
+
+A format character may be preceded by an integral repeat count.  For
+example, the format string `'4h'' means exactly the same as `'hhhh''.
+
+Whitespace characters between formats are ignored; a count and its
+format must not contain whitespace though.
+
+For the `s' format character, the count is interpreted as the size of
+the string, not a repeat count like for the other format characters;
+for example, `'10s'' means a single 10-byte string, while `'10c'' means
+10 characters.  For packing, the string is truncated or padded with
+null bytes as appropriate to make it fit.  For unpacking, the resulting
+string always has exactly the specified number of bytes.  As a special
+case, `'0s'' means a single, empty string (while `'0c'' means 0
+characters).
+
+The `p' format character encodes a "Pascal string", meaning a short
+variable-length string stored in a fixed number of bytes.  The count is
+the total number of bytes stored.  The first byte stored is the length
+of the string, or 255, whichever is smaller.  The bytes of the string
+follow.  If the string passed in to `pack()' is too long (longer than
+the count minus 1), only the leading count-1 bytes of the string are
+stored.  If the string is shorter than count-1, it is padded with null
+bytes so that exactly count bytes in all are used.  Note that for
+`unpack()', the `p' format character consumes count bytes, but that the
+string returned can never contain more than 255 characters.
+
+For the `I', `L', `q' and `Q' format characters, the return value is a
+Python long integer.
+
+For the `P' format character, the return value is a Python integer or
+long integer, depending on the size needed to hold a pointer when it
+has been cast to an integer type.  A `NULL' pointer will always be
+returned as the Python integer `0'. When packing pointer-sized values,
+Python integer or long integer objects may be used.  For example, the
+Alpha and Merced processors use 64-bit pointer values, meaning a Python
+long integer will be used to hold the pointer; other platforms use
+32-bit pointers and will use a Python integer.
+
+By default, C numbers are represented in the machine's native format
+and byte order, and properly aligned by skipping pad bytes if necessary
+(according to the rules used by the C compiler).
+
+Alternatively, the first character of the format string can be used to
+indicate the byte order, size and alignment of the packed data,
+according to the following table:
+
+Character                Byte order               Size and alignment
+------                   -----                    -----
+@                        native                   native
+=                        native                   standard
+<                        little-endian            standard
+>                        big-endian               standard
+!                        network (= big-endian)   standard
+
+If the first character is not one of these, `@' is assumed.
+
+Native byte order is big-endian or little-endian, depending on the host
+system.  For example, Motorola and Sun processors are big-endian; Intel
+and DEC processors are little-endian.
+
+Native size and alignment are determined using the C compiler's
+`sizeof' expression.  This is always combined with native byte order.
+
+Standard size and alignment are as follows: no alignment is required
+for any type (so you have to use pad bytes); `short' is 2 bytes; `int'
+and `long' are 4 bytes; `long long' (`__int64' on Windows) is 8 bytes;
+`float' and `double' are 32-bit and 64-bit IEEE floating point numbers,
+respectively.
+
+Note the difference between `@' and `=': both use native byte order,
+but the size and alignment of the latter is standardized.
+
+The form `!' is available for those poor souls who claim they can't
+remember whether network byte order is big-endian or little-endian.
+
+There is no way to indicate non-native byte order (force
+byte-swapping); use the appropriate choice of `<' or `>'.
+
+The `P' format character is only available for the native byte ordering
+(selected as the default or with the `@' byte order character). The
+byte order character `=' chooses to use little- or big-endian ordering
+based on the host system. The struct module does not interpret this as
+native ordering, so the `P' format is not available.
+
+Examples (all using native byte order, size and alignment, on a
+big-endian machine):
+
+     >>> from struct import *
+     >>> pack('hhl', 1, 2, 3)
+     '\x00\x01\x00\x02\x00\x00\x00\x03'
+     >>> unpack('hhl', '\x00\x01\x00\x02\x00\x00\x00\x03')
+     (1, 2, 3)
+     >>> calcsize('hhl')
+     8
+
+Hint: to align the end of a structure to the alignment requirement of a
+particular type, end the format with the code for that type with a
+repeat count of zero.  For example, the format `'llh0l'' specifies two
+pad bytes at the end, assuming longs are aligned on 4-byte boundaries.
+This only works when native size and alignment are in effect; standard
+size and alignment does not enforce any alignment.
+
+See also:
+     *Note array:: Packed binary storage of homogeneous data.  *Note
+     xdrlib:: Packing and unpacking of XDR data.
+
+
+File: python-lib.info,  Node: difflib,  Next: fpformat,  Prev: struct,  Up: String Services
+
+Helpers for computing deltas
+============================
+
+Helpers for computing differences between objects.
+
+_Added in Python version 2.1_
+
+`SequenceMatcher'
+     This is a flexible class for comparing pairs of sequences of any
+     type, so long as the sequence elements are hashable.  The basic
+     algorithm predates, and is a little fancier than, an algorithm
+     published in the late 1980's by Ratcliff and Obershelp under the
+     hyperbolic name "gestalt pattern matching."  The idea is to find
+     the longest contiguous matching subsequence that contains no
+     "junk" elements (the Ratcliff and Obershelp algorithm doesn't
+     address junk).  The same idea is then applied recursively to the
+     pieces of the sequences to the left and to the right of the
+     matching subsequence.  This does not yield minimal edit sequences,
+     but does tend to yield matches that "look right" to people.
+
+     *Timing:* The basic Ratcliff-Obershelp algorithm is cubic time in
+     the worst case and quadratic time in the expected case.
+     `SequenceMatcher' is quadratic time for the worst case and has
+     expected-case behavior dependent in a complicated way on how many
+     elements the sequences have in common; best case time is linear.
+
+`Differ'
+     This is a class for comparing sequences of lines of text, and
+     producing human-readable differences or deltas.  Differ uses
+     `SequenceMatcher' both to compare sequences of lines, and to
+     compare sequences of characters within similar (near-matching)
+     lines.
+
+     Each line of a `Differ' delta begins with a two-letter code:
+
+     Code                               Meaning
+     ------                             -----
+     '- '                               line unique to sequence 1
+     '+ '                               line unique to sequence 2
+     '  '                               line common to both sequences
+     '? '                               line not present in either input
+                                        sequence
+
+     Lines beginning with ``?~'' attempt to guide the eye to intraline
+     differences, and were not present in either input sequence. These
+     lines can be confusing if the sequences contain tab characters.
+
+`context_diff(a, b[, fromfile[, tofile [, fromfiledate[, tofiledate[, n [, lineterm]]]]]])'
+     Compare A and B (lists of strings); return a delta (a generator
+     generating the delta lines) in context diff format.
+
+     Context diffs are a compact way of showing just the lines that have
+     changed plus a few lines of context.  The changes are shown in a
+     before/after style.  The number of context lines is set by N which
+     defaults to three.
+
+     By default, the diff control lines (those with `***' or `---') are
+     created with a trailing newline.  This is helpful so that inputs
+     created from `file.readlines()' result in diffs that are suitable
+     for use with `file.writelines()' since both the inputs and outputs
+     have trailing newlines.
+
+     For inputs that do not have trailing newlines, set the LINETERM
+     argument to `""' so that the output will be uniformly newline free.
+
+     The context diff format normally has a header for filenames and
+     modification times.  Any or all of these may be specified using
+     strings for FROMFILE, TOFILE, FROMFILEDATE, and TOFILEDATE.  The
+     modification times are normally expressed in the format returned by
+     `time.ctime()'.  If not specified, the strings default to blanks.
+
+     `Tools/scripts/diff.py' is a command-line front-end for this
+     function.
+
+     _Added in Python version 2.3_
+
+`get_close_matches(word, possibilities[, n[, cutoff]])'
+     Return a list of the best "good enough" matches.  WORD is a
+     sequence for which close matches are desired (typically a string),
+     and POSSIBILITIES is a list of sequences against which to match
+     WORD (typically a list of strings).
+
+     Optional argument N (default `3') is the maximum number of close
+     matches to return; N must be greater than `0'.
+
+     Optional argument CUTOFF (default `0.6') is a float in the range
+     [0, 1].  Possibilities that don't score at least that similar to
+     WORD are ignored.
+
+     The best (no more than N) matches among the possibilities are
+     returned in a list, sorted by similarity score, most similar first.
+
+          >>> get_close_matches('appel', ['ape', 'apple', 'peach', 'puppy'])
+          ['apple', 'ape']
+          >>> import keyword
+          >>> get_close_matches('wheel', keyword.kwlist)
+          ['while']
+          >>> get_close_matches('apple', keyword.kwlist)
+          []
+          >>> get_close_matches('accept', keyword.kwlist)
+          ['except']
+
+`ndiff(a, b[, linejunk[, charjunk]])'
+     Compare A and B (lists of strings); return a `Differ'-style delta
+     (a generator generating the delta lines).
+
+     Optional keyword parameters LINEJUNK and CHARJUNK are for filter
+     functions (or `None'):
+
+     LINEJUNK: A function that accepts a single string argument, and
+     returns true if the string is junk, or false if not.  The default
+     is (`None'), starting with Python 2.3.  Before then, the default
+     was the module-level function `IS_LINE_JUNK()', which filters out
+     lines without visible characters, except for at most one pound
+     character (`#').  As of Python 2.3, the underlying
+     `SequenceMatcher' class does a dynamic analysis of which lines are
+     so frequent as to constitute noise, and this usually works better
+     than the pre-2.3 default.
+
+     CHARJUNK: A function that accepts a character (a string of length
+     1), and returns if the character is junk, or false if not.  The
+     default is module-level function `IS_CHARACTER_JUNK()', which
+     filters out whitespace characters (a blank or tab; note: bad idea
+     to include newline in this!).
+
+     `Tools/scripts/ndiff.py' is a command-line front-end to this
+     function.
+
+          >>> diff = ndiff('one\ntwo\nthree\n'.splitlines(1),
+          ...              'ore\ntree\nemu\n'.splitlines(1))
+          >>> print ''.join(diff),
+          - one
+          ?  ^
+          + ore
+          ?  ^
+          - two
+          - three
+          ?  -
+          + tree
+          + emu
+
+`restore(sequence, which)'
+     Return one of the two sequences that generated a delta.
+
+     Given a SEQUENCE produced by `Differ.compare()' or `ndiff()',
+     extract lines originating from file 1 or 2 (parameter WHICH),
+     stripping off line prefixes.
+
+     Example:
+
+          >>> diff = ndiff('one\ntwo\nthree\n'.splitlines(1),
+          ...              'ore\ntree\nemu\n'.splitlines(1))
+          >>> diff = list(diff) # materialize the generated delta into a list
+          >>> print ''.join(restore(diff, 1)),
+          one
+          two
+          three
+          >>> print ''.join(restore(diff, 2)),
+          ore
+          tree
+          emu
+
+`unified_diff(a, b[, fromfile[, tofile [, fromfiledate[, tofiledate[, n [, lineterm]]]]]])'
+     Compare A and B (lists of strings); return a delta (a generator
+     generating the delta lines) in unified diff format.
+
+     Unified diffs are a compact way of showing just the lines that have
+     changed plus a few lines of context.  The changes are shown in a
+     inline style (instead of separate before/after blocks).  The number
+     of context lines is set by N which defaults to three.
+
+     By default, the diff control lines (those with `---', `+++', or
+     `@@') are created with a trailing newline.  This is helpful so
+     that inputs created from `file.readlines()' result in diffs that
+     are suitable for use with `file.writelines()' since both the
+     inputs and outputs have trailing newlines.
+
+     For inputs that do not have trailing newlines, set the LINETERM
+     argument to `""' so that the output will be uniformly newline free.
+
+     The context diff format normally has a header for filenames and
+     modification times.  Any or all of these may be specified using
+     strings for FROMFILE, TOFILE, FROMFILEDATE, and TOFILEDATE.  The
+     modification times are normally expressed in the format returned by
+     `time.ctime()'.  If not specified, the strings default to blanks.
+
+     `Tools/scripts/diff.py' is a command-line front-end for this
+     function.
+
+     _Added in Python version 2.3_
+
+`IS_LINE_JUNK(line)'
+     Return true for ignorable lines.  The line LINE is ignorable if
+     LINE is blank or contains a single `#', otherwise it is not
+     ignorable.  Used as a default for parameter LINEJUNK in `ndiff()'
+     before Python 2.3.
+
+`IS_CHARACTER_JUNK(ch)'
+     Return true for ignorable characters.  The character CH is
+     ignorable if CH is a space or tab, otherwise it is not ignorable.
+     Used as a default for parameter CHARJUNK in `ndiff()'.
+
+See also:
+     `Pattern Matching: The Gestalt Approach'{Discussion of a similar
+     algorithm by John W. Ratcliff and D. E. Metzener. This was
+     published in in July, 1988.}
+
+* Menu:
+
+* SequenceMatcher Objects::
+* SequenceMatcher Examples::
+* Differ Objects::
+* Differ Example::
+
+
+File: python-lib.info,  Node: SequenceMatcher Objects,  Next: SequenceMatcher Examples,  Prev: difflib,  Up: difflib
+
+SequenceMatcher Objects
+-----------------------
+
+The `SequenceMatcher' class has this constructor:
+
+`SequenceMatcher([isjunk[, a[, b]]])'
+     Optional argument ISJUNK must be `None' (the default) or a
+     one-argument function that takes a sequence element and returns
+     true if and only if the element is "junk" and should be ignored.
+     Passing `None' for B is equivalent to passing `lambda x: 0'; in
+     other words, no elements are ignored.  For example, pass:
+
+          lambda x: x in " \t"
+
+     if you're comparing lines as sequences of characters, and don't
+     want to synch up on blanks or hard tabs.
+
+     The optional arguments A and B are sequences to be compared; both
+     default to empty strings.  The elements of both sequences must be
+     hashable.
+
+`SequenceMatcher' objects have the following methods:
+
+`set_seqs(a, b)'
+     Set the two sequences to be compared.
+
+`SequenceMatcher' computes and caches detailed information about the
+second sequence, so if you want to compare one sequence against many
+sequences, use `set_seq2()' to set the commonly used sequence once and
+call `set_seq1()' repeatedly, once for each of the other sequences.
+
+`set_seq1(a)'
+     Set the first sequence to be compared.  The second sequence to be
+     compared is not changed.
+
+`set_seq2(b)'
+     Set the second sequence to be compared.  The first sequence to be
+     compared is not changed.
+
+`find_longest_match(alo, ahi, blo, bhi)'
+     Find longest matching block in `A[ALO:AHI]' and `B[BLO:BHI]'.
+
+     If ISJUNK was omitted or `None', `get_longest_match()' returns
+     `(I, J, K)' such that `A[I:I+K]' is equal to `B[J:J+K]', where
+     `ALO <= I <= I+K <= AHI' and `BLO <= J <= J+K <= BHI'.  For all
+     `(I', J', K')' meeting those conditions, the additional conditions
+     `K >= K'', `I <= I'', and if `I == I'', `J <= J'' are also met.
+     In other words, of all maximal matching blocks, return one that
+     starts earliest in A, and of all those maximal matching blocks
+     that start earliest in A, return the one that starts earliest in B.
+
+          >>> s = SequenceMatcher(None, " abcd", "abcd abcd")
+          >>> s.find_longest_match(0, 5, 0, 9)
+          (0, 4, 5)
+
+     If ISJUNK was provided, first the longest matching block is
+     determined as above, but with the additional restriction that no
+     junk element appears in the block.  Then that block is extended as
+     far as possible by matching (only) junk elements on both sides.
+     So the resulting block never matches on junk except as identical
+     junk happens to be adjacent to an interesting match.
+
+     Here's the same example as before, but considering blanks to be
+     junk.  That prevents `' abcd'' from matching the `' abcd'' at the
+     tail end of the second sequence directly.  Instead only the
+     `'abcd'' can match, and matches the leftmost `'abcd'' in the
+     second sequence:
+
+          >>> s = SequenceMatcher(lambda x: x==" ", " abcd", "abcd abcd")
+          >>> s.find_longest_match(0, 5, 0, 9)
+          (1, 0, 4)
+
+     If no blocks match, this returns `(ALO, BLO, 0)'.
+
+`get_matching_blocks()'
+     Return list of triples describing matching subsequences.  Each
+     triple is of the form `(I, J, N)', and means that `A[I:I+N] ==
+     B[J:J+N]'.  The triples are monotonically increasing in I and J.
+
+     The last triple is a dummy, and has the value `(len(A), len(B),
+     0)'.  It is the only triple with `N == 0'.
+
+          >>> s = SequenceMatcher(None, "abxcd", "abcd")
+          >>> s.get_matching_blocks()
+          [(0, 0, 2), (3, 2, 2), (5, 4, 0)]
+
+`get_opcodes()'
+     Return list of 5-tuples describing how to turn A into B.  Each
+     tuple is of the form `(TAG, I1, I2, J1, J2)'.  The first tuple has
+     `I1 == J1 == 0', and remaining tuples have I1 equal to the I2 from
+     the preceeding tuple, and, likewise, J1 equal to the previous J2.
+
+     The TAG values are strings, with these meanings:
+
+     Value                              Meaning
+     ------                             -----
+     'replace'                          `A[I1:I2]' should be replaced by
+                                        `B[J1:J2]'.
+     'delete'                           `A[I1:I2]' should be deleted.
+                                        Note that `J1 == J2' in this case.
+     'insert'                           `B[J1:J2]' should be inserted at
+                                        `A[I1:I1]'. Note that `I1 == I2'
+                                        in this case.
+     'equal'                            `A[I1:I2] == B[J1:J2]' (the
+                                        sub-sequences are equal).
+
+     For example:
+
+          >>> a = "qabxcd"
+          >>> b = "abycdf"
+          >>> s = SequenceMatcher(None, a, b)
+          >>> for tag, i1, i2, j1, j2 in s.get_opcodes():
+          ...    print ("%7s a[%d:%d] (%s) b[%d:%d] (%s)" %
+          ...           (tag, i1, i2, a[i1:i2], j1, j2, b[j1:j2]))
+           delete a[0:1] (q) b[0:0] ()
+            equal a[1:3] (ab) b[0:2] (ab)
+          replace a[3:4] (x) b[2:3] (y)
+            equal a[4:6] (cd) b[3:5] (cd)
+           insert a[6:6] () b[5:6] (f)
+
+`get_grouped_opcodes([n])'
+     Return a generator of groups with up to N lines of context.
+
+     Starting with the groups returned by `get_opcodes()', this method
+     splits out smaller change clusters and eliminates intervening
+     ranges which have no changes.
+
+     The groups are returned in the same format as `get_opcodes()'.
+     _Added in Python version 2.3_
+
+`ratio()'
+     Return a measure of the sequences' similarity as a float in the
+     range [0, 1].
+
+     Where T is the total number of elements in both sequences, and M is
+     the number of matches, this is 2.0*M / T. Note that this is `1.0'
+     if the sequences are identical, and `0.0' if they have nothing in
+     common.
+
+     This is expensive to compute if `get_matching_blocks()' or
+     `get_opcodes()' hasn't already been called, in which case you may
+     want to try `quick_ratio()' or `real_quick_ratio()' first to get
+     an upper bound.
+
+`quick_ratio()'
+     Return an upper bound on `ratio()' relatively quickly.
+
+     This isn't defined beyond that it is an upper bound on `ratio()',
+     and is faster to compute.
+
+`real_quick_ratio()'
+     Return an upper bound on `ratio()' very quickly.
+
+     This isn't defined beyond that it is an upper bound on `ratio()',
+     and is faster to compute than either `ratio()' or `quick_ratio()'.
+
+The three methods that return the ratio of matching to total characters
+can give different results due to differing levels of approximation,
+although `quick_ratio()' and `real_quick_ratio()' are always at least
+as large as `ratio()':
+
+     >>> s = SequenceMatcher(None, "abcd", "bcde")
+     >>> s.ratio()
+     0.75
+     >>> s.quick_ratio()
+     0.75
+     >>> s.real_quick_ratio()
+     1.0
+
+
+File: python-lib.info,  Node: SequenceMatcher Examples,  Next: Differ Objects,  Prev: SequenceMatcher Objects,  Up: difflib
+
+SequenceMatcher Examples
+------------------------
+
+This example compares two strings, considering blanks to be "junk:"
+
+     >>> s = SequenceMatcher(lambda x: x == " ",
+     ...                     "private Thread currentThread;",
+     ...                     "private volatile Thread currentThread;")
+
+`ratio()' returns a float in [0, 1], measuring the similarity of the
+sequences.  As a rule of thumb, a `ratio()' value over 0.6 means the
+sequences are close matches:
+
+     >>> print round(s.ratio(), 3)
+     0.866
+
+If you're only interested in where the sequences match,
+`get_matching_blocks()' is handy:
+
+     >>> for block in s.get_matching_blocks():
+     ...     print "a[%d] and b[%d] match for %d elements" % block
+     a[0] and b[0] match for 8 elements
+     a[8] and b[17] match for 6 elements
+     a[14] and b[23] match for 15 elements
+     a[29] and b[38] match for 0 elements
+
+Note that the last tuple returned by `get_matching_blocks()' is always
+a dummy, `(len(A), len(B), 0)', and this is the only case in which the
+last tuple element (number of elements matched) is `0'.
+
+If you want to know how to change the first sequence into the second,
+use `get_opcodes()':
+
+     >>> for opcode in s.get_opcodes():
+     ...     print "%6s a[%d:%d] b[%d:%d]" % opcode
+      equal a[0:8] b[0:8]
+     insert a[8:8] b[8:17]
+      equal a[8:14] b[17:23]
+      equal a[14:29] b[23:38]
+
+See also the function `get_close_matches()' in this module, which shows
+how simple code building on `SequenceMatcher' can be used to do useful
+work.
+
+
+File: python-lib.info,  Node: Differ Objects,  Next: Differ Example,  Prev: SequenceMatcher Examples,  Up: difflib
+
+Differ Objects
+--------------
+
+Note that `Differ'-generated deltas make no claim to be *minimal*
+diffs. To the contrary, minimal diffs are often counter-intuitive,
+because they synch up anywhere possible, sometimes accidental matches
+100 pages apart. Restricting synch points to contiguous matches
+preserves some notion of locality, at the occasional cost of producing
+a longer diff.
+
+The `Differ' class has this constructor:
+
+`Differ([linejunk[, charjunk]])'
+     Optional keyword parameters LINEJUNK and CHARJUNK are for filter
+     functions (or `None'):
+
+     LINEJUNK: A function that accepts a single string argument, and
+     returns true if the string is junk.  The default is `None',
+     meaning that no line is considered junk.
+
+     CHARJUNK: A function that accepts a single character argument (a
+     string of length 1), and returns true if the character is junk.
+     The default is `None', meaning that no character is considered
+     junk.
+
+`Differ' objects are used (deltas generated) via a single method:
+
+`compare(a, b)'
+     Compare two sequences of lines, and generate the delta (a sequence
+     of lines).
+
+     Each sequence must contain individual single-line strings ending
+     with newlines. Such sequences can be obtained from the
+     `readlines()' method of file-like objects.  The delta generated
+     also consists of newline-terminated strings, ready to be printed
+     as-is via the `writelines()' method of a file-like object.
+
+
+File: python-lib.info,  Node: Differ Example,  Prev: Differ Objects,  Up: difflib
+
+Differ Example
+--------------
+
+This example compares two texts. First we set up the texts, sequences
+of individual single-line strings ending with newlines (such sequences
+can also be obtained from the `readlines()' method of file-like
+objects):
+
+     >>> text1 = '''  1. Beautiful is better than ugly.
+     ...   2. Explicit is better than implicit.
+     ...   3. Simple is better than complex.
+     ...   4. Complex is better than complicated.
+     ... '''.splitlines(1)
+     >>> len(text1)
+     4
+     >>> text1[0][-1]
+     '\n'
+     >>> text2 = '''  1. Beautiful is better than ugly.
+     ...   3.   Simple is better than complex.
+     ...   4. Complicated is better than complex.
+     ...   5. Flat is better than nested.
+     ... '''.splitlines(1)
+
+Next we instantiate a Differ object:
+
+     >>> d = Differ()
+
+Note that when instantiating a `Differ' object we may pass functions to
+filter out line and character "junk."  See the `Differ()' constructor
+for details.
+
+Finally, we compare the two:
+
+     >>> result = list(d.compare(text1, text2))
+
+`result' is a list of strings, so let's pretty-print it:
+
+     >>> from pprint import pprint
+     >>> pprint(result)
+     ['    1. Beautiful is better than ugly.\n',
+      '-   2. Explicit is better than implicit.\n',
+      '-   3. Simple is better than complex.\n',
+      '+   3.   Simple is better than complex.\n',
+      '?     ++                                \n',
+      '-   4. Complex is better than complicated.\n',
+      '?            ^                     ---- ^  \n',
+      '+   4. Complicated is better than complex.\n',
+      '?           ++++ ^                      ^  \n',
+      '+   5. Flat is better than nested.\n']
+
+As a single multi-line string it looks like this:
+
+     >>> import sys
+     >>> sys.stdout.writelines(result)
+         1. Beautiful is better than ugly.
+     -   2. Explicit is better than implicit.
+     -   3. Simple is better than complex.
+     +   3.   Simple is better than complex.
+     ?     ++
+     -   4. Complex is better than complicated.
+     ?            ^                     ---- ^
+     +   4. Complicated is better than complex.
+     ?           ++++ ^                      ^
+     +   5. Flat is better than nested.
+
+
+File: python-lib.info,  Node: fpformat,  Next: StringIO,  Prev: difflib,  Up: String Services
+
+Floating point conversions
+==========================
+
+General floating point formatting functions.
+
+The `fpformat' module defines functions for dealing with floating point
+numbers representations in 100% pure Python. _Note:_ This module is
+unneeded: everything here could be done via the `%' string
+interpolation operator.
+
+The `fpformat' module defines the following functions and an exception:
+
+`fix(x, digs)'
+     Format X as `[-]ddd.ddd' with DIGS digits after the point and at
+     least one digit before.  If `DIGS <= 0', the decimal point is
+     suppressed.
+
+     X can be either a number or a string that looks like one. DIGS is
+     an integer.
+
+     Return value is a string.
+
+`sci(x, digs)'
+     Format X as `[-]d.dddE[+-]ddd' with DIGS digits after the point
+     and exactly one digit before.  If `DIGS <= 0', one digit is kept
+     and the point is suppressed.
+
+     X can be either a real number, or a string that looks like one.
+     DIGS is an integer.
+
+     Return value is a string.
+
+`NotANumber'
+     Exception raised when a string passed to `fix()' or `sci()' as the
+     X parameter does not look like a number.  This is a subclass of
+     `ValueError' when the standard exceptions are strings.  The
+     exception value is the improperly formatted string that caused the
+     exception to be raised.
+
+Example:
+
+     >>> import fpformat
+     >>> fpformat.fix(1.23, 1)
+     '1.2'
+
+
+File: python-lib.info,  Node: StringIO,  Next: cStringIO,  Prev: fpformat,  Up: String Services
+
+Read and write strings as files
+===============================
+
+Read and write strings as if they were files.
+
+This module implements a file-like class, `StringIO', that reads and
+writes a string buffer (also known as _memory files_).  See the
+description of file objects for operations (section *Note File
+Objects::).
+
+`StringIO([buffer])'
+     When a `StringIO' object is created, it can be initialized to an
+     existing string by passing the string to the constructor.  If no
+     string is given, the `StringIO' will start empty.
+
+     The `StringIO' object can accept either Unicode or 8-bit strings,
+     but mixing the two may take some care.  If both are used, 8-bit
+     strings that cannot be interpreted as 7-bit ASCII (that use the
+     8th bit) will cause a `UnicodeError' to be raised when
+     `getvalue()' is called.
+
+The following methods of `StringIO' objects require special mention:
+
+`getvalue()'
+     Retrieve the entire contents of the "file" at any time before the
+     `StringIO' object's `close()' method is called.  See the note
+     above for information about mixing Unicode and 8-bit strings; such
+     mixing can cause this method to raise `UnicodeError'.
+
+`close()'
+     Free the memory buffer.
+
+
+File: python-lib.info,  Node: cStringIO,  Next: textwrap,  Prev: StringIO,  Up: String Services
+
+Faster version of `StringIO'
+============================
+
+Faster version of `StringIO', but not subclassable.
+
+The module `cStringIO' provides an interface similar to that of the
+`StringIO' module.  Heavy use of `StringIO.StringIO' objects can be
+made more efficient by using the function `StringIO()' from this module
+instead.
+
+Since this module provides a factory function which returns objects of
+built-in types, there's no way to build your own version using
+subclassing.  Use the original `StringIO' module in that case.
+
+Unlike the memory files implemented by the `StringIO' module, those
+provided by this module are not able to accept Unicode strings that
+cannot be encoded as plain ASCII strings.
+
+Another difference from the `StringIO' module is that calling
+`StringIO()' with a string parameter creates a read-only object.
+Unlike an object created without a string parameter, it does not have
+write methods.
+
+The following data objects are provided as well:
+
+`InputType'
+     The type object of the objects created by calling `StringIO' with
+     a string parameter.
+
+`OutputType'
+     The type object of the objects returned by calling `StringIO' with
+     no parameters.
+
+There is a C API to the module as well; refer to the module source for
+more information.
+
+
+File: python-lib.info,  Node: textwrap,  Next: codecs,  Prev: cStringIO,  Up: String Services
+
+Text wrapping and filling
+=========================
+
+Text wrapping and filling
+
+_Added in Python version 2.3_
+
+The `textwrap' module provides two convenience functions, `wrap()' and
+`fill()', as well as `TextWrapper', the class that does all the work,
+and a utility function `dedent()'.  If you're just wrapping or filling
+one or two text strings, the convenience functions should be good
+enough; otherwise, you should use an instance of `TextWrapper' for
+efficiency.
+
+`wrap(text[, width[, ...]])'
+     Wraps the single paragraph in TEXT (a string) so every line is at
+     most WIDTH characters long.  Returns a list of output lines,
+     without final newlines.
+
+     Optional keyword arguments correspond to the instance attributes of
+     `TextWrapper', documented below.  WIDTH defaults to `70'.
+
+`fill(text[, width[, ...]])'
+     Wraps the single paragraph in TEXT, and returns a single string
+     containing the wrapped paragraph.  `fill()' is shorthand for
+          "\n".join(wrap(text, ...))
+
+     In particular, `fill()' accepts exactly the same keyword arguments
+     as `wrap()'.
+
+Both `wrap()' and `fill()' work by creating a `TextWrapper' instance
+and calling a single method on it.  That instance is not reused, so for
+applications that wrap/fill many text strings, it will be more
+efficient for you to create your own `TextWrapper' object.
+
+An additional utility function, `dedent()', is provided to remove
+indentation from strings that have unwanted whitespace to the left of
+the text.
+
+`dedent(text)'
+     Remove any whitespace than can be uniformly removed from the left
+     of every line in TEXT.
+
+     This is typically used to make triple-quoted strings line up with
+     the left edge of screen/whatever, while still presenting it in the
+     source code in indented form.
+
+     For example:
+          def test():
+              # end first line with \ to avoid the empty line!
+              s = '''\
+              hello
+                world
+              '''
+              print repr(s)          # prints '    hello\n      world\n    '
+              print repr(dedent(s))  # prints 'hello\n  world\n'
+
+`TextWrapper(...)'
+     The `TextWrapper' constructor accepts a number of optional keyword
+     arguments.  Each argument corresponds to one instance attribute,
+     so for example
+          wrapper = TextWrapper(initial_indent="* ")
+
+     is the same as
+          wrapper = TextWrapper()
+          wrapper.initial_indent = "* "
+
+     You can re-use the same `TextWrapper' object many times, and you
+     can change any of its options through direct assignment to instance
+     attributes between uses.
+
+The `TextWrapper' instance attributes (and keyword arguments to the
+constructor) are as follows:
+
+`width'
+     (default: `70') The maximum length of wrapped lines.  As long as
+     there are no individual words in the input text longer than
+     `width', `TextWrapper' guarantees that no output line will be
+     longer than `width' characters.
+
+`expand_tabs'
+     (default: `True') If true, then all tab characters in TEXT will be
+     expanded to spaces using the `expand_tabs()' method of TEXT.
+
+`replace_whitespace'
+     (default: `True') If true, each whitespace character (as defined
+     by `string.whitespace') remaining after tab expansion will be
+     replaced by a single space.  _Note:_ If `expand_tabs' is false and
+     `replace_whitespace' is true, each tab character will be replaced
+     by a single space, which is _not_ the same as tab expansion.
+
+`initial_indent'
+     (default: `''') String that will be prepended to the first line of
+     wrapped output.  Counts towards the length of the first line.
+
+`subsequent_indent'
+     (default: `''') String that will be prepended to all lines of
+     wrapped output except the first.  Counts towards the length of each
+     line except the first.
+
+`fix_sentence_endings'
+     (default: `False') If true, `TextWrapper' attempts to detect
+     sentence endings and ensure that sentences are always separated by
+     exactly two spaces.  This is generally desired for text in a
+     monospaced font.  However, the sentence detection algorithm is
+     imperfect: it assumes that a sentence ending consists of a
+     lowercase letter followed by one of `.', `!', or `?', possibly
+     followed by one of `"' or `'', followed by a space.  One problem
+     with this is algorithm is that it is unable to detect the
+     difference between "Dr." in
+
+          [...] Dr. Frankenstein's monster [...]
+
+     and "Spot." in
+
+          [...] See Spot. See Spot run [...]
+
+     `fix_sentence_endings' is false by default.
+
+     Since the sentence detection algorithm relies on
+     `string.lowercase' for the definition of "lowercase letter," and a
+     convention of using two spaces after a period to separate
+     sentences on the same line, it is specific to English-language
+     texts.
+
+`break_long_words'
+     (default: `True') If true, then words longer than `width' will be
+     broken in order to ensure that no lines are longer than `width'.
+     If it is false, long words will not be broken, and some lines may
+     be longer than `width'.  (Long words will be put on a line by
+     themselves, in order to minimize the amount by which `width' is
+     exceeded.)
+
+`TextWrapper' also provides two public methods, analogous to the
+module-level convenience functions:
+
+`wrap(text)'
+     Wraps the single paragraph in TEXT (a string) so every line is at
+     most `width' characters long.  All wrapping options are taken from
+     instance attributes of the `TextWrapper' instance.  Returns a list
+     of output lines, without final newlines.
+
+`fill(text)'
+     Wraps the single paragraph in TEXT, and returns a single string
+     containing the wrapped paragraph.
+
+
+File: python-lib.info,  Node: codecs,  Next: unicodedata,  Prev: textwrap,  Up: String Services
+
+Codec registry and base classes
+===============================
+
+Encode and decode data and streams.
+
+This module defines base classes for standard Python codecs (encoders
+and decoders) and provides access to the internal Python codec registry
+which manages the codec and error handling lookup process.
+
+It defines the following functions:
+
+`register(search_function)'
+     Register a codec search function. Search functions are expected to
+     take one argument, the encoding name in all lower case letters, and
+     return a tuple of functions `(ENCODER, DECODER, STREAM_READER,
+     STREAM_WRITER)' taking the following arguments:
+
+     ENCODER and DECODER: These must be functions or methods which have
+     the same interface as the `encode()'/`decode()' methods of Codec
+     instances (see Codec Interface). The functions/methods are
+     expected to work in a stateless mode.
+
+     STREAM_READER and STREAM_WRITER: These have to be factory
+     functions providing the following interface:
+
+     `factory(STREAM, ERRORS='strict')'
+
+     The factory functions must return objects providing the interfaces
+     defined by the base classes `StreamWriter' and `StreamReader',
+     respectively. Stream codecs can maintain state.
+
+     Possible values for errors are `'strict'' (raise an exception in
+     case of an encoding error), `'replace'' (replace malformed data
+     with a suitable replacement marker, such as `?'), `'ignore''
+     (ignore malformed data and continue without further notice),
+     `'xmlcharrefreplace'' (replace with the appropriate XML character
+     reference (for encoding only)) and `'backslashreplace'' (replace
+     with backslashed escape sequences (for encoding only)) as well as
+     any other error handling name defined via `register_error()'.
+
+     In case a search function cannot find a given encoding, it should
+     return `None'.
+
+`lookup(encoding)'
+     Looks up a codec tuple in the Python codec registry and returns the
+     function tuple as defined above.
+
+     Encodings are first looked up in the registry's cache. If not
+     found, the list of registered search functions is scanned. If no
+     codecs tuple is found, a `LookupError' is raised. Otherwise, the
+     codecs tuple is stored in the cache and returned to the caller.
+
+To simplify access to the various codecs, the module provides these
+additional functions which use `lookup()' for the codec lookup:
+
+`getencoder(encoding)'
+     Lookup up the codec for the given encoding and return its encoder
+     function.
+
+     Raises a `LookupError' in case the encoding cannot be found.
+
+`getdecoder(encoding)'
+     Lookup up the codec for the given encoding and return its decoder
+     function.
+
+     Raises a `LookupError' in case the encoding cannot be found.
+
+`getreader(encoding)'
+     Lookup up the codec for the given encoding and return its
+     StreamReader class or factory function.
+
+     Raises a `LookupError' in case the encoding cannot be found.
+
+`getwriter(encoding)'
+     Lookup up the codec for the given encoding and return its
+     StreamWriter class or factory function.
+
+     Raises a `LookupError' in case the encoding cannot be found.
+
+`register_error(name, error_handler)'
+     Register the error handling function ERROR_HANDLER under the name
+     NAME. ERROR_HANDLER will be called during encoding and decoding in
+     case of an error, when NAME is specified as the errors parameter.
+
+     For encoding ERROR_HANDLER will be called with a
+     `UnicodeEncodeError' instance, which contains information about
+     the location of the error. The error handler must either raise
+     this or a different exception or return a tuple with a replacement
+     for the unencodable part of the input and a position where
+     encoding should continue. The encoder will encode the replacement
+     and continue encoding the original input at the specified
+     position. Negative position values will be treated as being
+     relative to the end of the input string. If the resulting position
+     is out of bound an IndexError will be raised.
+
+     Decoding and translating works similar, except `UnicodeDecodeError'
+     or `UnicodeTranslateError' will be passed to the handler and that
+     the replacement from the error handler will be put into the output
+     directly.
+
+`lookup_error(name)'
+     Return the error handler previously register under the name NAME.
+
+     Raises a `LookupError' in case the handler cannot be found.
+
+`strict_errors(exception)'
+     Implements the `strict' error handling.
+
+`replace_errors(exception)'
+     Implements the `replace' error handling.
+
+`ignore_errors(exception)'
+     Implements the `ignore' error handling.
+
+`xmlcharrefreplace_errors_errors(exception)'
+     Implements the `xmlcharrefreplace' error handling.
+
+`backslashreplace_errors_errors(exception)'
+     Implements the `backslashreplace' error handling.
+
+To simplify working with encoded files or stream, the module also
+defines these utility functions:
+
+`open(filename, mode[, encoding[, errors[, buffering]]])'
+     Open an encoded file using the given MODE and return a wrapped
+     version providing transparent encoding/decoding.
+
+     _Note:_ The wrapped version will only accept the object format
+     defined by the codecs, i.e. Unicode objects for most built-in
+     codecs.  Output is also codec-dependent and will usually be
+     Unicode as well.
+
+     ENCODING specifies the encoding which is to be used for the file.
+
+     ERRORS may be given to define the error handling. It defaults to
+     `'strict'' which causes a `ValueError' to be raised in case an
+     encoding error occurs.
+
+     BUFFERING has the same meaning as for the built-in `open()'
+     function.  It defaults to line buffered.
+
+`EncodedFile(file, input[, output[, errors]])'
+     Return a wrapped version of file which provides transparent
+     encoding translation.
+
+     Strings written to the wrapped file are interpreted according to
+     the given INPUT encoding and then written to the original file as
+     strings using the OUTPUT encoding. The intermediate encoding will
+     usually be Unicode but depends on the specified codecs.
+
+     If OUTPUT is not given, it defaults to INPUT.
+
+     ERRORS may be given to define the error handling. It defaults to
+     `'strict'', which causes `ValueError' to be raised in case an
+     encoding error occurs.
+
+The module also provides the following constants which are useful for
+reading and writing to platform dependent files:
+
+`BOM'
+
+`BOM_BE'
+
+`BOM_LE'
+
+`BOM_UTF8'
+
+`BOM_UTF16'
+
+`BOM_UTF16_BE'
+
+`BOM_UTF16_LE'
+
+`BOM_UTF32'
+
+`BOM_UTF32_BE'
+
+`BOM_UTF32_LE'
+     These constants define various encodings of the Unicode byte order
+     mark (BOM) used in UTF-16 and UTF-32 data streams to indicate the
+     byte order used in the stream or file and in UTF-8 as a Unicode
+     signature.  `BOM_UTF16' is either `BOM_UTF16_BE' or `BOM_UTF16_LE'
+     depending on the platform's native byte order, `BOM' is an alias
+     for `BOM_UTF16', `BOM_LE' for `BOM_UTF16_LE' and `BOM_BE' for
+     `BOM_UTF16_BE'.  The others represent the BOM in UTF-8 and UTF-32
+     encodings.
+
+See also:
+    <http://sourceforge.net/projects/python-codecs/>
+          A SourceForge project working on additional support for Asian
+          codecs for use with Python.  They are in the early stages of
+          development at the time of this writing -- look in their FTP
+          area for downloadable files.
+
+* Menu:
+
+* Codec Base Classes::
+* Standard Encodings::
+* encodingsidna --- Internationalized Domain Names in Applications::
+

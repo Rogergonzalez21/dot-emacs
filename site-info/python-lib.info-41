@@ -1,0 +1,1227 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: imghdr,  Next: sndhdr,  Prev: rgbimg,  Up: Multimedia Services
+
+Determine the type of an image
+==============================
+
+Determine the type of image contained in a file or byte stream.
+
+The `imghdr' module determines the type of image contained in a file or
+byte stream.
+
+The `imghdr' module defines the following function:
+
+`what(filename[, h])'
+     Tests the image data contained in the file named by FILENAME, and
+     returns a string describing the image type.  If optional H is
+     provided, the FILENAME is ignored and H is assumed to contain the
+     byte stream to test.
+
+The following image types are recognized, as listed below with the
+return value from `what()':
+
+Value                                Image format
+------                               -----
+'rgb'                                SGI ImgLib Files
+'gif'                                GIF 87a and 89a Files
+'pbm'                                Portable Bitmap Files
+'pgm'                                Portable Graymap Files
+'ppm'                                Portable Pixmap Files
+'tiff'                               TIFF Files
+'rast'                               Sun Raster Files
+'xbm'                                X Bitmap Files
+'jpeg'                               JPEG data in JFIF format
+'bmp'                                BMP files
+'png'                                Portable Network Graphics
+
+You can extend the list of file types `imghdr' can recognize by
+appending to this variable:
+
+`tests'
+     A list of functions performing the individual tests.  Each function
+     takes two arguments: the byte-stream and an open file-like object.
+     When `what()' is called with a byte-stream, the file-like object
+     will be `None'.
+
+     The test function should return a string describing the image type
+     if the test succeeded, or `None' if it failed.
+
+Example:
+
+     >>> import imghdr
+     >>> imghdr.what('/tmp/bass.gif')
+     'gif'
+
+
+File: python-lib.info,  Node: sndhdr,  Next: ossaudiodev,  Prev: imghdr,  Up: Multimedia Services
+
+Determine type of sound file
+============================
+
+Determine type of a sound file.
+
+The `sndhdr' provides utility functions which attempt to determine the
+type of sound data which is in a file.  When these functions are able
+to determine what type of sound data is stored in a file, they return a
+tuple `(TYPE, SAMPLING_RATE, CHANNELS, FRAMES, BITS_PER_SAMPLE)'.  The
+value for TYPE indicates the data type and will be one of the strings
+`'aifc'', `'aiff'', `'au'', `'hcom'', `'sndr'', `'sndt'', `'voc'',
+`'wav'', `'8svx'', `'sb'', `'ub'', or `'ul''.  The SAMPLING_RATE will
+be either the actual value or `0' if unknown or difficult to decode.
+Similarly, CHANNELS will be either the number of channels or `0' if it
+cannot be determined or if the value is difficult to decode.  The value
+for FRAMES will be either the number of frames or `-1'.  The last item
+in the tuple, BITS_PER_SAMPLE, will either be the sample size in bits
+or `'A'' for A-LAW  or `'U'' for u-LAW .
+
+`what(filename)'
+     Determines the type of sound data stored in the file FILENAME
+     using `whathdr()'.  If it succeeds, returns a tuple as described
+     above, otherwise `None' is returned.
+
+`whathdr(filename)'
+     Determines the type of sound data stored in a file based on the
+     file header.  The name of the file is given by FILENAME.  This
+     function returns a tuple as described above on success, or `None'.
+
+
+File: python-lib.info,  Node: ossaudiodev,  Prev: sndhdr,  Up: Multimedia Services
+
+Access to OSS-compatible audio devices
+======================================
+
+Access to OSS-compatible audio devices.
+
+This module allows you to access the OSS (Open Sound System) audio
+interface.  OSS is available for a wide range of open-source and
+commercial Unices, and is the standard audio interface for Linux and
+recent versions of FreeBSD.
+
+See also:
+     `Open Sound System Programmer's Guide' {the official documentation
+     for the OSS C API} The module defines a large number of constants
+     supplied by the OSS device driver; see `<sys/soundcard.h>' on
+     either Linux or FreeBSD for a listing .
+
+`ossaudiodev' defines the following variables and functions:
+
+`OSSAudioError'
+     This exception is raised on certain errors.  The argument is a
+     string describing what went wrong.
+
+     (If `ossaudiodev' receives an error from a system call such as
+     `open()', `write()', or `ioctl()', it raises `IOError'.  Errors
+     detected directly by `ossaudiodev' result in `OSSAudioError'.)
+
+     (For backwards compatibility, the exception class is also
+     available as `ossaudiodev.error'.)
+
+`open([device, ]mode)'
+     Open an audio device and return an OSS audio device object.  This
+     object supports many file-like methods, such as `read()',
+     `write()', and `fileno()' (although there are subtle differences
+     between conventional Unix read/write semantics and those of OSS
+     audio devices).  It also supports a number of audio-specific
+     methods; see below for the complete list of methods.
+
+     DEVICE is the audio device filename to use.  If it is not
+     specified, this module first looks in the environment variable
+     `AUDIODEV' for a device to use.  If not found, it falls back to
+     `/dev/dsp'.
+
+     MODE is one of `'r'' for read-only (record) access, `'w'' for
+     write-only (playback) access and `'rw'' for both.  Since many
+     sound cards only allow one process to have the recorder or player
+     open at a time, it is a good idea to open the device only for the
+     activity needed.  Further, some sound cards are half-duplex: they
+     can be opened for reading or writing, but not both at once.
+
+     Note the unusual calling syntax: the _first_ argument is optional,
+     and the second is required.  This is a historical artifact for
+     compatibility with the older `linuxaudiodev' module which
+     `ossaudiodev' supersedes.
+`openmixer([device])'
+     Open a mixer device and return an OSS mixer device object.  DEVICE
+     is the mixer device filename to use.  If it is not specified, this
+     module first looks in the environment variable `MIXERDEV' for a
+     device to use.  If not found, it falls back to `/dev/mixer'.
+
+* Menu:
+
+* Audio Device Objects::
+* Mixer Device Objects::
+
+
+File: python-lib.info,  Node: Audio Device Objects,  Next: Mixer Device Objects,  Prev: ossaudiodev,  Up: ossaudiodev
+
+Audio Device Objects
+--------------------
+
+Before you can write to or read from an audio device, you must call
+three methods in the correct order:
+  1. `setfmt()' to set the output format
+
+  2. `channels()' to set the number of channels
+
+  3. `speed()' to set the sample rate
+     Alternately, you can use the `setparameters()' method to set all
+three audio parameters at once.  This is more convenient, but may not be
+as flexible in all cases.
+
+The audio device objects returned by `open()' define the following
+methods:
+
+`close()'
+     Explicitly close the audio device.  When you are done writing to or
+     reading from an audio device, you should explicitly close it.  A
+     closed device cannot be used again.
+
+`fileno()'
+     Return the file descriptor associated with the device.
+
+`read(size)'
+     Read SIZE bytes from the audio input and return them as a Python
+     string.  Unlike most UNIX device drivers, OSS audio devices in
+     blocking mode (the default) will block `read()' until the entire
+     requested amount of data is available.
+
+`write(data)'
+     Write the Python string DATA to the audio device and return the
+     number of bytes written.  If the audio device is in blocking mode
+     (the default), the entire string is always written (again, this is
+     different from usual UNIX device semantics).  If the device is in
+     non-blocking mode, some data may not be written--see `writeall()'.
+
+`writeall(data)'
+     Write the entire Python string DATA to the audio device: waits
+     until the audio device is able to accept data, writes as much data
+     as it will accept, and repeats until DATA has been completely
+     written.  If the device is in blocking mode (the default), this
+     has the same effect as `write()'; `writeall()' is only useful in
+     non-blocking mode.  Has no return value, since the amount of data
+     written is always equal to the amount of data supplied.
+
+The following methods each map to exactly one `ioctl()' system call.
+The correspondence is obvious: for example, `setfmt()' corresponds to
+the `SNDCTL_DSP_SETFMT' ioctl, and `sync()' to `SNDCTL_DSP_SYNC' (this
+can be useful when consulting the OSS documentation).  If the underlying
+`ioctl()' fails, they all raise `IOError'.
+
+`nonblock()'
+     Put the device into non-blocking mode.  Once in non-blocking mode,
+     there is no way to return it to blocking mode.
+
+`getfmts()'
+     Return a bitmask of the audio output formats supported by the
+     soundcard.  On a typical Linux system, these formats are:
+
+     Format                             Description
+     ------                             -----
+     AFMT_MU_LAW                        a logarithmic encoding (used by
+                                        Sun `.au' files and `/dev/audio')
+     AFMT_A_LAW                         a logarithmic encoding
+     AFMT_IMA_ADPCM                     a 4:1 compressed format defined
+                                        by the Interactive Multimedia
+                                        Association
+     AFMT_U8                            Unsigned, 8-bit audio
+     AFMT_S16_LE                        Unsigned, 16-bit audio,
+                                        little-endian byte order (as used
+                                        by Intel processors)
+     AFMT_S16_BE                        Unsigned, 16-bit audio,
+                                        big-endian byte order (as used by
+                                        68k, PowerPC, Sparc)
+     AFMT_S8                            Signed, 8 bit audio
+     AFMT_U16_LE                        Signed, 16-bit little-endian audio
+     AFMT_U16_BE                        Signed, 16-bit big-endian audio
+
+     Most systems support only a subset of these formats.  Many devices
+     only support `AFMT_U8'; the most common format used today is
+     `AFMT_S16_LE'.
+
+`setfmt(format)'
+     Try to set the current audio format to FORMAT--see `getfmts()' for
+     a list.  Returns the audio format that the device was set to,
+     which may not be the requested format.  May also be used to return
+     the current audio format--do this by passing an "audio format" of
+     `AFMT_QUERY'.
+
+`channels(nchannels)'
+     Set the number of output channels to NCHANNELS.  A value of 1
+     indicates monophonic sound, 2 stereophonic.  Some devices may have
+     more than 2 channels, and some high-end devices may not support
+     mono.  Returns the number of channels the device was set to.
+
+`speed(samplerate)'
+     Try to set the audio sampling rate to SAMPLERATE samples per
+     second.  Returns the rate actually set.  Most sound devices don't
+     support arbitrary sampling rates.  Common rates are:
+     Rate                               Description
+     ------                             -----
+     8000                               default rate for `/dev/audio'
+     11025                              speech recording
+     22050                              
+     44100                              CD quality audio (at 16
+                                        bits/sample and 2 channels)
+     96000                              DVD quality audio (at 24
+                                        bits/sample)
+
+`sync()'
+     Wait until the sound device has played every byte in its buffer.
+     (This happens implicitly when the device is closed.)  The OSS
+     documentation recommends closing and re-opening the device rather
+     than using `sync()'.
+
+`reset()'
+     Immediately stop playing or recording and return the device to a
+     state where it can accept commands.  The OSS documentation
+     recommends closing and re-opening the device after calling
+     `reset()'.
+
+`post()'
+     Tell the driver that there is likely to be a pause in the output,
+     making it possible for the device to handle the pause more
+     intelligently.  You might use this after playing a spot sound
+     effect, before waiting for user input, or before doing disk I/O.
+
+The following convenience methods combine several ioctls, or one ioctl
+and some simple calculations.
+
+`setparameters(format, nchannels, samplerate [, strict=False])'
+     Set the key audio sampling parameters--sample format, number of
+     channels, and sampling rate--in one method call.  FORMAT,
+     NCHANNELS, and SAMPLERATE should be as specified in the
+     `setfmt()', `channels()', and `speed()' methods.  If STRICT is
+     true, `setparameters()' checks to see if each parameter was
+     actually set to the requested value, and raises `OSSAudioError' if
+     not.  Returns a tuple (FORMAT, NCHANNELS, SAMPLERATE) indicating
+     the parameter values that were actually set by the device driver
+     (i.e., the same as the return valus of `setfmt()', `channels()',
+     and `speed()').
+
+     For example,
+            (fmt, channels, rate) = dsp.setparameters(fmt, channels, rate)
+
+     is equivalent to
+            fmt = dsp.setfmt(fmt)
+            channels = dsp.channels(channels)
+            rate = dsp.rate(channels)
+
+`bufsize()'
+     Returns the size of the hardware buffer, in samples.
+
+`obufcount()'
+     Returns the number of samples that are in the hardware buffer yet
+     to be played.
+
+`obuffree()'
+     Returns the number of samples that could be queued into the
+     hardware buffer to be played without blocking.
+
+
+File: python-lib.info,  Node: Mixer Device Objects,  Prev: Audio Device Objects,  Up: ossaudiodev
+
+Mixer Device Objects
+--------------------
+
+File-like interface
+
+`close()'
+     This method closes the open mixer device file.  Any further
+     attempts to use the mixer after this file is closed will raise an
+     IOError.
+
+`fileno()'
+     Returns the file handle number of the open mixer device file.
+
+Mixer interface
+
+`controls()'
+     This method returns a bitmask specifying the available mixer
+     controls ("Control" being a specific mixable "channel", such as
+     `SOUND_MIXER_PCM' or `SOUND_MIXER_SYNTH').  This bitmask indicates
+     a subset of all available mixer channels--the `SOUND_MIXER_*'
+     constants defined at module level.  To determine if, for example,
+     the current mixer object supports a PCM mixer, use the following
+     Python code:
+
+          mixer=ossaudiodev.openmixer()
+          if mixer.channels() & (1 << ossaudiodev.SOUND_MIXER_PCM):
+          	# PCM is supported
+          	<code>
+
+     For most purposes, the `SOUND_MIXER_VOLUME' (Master volume) and
+     `SOUND_MIXER_PCM' channels should suffice--but code that uses the
+     mixer should be flexible when it comes to choosing sound channels.
+     On the Gravis Ultrasound, for example, `SOUND_MIXER_VOLUME' does
+     not exist.
+
+`stereocontrols()'
+     Returns a bitmask indicating stereo mixer channels.  If a bit is
+     set, the corresponding channel is stereo; if it is unset, the
+     channel is either monophonic or not supported by the mixer (use in
+     combination with `channels()' to determine which).
+
+     See the code example for the `channels()' function for an example
+     of getting data from a bitmask.
+
+`reccontrols()'
+     Returns a bitmask specifying the mixer controls that may be used to
+     record.  See the code example for `controls()' for an example of
+     reading from a bitmask.
+
+`get(channel)'
+     Returns the volume of a given mixer channel.  The returned volume
+     is a 2-tuple `(left_volume,right_volume)'.  Volumes are specified
+     as numbers from 0 (silent) to 100 (full volume).  If the channel is
+     monophonic, a 2-tuple is still returned, but both channel volumes
+     are the same.
+
+     If an unknown channel is specified, `error' is raised.
+
+`set(channel, (left, right))'
+     Sets the volume for a given mixer channel to `(left,right)'.
+     `left' and `right' must be ints and between 0 (silent) and 100
+     (full volume).  On success, the new volume is returned as a
+     2-tuple.  Note that this may not be exactly the same as the volume
+     specified, because of the limited resolution of some soundcard's
+     mixers.
+
+     Raises `IOError' if an invalid mixer channel was specified;
+     `TypeError' if the argument format was incorrect, and `error' if
+     the specified volumes were out-of-range.
+
+`get_recsrc()'
+     This method returns a bitmask indicating which channel or channels
+     are currently being used as a recording source.
+
+`set_recsrc(bitmask)'
+     Call this function to specify a recording source.  Returns a
+     bitmask indicating the new recording source (or sources) if
+     successful; raises `IOError' if an invalid source was specified.
+     To set the current recording source to the microphone input:
+
+          mixer.setrecsrc (1 << ossaudiodev.SOUND_MIXER_MIC)
+
+
+File: python-lib.info,  Node: Cryptographic Services,  Next: Graphical User Interfaces with Tk,  Prev: Multimedia Services,  Up: Top
+
+Cryptographic Services
+**********************
+
+The modules described in this chapter implement various algorithms of a
+cryptographic nature.  They are available at the discretion of the
+installation.  Here's an overview:
+
+Hardcore cypherpunks will probably find the cryptographic modules
+written by A.M. Kuchling of further interest; the package adds built-in
+modules for DES and IDEA encryption, provides a Python module for
+reading and decrypting PGP files, and then some.  These modules are not
+distributed with Python but available separately.  See the URL
+<http://www.amk.ca/python/code/crypto.html> for more information.
+
+* Menu:
+
+* hmac::
+* md5::
+* sha::
+* mpz::
+* rotor::
+
+
+File: python-lib.info,  Node: hmac,  Next: md5,  Prev: Cryptographic Services,  Up: Cryptographic Services
+
+Keyed-Hashing for Message Authentication
+========================================
+
+Keyed-Hashing for Message Authentication (HMAC) implementation for
+Python.
+
+_Added in Python version 2.2_
+
+This module implements the HMAC algorithm as described by RFC 2104 .
+
+`new(key[, msg[, digestmod]])'
+     Return a new hmac object.  If MSG is present, the method call
+     `update(MSG)' is made. DIGESTMOD is the digest module for the HMAC
+     object to use. It defaults to the `md5' module.
+
+An HMAC object has the following methods:
+
+`update(msg)'
+     Update the hmac object with the string MSG.  Repeated calls are
+     equivalent to a single call with the concatenation of all the
+     arguments: `m.update(a); m.update(b)' is equivalent to `m.update(a
+     + b)'.
+
+`digest()'
+     Return the digest of the strings passed to the `update()' method
+     so far.  This is a 16-byte string (for `md5') or a 20-byte string
+     (for `sha') which may contain non-ASCII characters, including NUL
+     bytes.
+
+`hexdigest()'
+     Like `digest()' except the digest is returned as a string of
+     length 32 for `md5' (40 for `sha'), containing only hexadecimal
+     digits.  This may be used to exchange the value safely in email or
+     other non-binary environments.
+
+`copy()'
+     Return a copy ("clone") of the hmac object.  This can be used to
+     efficiently compute the digests of strings that share a common
+     initial substring.
+
+
+File: python-lib.info,  Node: md5,  Next: sha,  Prev: hmac,  Up: Cryptographic Services
+
+MD5 message digest algorithm
+============================
+
+RSA's MD5 message digest algorithm.
+
+This module implements the interface to RSA's MD5 message digest
+algorithm (see also Internet RFC 1321 ).  Its use is quite
+straightforward: use `new()' to create an md5 object.  You can now feed
+this object with arbitrary strings using the `update()' method, and at
+any point you can ask it for the "digest" (a strong kind of 128-bit
+checksum, a.k.a. "fingerprint") of the concatenation of the strings fed
+to it so far using the `digest()' method.
+
+For example, to obtain the digest of the string `'Nobody inspects the
+spammish repetition'':
+
+     >>> import md5
+     >>> m = md5.new()
+     >>> m.update("Nobody inspects")
+     >>> m.update(" the spammish repetition")
+     >>> m.digest()
+     '\xbbd\x9c\x83\xdd\x1e\xa5\xc9\xd9\xde\xc9\xa1\x8d\xf0\xff\xe9'
+
+More condensed:
+
+     >>> md5.new("Nobody inspects the spammish repetition").digest()
+     '\xbbd\x9c\x83\xdd\x1e\xa5\xc9\xd9\xde\xc9\xa1\x8d\xf0\xff\xe9'
+
+The following values are provided as constants in the module and as
+attributes of the md5 objects returned by `new()':
+
+`digest_size'
+     The size of the resulting digest in bytes.  This is always `16'.
+
+md5 objects support the following methods:
+
+`new([arg])'
+     Return a new md5 object.  If ARG is present, the method call
+     `update(ARG)' is made.
+
+`md5([arg])'
+     For backward compatibility reasons, this is an alternative name
+     for the `new()' function.
+
+An md5 object has the following methods:
+
+`update(arg)'
+     Update the md5 object with the string ARG.  Repeated calls are
+     equivalent to a single call with the concatenation of all the
+     arguments: `m.update(a); m.update(b)' is equivalent to
+     `m.update(a+b)'.
+
+`digest()'
+     Return the digest of the strings passed to the `update()' method
+     so far.  This is a 16-byte string which may contain non-ASCII
+     characters, including null bytes.
+
+`hexdigest()'
+     Like `digest()' except the digest is returned as a string of
+     length 32, containing only hexadecimal digits.  This may be used
+     to exchange the value safely in email or other non-binary
+     environments.
+
+`copy()'
+     Return a copy ("clone") of the md5 object.  This can be used to
+     efficiently compute the digests of strings that share a common
+     initial substring.
+
+See also:
+     *Note sha:: Similar module implementing the Secure Hash Algorithm
+     (SHA).  The SHA algorithm is considered a more secure hash.
+
+
+File: python-lib.info,  Node: sha,  Next: mpz,  Prev: md5,  Up: Cryptographic Services
+
+SHA-1 message digest algorithm
+==============================
+
+NIST's secure hash algorithm, SHA.
+
+This module implements the interface to NIST's  secure hash algorithm,
+known as SHA-1.  SHA-1 is an improved version of the original SHA hash
+algorithm.  It is used in the same way as the `md5' module: use `new()'
+to create an sha object, then feed this object with arbitrary strings
+using the `update()' method, and at any point you can ask it for the
+"digest" of the concatenation of the strings fed to it so far.    SHA-1
+digests are 160 bits instead of MD5's 128 bits.
+
+`new([string])'
+     Return a new sha object.  If STRING is present, the method call
+     `update(STRING)' is made.
+
+The following values are provided as constants in the module and as
+attributes of the sha objects returned by `new()':
+
+`blocksize'
+     Size of the blocks fed into the hash function; this is always `1'.
+     This size is used to allow an arbitrary string to be hashed.
+
+`digest_size'
+     The size of the resulting digest in bytes.  This is always `20'.
+
+An sha object has the same methods as md5 objects:
+
+`update(arg)'
+     Update the sha object with the string ARG.  Repeated calls are
+     equivalent to a single call with the concatenation of all the
+     arguments: `m.update(a); m.update(b)' is equivalent to
+     `m.update(a+b)'.
+
+`digest()'
+     Return the digest of the strings passed to the `update()' method
+     so far.  This is a 20-byte string which may contain non-ASCII
+     characters, including null bytes.
+
+`hexdigest()'
+     Like `digest()' except the digest is returned as a string of
+     length 40, containing only hexadecimal digits.  This may be used
+     to exchange the value safely in email or other non-binary
+     environments.
+
+`copy()'
+     Return a copy ("clone") of the sha object.  This can be used to
+     efficiently compute the digests of strings that share a common
+     initial substring.
+
+See also:
+     `Secure Hash Standard' {The Secure Hash Algorithm is defined by
+     NIST document FIPS PUB 180-1: , published in April of 1995.  It is
+     available online as plain text (at least one diagram was omitted)
+     and as PDF at
+     <http://csrc.nist.gov/publications/fips/fips180-1/fip180-1.pdf>.}
+
+     `Cryptographic Toolkit (Secure Hashing)' {Links from NIST to
+     various information on secure hashing.}
+
+
+File: python-lib.info,  Node: mpz,  Next: rotor,  Prev: sha,  Up: Cryptographic Services
+
+GNU arbitrary magnitude integers
+================================
+
+Interface to the GNU MP library for arbitrary precision arithmetic.
+
+_This is deprecated in Python 2.2.  See the references at the end of
+this section for information about packages which provide similar
+functionality.  This module will be removed in Python 2.3._
+
+This is an optional module.  It is only available when Python is
+configured to include it, which requires that the GNU MP software is
+installed.
+
+This module implements the interface to part of the GNU MP library,
+which defines arbitrary precision integer and rational number
+arithmetic routines.  Only the interfaces to the _integer_ (`mpz_*()')
+routines are provided. If not stated otherwise, the description in the
+GNU MP documentation can be applied.
+
+Support for rational numbers  can be implemented in Python.  For an
+example, see the `Rat'  module, provided as `Demos/classes/Rat.py' in
+the Python source distribution.
+
+In general, "mpz"-numbers can be used just like other standard Python
+numbers, e.g., you can use the built-in operators like `+', `*', etc.,
+as well as the standard built-in functions like `abs()', `int()', ...,
+`divmod()', `pow()'.  *Please note:* the _bitwise-xor_ operation has
+been implemented as a bunch of _and_s, _invert_s and _or_s, because the
+library lacks an `mpz_xor()' function, and I didn't need one.
+
+You create an mpz-number by calling the function `mpz()' (see below for
+an exact description). An mpz-number is printed like this: `mpz(VALUE)'.
+
+`mpz(value)'
+     Create a new mpz-number. VALUE can be an integer, a long, another
+     mpz-number, or even a string. If it is a string, it is interpreted
+     as an array of radix-256 digits, least significant digit first,
+     resulting in a positive number. See also the `binary()' method,
+     described below.
+
+`MPZType'
+     The type of the objects returned by `mpz()' and most other
+     functions in this module.
+
+A number of _extra_ functions are defined in this module. Non
+mpz-arguments are converted to mpz-values first, and the functions
+return mpz-numbers.
+
+`powm(base, exponent, modulus)'
+     Return `pow(BASE, EXPONENT) %{} MODULUS'. If `EXPONENT == 0',
+     return `mpz(1)'. In contrast to the C library function, this
+     version can handle negative exponents.
+
+`gcd(op1, op2)'
+     Return the greatest common divisor of OP1 and OP2.
+
+`gcdext(a, b)'
+     Return a tuple `(G, S, T)', such that `A*S + B*T == G == gcd(A,
+     B)'.
+
+`sqrt(op)'
+     Return the square root of OP. The result is rounded towards zero.
+
+`sqrtrem(op)'
+     Return a tuple `(ROOT, REMAINDER)', such that `ROOT*ROOT +
+     REMAINDER == OP'.
+
+`divm(numerator, denominator, modulus)'
+     Returns a number Q such that `Q * DENOMINATOR %{} MODULUS ==
+     NUMERATOR'.  One could also implement this function in Python,
+     using `gcdext()'.
+
+An mpz-number has one method:
+
+`binary()'
+     Convert this mpz-number to a binary string, where the number has
+     been stored as an array of radix-256 digits, least significant
+     digit first.
+
+     The mpz-number must have a value greater than or equal to zero,
+     otherwise `ValueError' will be raised.
+
+See also:
+     `General Multiprecision Python'{ This project is building new
+     numeric types to allow arbitrary-precision arithmetic in Python.
+     Their first efforts are also based on the GNU MP library.}
+
+     `mxNumber -- Extended Numeric Types for Python'{Another wrapper
+     around the GNU MP library, including a port of that library to
+     Windows.}
+
+
+File: python-lib.info,  Node: rotor,  Prev: mpz,  Up: Cryptographic Services
+
+Enigma-like encryption and decryption
+=====================================
+
+Enigma-like encryption and decryption.
+
+_This is deprecated in Python 2.3.  The encryption algorithm is
+insecure._
+
+This module implements a rotor-based encryption algorithm, contributed
+by Lance Ellinghouse .  The design is derived from the Enigma device ,
+a machine used during World War II to encipher messages.  A rotor is
+simply a permutation.  For example, if the character `A' is the origin
+of the rotor, then a given rotor might map `A' to `L', `B' to `Z', `C'
+to `G', and so on.  To encrypt, we choose several different rotors, and
+set the origins of the rotors to known positions; their initial
+position is the ciphering key.  To encipher a character, we permute the
+original character by the first rotor, and then apply the second
+rotor's permutation to the result. We continue until we've applied all
+the rotors; the resulting character is our ciphertext.  We then change
+the origin of the final rotor by one position, from `A' to `B'; if the
+final rotor has made a complete revolution, then we rotate the
+next-to-last rotor by one position, and apply the same procedure
+recursively.  In other words, after enciphering one character, we
+advance the rotors in the same fashion as a car's odometer. Decoding
+works in the same way, except we reverse the permutations and apply
+them in the opposite order.
+
+The available functions in this module are:
+
+`newrotor(key[, numrotors])'
+     Return a rotor object. KEY is a string containing the encryption
+     key for the object; it can contain arbitrary binary data but not
+     null bytes.  The key will be used to randomly generate the rotor
+     permutations and their initial positions.  NUMROTORS is the number
+     of rotor permutations in the returned object; if it is omitted, a
+     default value of 6 will be used.
+
+Rotor objects have the following methods:
+
+`setkey(key)'
+     Sets the rotor's key to KEY. The key should not contain null bytes.
+
+`encrypt(plaintext)'
+     Reset the rotor object to its initial state and encrypt PLAINTEXT,
+     returning a string containing the ciphertext.  The ciphertext is
+     always the same length as the original plaintext.
+
+`encryptmore(plaintext)'
+     Encrypt PLAINTEXT without resetting the rotor object, and return a
+     string containing the ciphertext.
+
+`decrypt(ciphertext)'
+     Reset the rotor object to its initial state and decrypt CIPHERTEXT,
+     returning a string containing the plaintext.  The plaintext string
+     will always be the same length as the ciphertext.
+
+`decryptmore(ciphertext)'
+     Decrypt CIPHERTEXT without resetting the rotor object, and return a
+     string containing the plaintext.
+
+An example usage:
+     >>> import rotor
+     >>> rt = rotor.newrotor('key', 12)
+     >>> rt.encrypt('bar')
+     '\xab4\xf3'
+     >>> rt.encryptmore('bar')
+     '\xef\xfd$'
+     >>> rt.encrypt('bar')
+     '\xab4\xf3'
+     >>> rt.decrypt('\xab4\xf3')
+     'bar'
+     >>> rt.decryptmore('\xef\xfd$')
+     'bar'
+     >>> rt.decrypt('\xef\xfd$')
+     'l(\xcd'
+     >>> del rt
+
+The module's code is not an exact simulation of the original Enigma
+device; it implements the rotor encryption scheme differently from the
+original. The most important difference is that in the original Enigma,
+there were only 5 or 6 different rotors in existence, and they were
+applied twice to each character; the cipher key was the order in which
+they were placed in the machine.  The Python `rotor' module uses the
+supplied key to initialize a random number generator; the rotor
+permutations and their initial positions are then randomly generated.
+The original device only enciphered the letters of the alphabet, while
+this module can handle any 8-bit binary data; it also produces binary
+output.  This module can also operate with an arbitrary number of
+rotors.
+
+The original Enigma cipher was broken in 1944. The version implemented
+here is probably a good deal more difficult to crack (especially if you
+use many rotors), but it won't be impossible for a truly skillful and
+determined attacker to break the cipher.  So if you want to keep the
+NSA out of your files, this rotor cipher may well be unsafe, but for
+discouraging casual snooping through your files, it will probably be
+just fine, and may be somewhat safer than using the UNIX `crypt'
+command.
+
+
+File: python-lib.info,  Node: Graphical User Interfaces with Tk,  Next: Restricted Execution,  Prev: Cryptographic Services,  Up: Top
+
+Graphical User Interfaces with Tk
+*********************************
+
+Tk/Tcl has long been an integral part of Python.  It provides a robust
+and platform independent windowing toolkit, that is available to Python
+programmers using the `Tkinter' module, and its extension, the `Tix'
+module.
+
+The `Tkinter' module is a thin object-oriented layer on top of Tcl/Tk.
+To use `Tkinter', you don't need to write Tcl code, but you will need
+to consult the Tk documentation, and occasionally the Tcl
+documentation.  `Tkinter' is a set of wrappers that implement the Tk
+widgets as Python classes.  In addition, the internal module `_tkinter'
+provides a threadsafe mechanism which allows Python and Tcl to interact.
+
+Tk is not the only GUI for Python, but is however the most commonly
+used one; see section~, "Other User Interface Modules and Packages,"
+for more information on other GUI toolkits for Python.
+
+* Menu:
+
+* Tkinter::
+* Tix::
+* ScrolledText::
+* turtle::
+* Idle::
+* Other Graphical User Interface Packages::
+
+
+File: python-lib.info,  Node: Tkinter,  Next: Tix,  Prev: Graphical User Interfaces with Tk,  Up: Graphical User Interfaces with Tk
+
+Python interface to Tcl/Tk
+==========================
+
+Interface to Tcl/Tk for graphical user interfaces
+
+The `Tkinter' module ("Tk interface") is the standard Python interface
+to the Tk GUI toolkit.  Both Tk and `Tkinter' are available on most
+UNIX platforms, as well as on Windows and Macintosh systems.  (Tk
+itself is not part of Python; it is maintained at ActiveState.)
+
+See also:
+     `Python Tkinter Resources' {The Python Tkinter Topic Guide
+     provides a great deal of information on using Tk from Python and
+     links to other sources of information on Tk.}
+
+     `An Introduction to Tkinter' {Fredrik Lundh's on-line reference
+     material.}
+
+     `Tkinter reference: a GUI for Python' {On-line reference material.}
+
+     `Tkinter for JPython' {The Jython interface to Tkinter.}
+
+     `Python and Tkinter Programming' {The book by John Grayson (ISBN
+     1-884777-81-3).}
+
+* Menu:
+
+* Tkinter Modules::
+* Tkinter Life Preserver::
+* A Very Quick Look at Tcl/Tk::
+* Mapping Basic Tk into Tkinter::
+* How Tk and Tkinter are Related::
+* Handy Reference::
+
+
+File: python-lib.info,  Node: Tkinter Modules,  Next: Tkinter Life Preserver,  Prev: Tkinter,  Up: Tkinter
+
+Tkinter Modules
+---------------
+
+Most of the time, the `Tkinter' module is all you really need, but a
+number of additional modules are available as well.  The Tk interface
+is located in a binary module named `_tkinter'.  This module contains
+the low-level interface to Tk, and should never be used directly by
+application programmers. It is usually a shared library (or DLL), but
+might in some cases be statically linked with the Python interpreter.
+
+In addition to the Tk interface module, `Tkinter' includes a number of
+Python modules. The two most important modules are the `Tkinter' module
+itself, and a module called `Tkconstants'. The former automatically
+imports the latter, so to use Tkinter, all you need to do is to import
+one module:
+
+     import Tkinter
+
+Or, more often:
+
+     from Tkinter import *
+
+`Tk(screenName=None, baseName=None, className='Tk')'
+     The `Tk' class is instantiated without arguments.  This creates a
+     toplevel widget of Tk which usually is the main window of an
+     appliation. Each instance has its own associated Tcl interpreter.
+
+Other modules that provide Tk support include:
+
+``ScrolledText''
+     Text widget with a vertical scroll bar built in.
+
+``tkColorChooser''
+     Dialog to let the user choose a color.
+
+``tkCommonDialog''
+     Base class for the dialogs defined in the other modules listed
+     here.
+
+``tkFileDialog''
+     Common dialogs to allow the user to specify a file to open or save.
+
+``tkFont''
+     Utilities to help work with fonts.
+
+``tkMessageBox''
+     Access to standard Tk dialog boxes.
+
+``tkSimpleDialog''
+     Basic dialogs and convenience functions.
+
+``Tkdnd''
+     Drag-and-drop support for `Tkinter'.  This is experimental and
+     should become deprecated when it is replaced with the Tk DND.
+
+``turtle''
+     Turtle graphics in a Tk window.
+
+
+File: python-lib.info,  Node: Tkinter Life Preserver,  Next: A Very Quick Look at Tcl/Tk,  Prev: Tkinter Modules,  Up: Tkinter
+
+Tkinter Life Preserver
+----------------------
+
+This section is not designed to be an exhaustive tutorial on either Tk
+or Tkinter.  Rather, it is intended as a stop gap, providing some
+introductory orientation on the system.
+
+Credits:
+   * Tkinter was written by Steen Lumholt and Guido van Rossum.
+
+   * Tk was written by John Ousterhout while at Berkeley.
+
+   * This Life Preserver was written by Matt Conway at the University
+     of Virginia.
+
+   * The html rendering, and some liberal editing, was produced from a
+     FrameMaker version by Ken Manheimer.
+
+   * Fredrik Lundh elaborated and revised the class interface
+     descriptions, to get them current with Tk 4.2.
+
+   * Mike Clarkson converted the documentation to LaTeX, and compiled
+     the User Interface chapter of the reference manual.
+
+* Menu:
+
+* How To Use This Section::
+* A Simple Hello World Program::
+
+
+File: python-lib.info,  Node: How To Use This Section,  Next: A Simple Hello World Program,  Prev: Tkinter Life Preserver,  Up: Tkinter Life Preserver
+
+How To Use This Section
+.......................
+
+This section is designed in two parts: the first half (roughly) covers
+background material, while the second half can be taken to the keyboard
+as a handy reference.
+
+When trying to answer questions of the form "how do I do blah", it is
+often best to find out how to do"blah" in straight Tk, and then convert
+this back into the corresponding `Tkinter' call.  Python programmers
+can often guess at the correct Python command by looking at the Tk
+documentation. This means that in order to use Tkinter, you will have
+to know a little bit about Tk. This document can't fulfill that role,
+so the best we can do is point you to the best documentation that
+exists. Here are some hints:
+
+   * The authors strongly suggest getting a copy of the Tk man pages.
+     Specifically, the man pages in the `mann' directory are most
+     useful. The `man3' man pages describe the C interface to the Tk
+     library and thus are not especially helpful for script writers.
+
+   * Addison-Wesley publishes a book called  by John Ousterhout (ISBN
+     0-201-63337-X) which is a good introduction to Tcl and Tk for the
+     novice.  The book is not exhaustive, and for many details it
+     defers to the man pages.
+
+   * `Tkinter.py' is a last resort for most, but can be a good place to
+     go when nothing else makes sense.
+
+See also:
+     `ActiveState Tcl Home Page' {The Tk/Tcl development is largely
+     taking place at ActiveState.} `Tcl and the Tk Toolkit' {The book
+     by John Ousterhout, the inventor of Tcl .} `Practical Programming
+     in Tcl and Tk' {Brent Welch's encyclopedic book.}
+
+
+File: python-lib.info,  Node: A Simple Hello World Program,  Prev: How To Use This Section,  Up: Tkinter Life Preserver
+
+A Simple Hello World Program
+............................
+
+     from Tkinter import *
+     
+     class Application(Frame):
+         def say_hi(self):
+             print "hi there, everyone!"
+     
+         def createWidgets(self):
+             self.QUIT = Button(self)
+             self.QUIT["text"] = "QUIT"
+             self.QUIT["fg"]   = "red"
+             self.QUIT["command"] =  self.quit
+     
+             self.QUIT.pack({"side": "left"})
+     
+             self.hi_there = Button(self)
+             self.hi_there["text"] = "Hello",
+             self.hi_there["command"] = self.say_hi
+     
+             self.hi_there.pack({"side": "left"})
+     
+         def __init__(self, master=None):
+             Frame.__init__(self, master)
+             self.pack()
+             self.createWidgets()
+     
+     app = Application()
+     app.mainloop()
+
+
+File: python-lib.info,  Node: A Very Quick Look at Tcl/Tk,  Next: Mapping Basic Tk into Tkinter,  Prev: Tkinter Life Preserver,  Up: Tkinter
+
+A (Very) Quick Look at Tcl/Tk
+-----------------------------
+
+The class hierarchy looks complicated, but in actual practice,
+application programmers almost always refer to the classes at the very
+bottom of the hierarchy.
+
+Notes:
+   * These classes are provided for the purposes of organizing certain
+     functions under one namespace. They aren't meant to be
+     instantiated independently.
+
+   * The `Tk' class is meant to be instantiated only once in an
+     application. Application programmers need not instantiate one
+     explicitly, the system creates one whenever any of the other
+     classes are instantiated.
+
+   * The `Widget' class is not meant to be instantiated, it is meant
+     only for subclassing to make "real" widgets (in C++, this is
+     called an `abstract class').
+
+To make use of this reference material, there will be times when you
+will need to know how to read short passages of Tk and how to identify
+the various parts of a Tk command.  (See section~*Note Handy
+Reference:: for the `Tkinter' equivalents of what's below.)
+
+Tk scripts are Tcl programs.  Like all Tcl programs, Tk scripts are
+just lists of tokens separated by spaces.  A Tk widget is just its
+_class_, the _options_ that help configure it, and the _actions_ that
+make it do useful things.
+
+To make a widget in Tk, the command is always of the form:
+
+                     classCommand newPathname options
+
+`CLASSCOMMAND'
+     denotes which kind of widget to make (a button, a label, a menu...)
+
+`NEWPATHNAME'
+     is the new name for this widget.  All names in Tk must be unique.
+     To help enforce this, widgets in Tk are named with _pathnames_,
+     just like files in a file system.  The top level widget, the
+     _root_, is called `.' (period) and children are delimited by more
+     periods.  For example, `.myApp.controlPanel.okButton' might be the
+     name of a widget.
+
+`OPTIONS'
+     configure the widget's appearance and in some cases, its behavior.
+     The options come in the form of a list of flags and values.
+     Flags are proceeded by a `-', like unix shell command flags, and
+     values are put in quotes if they are more than one word.
+
+For example:
+
+         button   .fred   -fg red -text "hi there"
+            ^       ^     \_____________________/
+            |       |                |
+          class    new            options
+         command  widget  (-opt val -opt val ...)
+
+Once created, the pathname to the widget becomes a new command.  This
+new WIDGET COMMAND is the programmer's handle for getting the new
+widget to perform some ACTION.  In C, you'd express this as
+someAction(fred, someOptions), in C++, you would express this as
+fred.someAction(someOptions), and in Tk, you say:
+
+         .fred someAction someOptions
+
+Note that the object name, `.fred', starts with a dot.
+
+As you'd expect, the legal values for SOMEACTION will depend on the
+widget's class: `.fred disable' works if fred is a button (fred gets
+greyed out), but does not work if fred is a label (disabling of labels
+is not supported in Tk).
+
+The legal values of SOMEOPTIONS is action dependent.  Some actions,
+like `disable', require no arguments, others, like a text-entry box's
+`delete' command, would need arguments to specify what range of text to
+delete.
+
+
+File: python-lib.info,  Node: Mapping Basic Tk into Tkinter,  Next: How Tk and Tkinter are Related,  Prev: A Very Quick Look at Tcl/Tk,  Up: Tkinter
+
+Mapping Basic Tk into Tkinter
+-----------------------------
+
+Class commands in Tk correspond to class constructors in Tkinter.
+
+         button .fred                =====>  fred = Button()
+
+The master of an object is implicit in the new name given to it at
+creation time.  In Tkinter, masters are specified explicitly.
+
+         button .panel.fred          =====>  fred = Button(panel)
+
+The configuration options in Tk are given in lists of hyphened tags
+followed by values.  In Tkinter, options are specified as
+keyword-arguments in the instance constructor, and keyword-args for
+configure calls or as instance indices, in dictionary style, for
+established instances.  See section~*Note turtle:: on setting options.
+
+         button .fred -fg red        =====>  fred = Button(panel, fg = "red")
+         .fred configure -fg red     =====>  fred["fg"] = red
+                                     OR ==>  fred.config(fg = "red")
+
+In Tk, to perform an action on a widget, use the widget name as a
+command, and follow it with an action name, possibly with arguments
+(options).  In Tkinter, you call methods on the class instance to
+invoke actions on the widget.  The actions (methods) that a given
+widget can perform are listed in the Tkinter.py module.
+
+         .fred invoke                =====>  fred.invoke()
+
+To give a widget to the packer (geometry manager), you call pack with
+optional arguments.  In Tkinter, the Pack class holds all this
+functionality, and the various forms of the pack command are
+implemented as methods.  All widgets in `Tkinter' are subclassed from
+the Packer, and so inherit all the packing methods. See the `Tix'
+module documentation for additional information on the Form geometry
+manager.
+
+         pack .fred -side left       =====>  fred.pack(side = "left")
+
+
+File: python-lib.info,  Node: How Tk and Tkinter are Related,  Next: Handy Reference,  Prev: Mapping Basic Tk into Tkinter,  Up: Tkinter
+
+How Tk and Tkinter are Related
+------------------------------
+
+_Note:_ This was derived from a graphical image; the image will be used
+more directly in a subsequent version of this document.
+
+From the top down:
+`Your App Here (Python)'
+     A Python application makes a `Tkinter' call.
+
+`Tkinter (Python Module)'
+     This call (say, for example, creating a button widget), is
+     implemented in the _Tkinter_ module, which is written in Python.
+     This Python function will parse the commands and the arguments and
+     convert them into a form that makes them look as if they had come
+     from a Tk script instead of a Python script.
+
+`tkinter (C)'
+     These commands and their arguments will be passed to a C function
+     in the _tkinter_ - note the lowercase - extension module.
+
+`Tk Widgets (C and Tcl)'
+     This C function is able to make calls into other C modules,
+     including the C functions that make up the Tk library.  Tk is
+     implemented in C and some Tcl.  The Tcl part of the Tk widgets is
+     used to bind certain default behaviors to widgets, and is executed
+     once at the point where the Python `Tkinter' module is imported.
+     (The user never sees this stage).
+
+`Tk (C)'
+     The Tk part of the Tk Widgets implement the final mapping to ...
+
+`Xlib (C)'
+     the Xlib library to draw graphics on the screen.
+
+
+File: python-lib.info,  Node: Handy Reference,  Prev: How Tk and Tkinter are Related,  Up: Tkinter
+
+Handy Reference
+---------------
+
+* Menu:
+
+* Setting Options::
+* Packer::
+* Packer Options::
+* Coupling Widget Variables::
+* Window Manager::
+* Tk Option Data Types::
+* Bindings and Events::
+* index Parameter::
+* Images::
+

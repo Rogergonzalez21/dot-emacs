@@ -1,0 +1,904 @@
+This is python-api.info, produced by makeinfo version 4.3 from
+python-api.texi.
+
+October 3, 2003
+
+
+File: python-api.info,  Node: Thread State and the Global Interpreter Lock,  Next: Profiling and Tracing,  Prev: Initialization,  Up: Initialization
+
+Thread State and the Global Interpreter Lock
+============================================
+
+The Python interpreter is not fully thread safe.  In order to support
+multi-threaded Python programs, there's a global lock that must be held
+by the current thread before it can safely access Python objects.
+Without the lock, even the simplest operations could cause problems in
+a multi-threaded program: for example, when two threads simultaneously
+increment the reference count of the same object, the reference count
+could end up being incremented only once instead of twice.
+
+Therefore, the rule exists that only the thread that has acquired the
+global interpreter lock may operate on Python objects or call Python/C
+API functions.  In order to support multi-threaded Python programs, the
+interpreter regularly releases and reacquires the lock -- by default,
+every 100 bytecode instructions (this can be changed with
+`sys.setcheckinterval()').  The lock is also released and reacquired
+around potentially blocking I/O operations like reading or writing a
+file, so that other threads can run while the thread that requests the
+I/O is waiting for the I/O operation to complete.
+
+The Python interpreter needs to keep some bookkeeping information
+separate per thread -- for this it uses a data structure called
+`PyThreadState' .  This is new in Python 1.5; in earlier versions, such
+state was stored in global variables, and switching threads could cause
+problems.  In particular, exception handling is now thread safe, when
+the application uses `sys.exc_info()' to access the exception last
+raised in the current thread.
+
+There's one global variable left, however: the pointer to the current
+`PyThreadState'  structure.  While most thread packages have a way to
+store "per-thread global data," Python's internal platform independent
+thread abstraction doesn't support this yet.  Therefore, the current
+thread state must be manipulated explicitly.
+
+This is easy enough in most cases.  Most code manipulating the global
+interpreter lock has the following simple structure:
+
+     Save the thread state in a local variable.
+     Release the interpreter lock.
+     ...Do some blocking I/O operation...
+     Reacquire the interpreter lock.
+     Restore the thread state from the local variable.
+
+This is so common that a pair of macros exists to simplify it:
+
+     Py_BEGIN_ALLOW_THREADS
+     ...Do some blocking I/O operation...
+     Py_END_ALLOW_THREADS
+
+The `Py_BEGIN_ALLOW_THREADS' macro opens a new block and declares a
+hidden local variable; the `Py_END_ALLOW_THREADS' macro closes the
+block.  Another advantage of using these two macros is that when Python
+is compiled without thread support, they are defined empty, thus saving
+the thread state and lock manipulations.
+
+When thread support is enabled, the block above expands to the
+following code:
+
+         PyThreadState *_save;
+     
+         _save = PyEval_SaveThread();
+         ...Do some blocking I/O operation...
+         PyEval_RestoreThread(_save);
+
+Using even lower level primitives, we can get roughly the same effect
+as follows:
+
+         PyThreadState *_save;
+     
+         _save = PyThreadState_Swap(NULL);
+         PyEval_ReleaseLock();
+         ...Do some blocking I/O operation...
+         PyEval_AcquireLock();
+         PyThreadState_Swap(_save);
+
+There are some subtle differences; in particular,
+`PyEval_RestoreThread()'  saves and restores the value of the  global
+variable `errno' , since the lock manipulation does not guarantee that
+`errno' is left alone.  Also, when thread support is disabled,
+`PyEval_SaveThread()'  and `PyEval_RestoreThread()' don't manipulate
+the lock; in this case, `PyEval_ReleaseLock()'  and
+`PyEval_AcquireLock()'  are not available.  This is done so that
+dynamically loaded extensions compiled with thread support enabled can
+be loaded by an interpreter that was compiled with disabled thread
+support.
+
+The global interpreter lock is used to protect the pointer to the
+current thread state.  When releasing the lock and saving the thread
+state, the current thread state pointer must be retrieved before the
+lock is released (since another thread could immediately acquire the
+lock and store its own thread state in the global variable).
+Conversely, when acquiring the lock and restoring the thread state, the
+lock must be acquired before storing the thread state pointer.
+
+Why am I going on with so much detail about this?  Because when threads
+are created from C, they don't have the global interpreter lock, nor is
+there a thread state data structure for them.  Such threads must
+bootstrap themselves into existence, by first creating a thread state
+data structure, then acquiring the lock, and finally storing their
+thread state pointer, before they can start using the Python/C API.
+When they are done, they should reset the thread state pointer, release
+the lock, and finally free their thread state data structure.
+
+When creating a thread data structure, you need to provide an
+interpreter state data structure.  The interpreter state data structure
+hold global data that is shared by all threads in an interpreter, for
+example the module administration (`sys.modules').  Depending on your
+needs, you can either create a new interpreter state data structure, or
+share the interpreter state data structure used by the Python main
+thread (to access the latter, you must obtain the thread state and
+access its `interp' member; this must be done by a thread that is
+created by Python or by the main thread after Python is initialized).
+
+Assuming you have access to an interpreter object, the typical idiom
+for calling into Python from a C thread is
+
+         PyThreadState *tstate;
+         PyObject *result;
+     
+         /* interp is your reference to an interpreter object. */
+         tstate = PyThreadState_New(interp);
+         PyEval_AcquireThread(tstate);
+     
+         /* Perform Python actions here.  */
+         result = CallSomeFunction();
+         /* evaluate result */
+     
+         /* Release the thread. No Python API allowed beyond this point. */
+         PyEval_ReleaseThread(tstate);
+     
+         /* You can either delete the thread state, or save it
+            until you need it the next time. */
+         PyThreadState_Delete(tstate);
+
+`PyInterpreterState'
+     This data structure represents the state shared by a number of
+     cooperating threads.  Threads belonging to the same interpreter
+     share their module administration and a few other internal items.
+     There are no public members in this structure.
+
+     Threads belonging to different interpreters initially share
+     nothing, except process state like available memory, open file
+     descriptors and such.  The global interpreter lock is also shared
+     by all threads, regardless of to which interpreter they belong.
+
+`PyThreadState'
+     This data structure represents the state of a single thread.  The
+     only public data member is `PyInterpreterState *'`interp', which
+     points to this thread's interpreter state.
+
+`void PyEval_InitThreads()'
+     Initialize and acquire the global interpreter lock.  It should be
+     called in the main thread before creating a second thread or
+     engaging in any other thread operations such as
+     `PyEval_ReleaseLock()'  or `PyEval_ReleaseThread(TSTATE)' .  It is
+     not needed before calling `PyEval_SaveThread()'  or
+     `PyEval_RestoreThread()' .
+
+     This is a no-op when called for a second time.  It is safe to call
+     this function before calling `Py_Initialize()' .
+
+     When only the main thread exists, no lock operations are needed.
+     This is a common situation (most Python programs do not use
+     threads), and the lock operations slow the interpreter down a bit.
+     Therefore, the lock is not created initially.  This situation is
+     equivalent to having acquired the lock: when there is only a single
+     thread, all object accesses are safe.  Therefore, when this
+     function initializes the lock, it also acquires it.  Before the
+     Python `thread'  module creates a new thread, knowing that either
+     it has the lock or the lock hasn't been created yet, it calls
+     `PyEval_InitThreads()'.  When this call returns, it is guaranteed
+     that the lock has been created and that it has acquired it.
+
+     It is *not* safe to call this function when it is unknown which
+     thread (if any) currently has the global interpreter lock.
+
+     This function is not available when thread support is disabled at
+     compile time.
+
+`void PyEval_AcquireLock()'
+     Acquire the global interpreter lock.  The lock must have been
+     created earlier.  If this thread already has the lock, a deadlock
+     ensues.  This function is not available when thread support is
+     disabled at compile time.
+
+`void PyEval_ReleaseLock()'
+     Release the global interpreter lock.  The lock must have been
+     created earlier.  This function is not available when thread
+     support is disabled at compile time.
+
+`void PyEval_AcquireThread(PyThreadState *tstate)'
+     Acquire the global interpreter lock and then set the current thread
+     state to TSTATE, which should not be `NULL'.  The lock must have
+     been created earlier.  If this thread already has the lock,
+     deadlock ensues.  This function is not available when thread
+     support is disabled at compile time.
+
+`void PyEval_ReleaseThread(PyThreadState *tstate)'
+     Reset the current thread state to `NULL' and release the global
+     interpreter lock.  The lock must have been created earlier and must
+     be held by the current thread.  The TSTATE argument, which must
+     not be `NULL', is only used to check that it represents the
+     current thread state -- if it isn't, a fatal error is reported.
+     This function is not available when thread support is disabled at
+     compile time.
+
+`PyThreadState* PyEval_SaveThread()'
+     Release the interpreter lock (if it has been created and thread
+     support is enabled) and reset the thread state to `NULL', returning
+     the previous thread state (which is not `NULL').  If the lock has
+     been created, the current thread must have acquired it.  (This
+     function is available even when thread support is disabled at
+     compile time.)
+
+`void PyEval_RestoreThread(PyThreadState *tstate)'
+     Acquire the interpreter lock (if it has been created and thread
+     support is enabled) and set the thread state to TSTATE, which must
+     not be `NULL'.  If the lock has been created, the current thread
+     must not have acquired it, otherwise deadlock ensues.  (This
+     function is available even when thread support is disabled at
+     compile time.)
+
+The following macros are normally used without a trailing semicolon;
+look for example usage in the Python source distribution.
+
+`Py_BEGIN_ALLOW_THREADS'
+     This macro expands to `{ PyThreadState *_save; _save =
+     PyEval_SaveThread();'.  Note that it contains an opening brace; it
+     must be matched with a following `Py_END_ALLOW_THREADS' macro.
+     See above for further discussion of this macro.  It is a no-op
+     when thread support is disabled at compile time.
+
+`Py_END_ALLOW_THREADS'
+     This macro expands to `PyEval_RestoreThread(_save); }'.  Note that
+     it contains a closing brace; it must be matched with an earlier
+     `Py_BEGIN_ALLOW_THREADS' macro.  See above for further discussion
+     of this macro.  It is a no-op when thread support is disabled at
+     compile time.
+
+`Py_BLOCK_THREADS'
+     This macro expands to `PyEval_RestoreThread(_save);': it is
+     equivalent to `Py_END_ALLOW_THREADS' without the closing brace.
+     It is a no-op when thread support is disabled at compile time.
+
+`Py_UNBLOCK_THREADS'
+     This macro expands to `_save = PyEval_SaveThread();': it is
+     equivalent to `Py_BEGIN_ALLOW_THREADS' without the opening brace
+     and variable declaration.  It is a no-op when thread support is
+     disabled at compile time.
+
+All of the following functions are only available when thread support
+is enabled at compile time, and must be called only when the
+interpreter lock has been created.
+
+`PyInterpreterState* PyInterpreterState_New()'
+     Create a new interpreter state object.  The interpreter lock need
+     not be held, but may be held if it is necessary to serialize calls
+     to this function.
+
+`void PyInterpreterState_Clear(PyInterpreterState *interp)'
+     Reset all information in an interpreter state object.  The
+     interpreter lock must be held.
+
+`void PyInterpreterState_Delete(PyInterpreterState *interp)'
+     Destroy an interpreter state object.  The interpreter lock need not
+     be held.  The interpreter state must have been reset with a
+     previous call to `PyInterpreterState_Clear()'.
+
+`PyThreadState* PyThreadState_New(PyInterpreterState *interp)'
+     Create a new thread state object belonging to the given interpreter
+     object.  The interpreter lock need not be held, but may be held if
+     it is necessary to serialize calls to this function.
+
+`void PyThreadState_Clear(PyThreadState *tstate)'
+     Reset all information in a thread state object.  The interpreter
+     lock must be held.
+
+`void PyThreadState_Delete(PyThreadState *tstate)'
+     Destroy a thread state object.  The interpreter lock need not be
+     held.  The thread state must have been reset with a previous call
+     to `PyThreadState_Clear()'.
+
+`PyThreadState* PyThreadState_Get()'
+     Return the current thread state.  The interpreter lock must be
+     held.  When the current thread state is `NULL', this issues a fatal
+     error (so that the caller needn't check for `NULL').
+
+`PyThreadState* PyThreadState_Swap(PyThreadState *tstate)'
+     Swap the current thread state with the thread state given by the
+     argument TSTATE, which may be `NULL'.  The interpreter lock must
+     be held.
+
+`PyObject* PyThreadState_GetDict()'
+     Return a dictionary in which extensions can store thread-specific
+     state information.  Each extension should use a unique key to use
+     to store state in the dictionary.  It is okay to call this function
+     when no current thread state is available.  If this function
+     returns `NULL', no exception has been raised and the caller should
+     assume no current thread state is available.  _Changed in Python
+     version 2.3_
+
+`int PyThreadState_SetAsyncExc(long id, PyObject *exc)'
+     Asynchronously raise an exception in a thread.  The ID argument is
+     the thread id of the target thread; EXC is the exception object to
+     be raised.  This function does not steal any references to EXC.
+     To prevent naive misuse, you must write your own C extension to
+     call this.  Must be called with the GIL held.  Returns the number
+     of thread states modified; if it returns a number greater than
+     one, you're in trouble, and you should call it again with EXC set
+     to `NULL' to revert the effect.  This raises no exceptions.
+     _Added in Python version 2.3_
+
+
+File: python-api.info,  Node: Profiling and Tracing,  Next: Advanced Debugger Support,  Prev: Thread State and the Global Interpreter Lock,  Up: Initialization
+
+Profiling and Tracing
+=====================
+
+The Python interpreter provides some low-level support for attaching
+profiling and execution tracing facilities.  These are used for
+profiling, debugging, and coverage analysis tools.
+
+Starting with Python 2.2, the implementation of this facility was
+substantially revised, and an interface from C was added.  This C
+interface allows the profiling or tracing code to avoid the overhead of
+calling through Python-level callable objects, making a direct C
+function call instead.  The essential attributes of the facility have
+not changed; the interface allows trace functions to be installed
+per-thread, and the basic events reported to the trace function are the
+same as had been reported to the Python-level trace functions in
+previous versions.
+
+`int (*Py_tracefunc)(PyObject *obj, PyFrameObject *frame, int what, PyObject *arg)'
+     The type of the trace function registered using
+     `PyEval_SetProfile()' and `PyEval_SetTrace()'.  The first
+     parameter is the object passed to the registration function as
+     OBJ, FRAME is the frame object to which the event pertains, WHAT
+     is one of the constants `PyTrace_CALL', `PyTrace_EXCEPT',
+     `PyTrace_LINE' or `PyTrace_RETURN', and ARG depends on the value
+     of WHAT:
+
+     Value of WHAT                      Meaning of ARG
+     ------                             -----
+     PyTrace_CALL                       Always `NULL'.
+     PyTrace_EXCEPT                     Exception information as returned
+                                        by `sys.exc_info()'.
+     PyTrace_LINE                       Always `NULL'.
+     PyTrace_RETURN                     Value being returned to the
+                                        caller.
+
+`int PyTrace_CALL'
+     The value of the WHAT parameter to a `Py_tracefunc' function when
+     a new call to a function or method is being reported, or a new
+     entry into a generator.  Note that the creation of the iterator
+     for a generator function is not reported as there is no control
+     transfer to the Python bytecode in the corresponding frame.
+
+`int PyTrace_EXCEPT'
+     The value of the WHAT parameter to a `Py_tracefunc' function when
+     an exception has been raised.  The callback function is called
+     with this value for WHAT when after any bytecode is processed
+     after which the exception becomes set within the frame being
+     executed.  The effect of this is that as exception propogation
+     causes the Python stack to unwind, the callback is called upon
+     return to each frame as the exception propagates.  Only trace
+     functions receives these events; they are not needed by the
+     profiler.
+
+`int PyTrace_LINE'
+     The value passed as the WHAT parameter to a trace function (but
+     not a profiling function) when a line-number event is being
+     reported.
+
+`int PyTrace_RETURN'
+     The value for the WHAT parameter to `Py_tracefunc' functions when
+     a call is returning without propogating an exception.
+
+`void PyEval_SetProfile(Py_tracefunc func, PyObject *obj)'
+     Set the profiler function to FUNC.  The OBJ parameter is passed to
+     the function as its first parameter, and may be any Python object,
+     or `NULL'.  If the profile function needs to maintain state, using
+     a different value for OBJ for each thread provides a convenient
+     and thread-safe place to store it.  The profile function is called
+     for all monitored events except the line-number events.
+
+`void PyEval_SetTrace(Py_tracefunc func, PyObject *obj)'
+     Set the tracing function to FUNC.  This is similar to
+     `PyEval_SetProfile()', except the tracing function does receive
+     line-number events.
+
+
+File: python-api.info,  Node: Advanced Debugger Support,  Prev: Profiling and Tracing,  Up: Initialization
+
+Advanced Debugger Support
+=========================
+
+These functions are only intended to be used by advanced debugging
+tools.
+
+`PyInterpreterState* PyInterpreterState_Head()'
+     Return the interpreter state object at the head of the list of all
+     such objects.  _Added in Python version 2.2_
+
+`PyInterpreterState* PyInterpreterState_Next(PyInterpreterState *interp)'
+     Return the next interpreter state object after INTERP from the
+     list of all such objects.  _Added in Python version 2.2_
+
+`PyThreadState * PyInterpreterState_ThreadHead(PyInterpreterState *interp)'
+     Return the a pointer to the first `PyThreadState' object in the
+     list of threads associated with the interpreter INTERP.  _Added in
+     Python version 2.2_
+
+`PyThreadState* PyThreadState_Next(PyThreadState *tstate)'
+     Return the next thread state object after TSTATE from the list of
+     all such objects belonging to the same `PyInterpreterState' object.
+     _Added in Python version 2.2_
+
+
+File: python-api.info,  Node: Memory Management,  Next: Object Implementation Support,  Prev: Initialization,  Up: Top
+
+Memory Management
+*****************
+
+* Menu:
+
+* Overview::
+* Memory Interface::
+* Examples::
+
+
+File: python-api.info,  Node: Overview,  Next: Memory Interface,  Prev: Memory Management,  Up: Memory Management
+
+Overview
+========
+
+Memory management in Python involves a private heap containing all
+Python objects and data structures. The management of this private heap
+is ensured internally by the _Python memory manager_.  The Python
+memory manager has different components which deal with various dynamic
+storage management aspects, like sharing, segmentation, preallocation
+or caching.
+
+At the lowest level, a raw memory allocator ensures that there is
+enough room in the private heap for storing all Python-related data by
+interacting with the memory manager of the operating system. On top of
+the raw memory allocator, several object-specific allocators operate on
+the same heap and implement distinct memory management policies adapted
+to the peculiarities of every object type. For example, integer objects
+are managed differently within the heap than strings, tuples or
+dictionaries because integers imply different storage requirements and
+speed/space tradeoffs. The Python memory manager thus delegates some of
+the work to the object-specific allocators, but ensures that the latter
+operate within the bounds of the private heap.
+
+It is important to understand that the management of the Python heap is
+performed by the interpreter itself and that the user has no control
+over it, even if she regularly manipulates object pointers to memory
+blocks inside that heap.  The allocation of heap space for Python
+objects and other internal buffers is performed on demand by the Python
+memory manager through the Python/C API functions listed in this
+document.
+
+To avoid memory corruption, extension writers should never try to
+operate on Python objects with the functions exported by the C library:
+`malloc()' , `calloc()' , `realloc()'  and `free()' .  This will result
+in mixed calls between the C allocator and the Python memory manager
+with fatal consequences, because they implement different algorithms
+and operate on different heaps.  However, one may safely allocate and
+release memory blocks with the C library allocator for individual
+purposes, as shown in the following example:
+
+         PyObject *res;
+         char *buf = (char *) malloc(BUFSIZ); /* for I/O */
+     
+         if (buf == NULL)
+             return PyErr_NoMemory();
+         ...Do some I/O operation involving buf...
+         res = PyString_FromString(buf);
+         free(buf); /* malloc'ed */
+         return res;
+
+In this example, the memory request for the I/O buffer is handled by
+the C library allocator. The Python memory manager is involved only in
+the allocation of the string object returned as a result.
+
+In most situations, however, it is recommended to allocate memory from
+the Python heap specifically because the latter is under control of the
+Python memory manager. For example, this is required when the
+interpreter is extended with new object types written in C. Another
+reason for using the Python heap is the desire to _inform_ the Python
+memory manager about the memory needs of the extension module.  Even
+when the requested memory is used exclusively for internal,
+highly-specific purposes, delegating all memory requests to the Python
+memory manager causes the interpreter to have a more accurate image of
+its memory footprint as a whole. Consequently, under certain
+circumstances, the Python memory manager may or may not trigger
+appropriate actions, like garbage collection, memory compaction or
+other preventive procedures. Note that by using the C library allocator
+as shown in the previous example, the allocated memory for the I/O
+buffer escapes completely the Python memory manager.
+
+
+File: python-api.info,  Node: Memory Interface,  Next: Examples,  Prev: Overview,  Up: Memory Management
+
+Memory Interface
+================
+
+The following function sets, modeled after the ANSI C standard, but
+specifying  behavior when requesting zero bytes, are available for
+allocating and releasing memory from the Python heap:
+
+`void* PyMem_Malloc(size_t n)'
+     Allocates N bytes and returns a pointer of type `void*' to the
+     allocated memory, or `NULL' if the request fails.  Requesting zero
+     bytes returns a distinct non-`NULL' pointer if possible, as if
+     `PyMem_Malloc(1)' had been called instead.  The memory will not
+     have been initialized in any way.
+
+`void* PyMem_Realloc(void *p, size_t n)'
+     Resizes the memory block pointed to by P to N bytes.  The contents
+     will be unchanged to the minimum of the old and the new sizes. If
+     P is `NULL', the call is equivalent to `PyMem_Malloc(N)'; else if
+     N is equal to zero, the memory block is resized but is not freed,
+     and the returned pointer is non-`NULL'.  Unless P is `NULL', it
+     must have been returned by a previous call to `PyMem_Malloc()' or
+     `PyMem_Realloc()'.
+
+`void PyMem_Free(void *p)'
+     Frees the memory block pointed to by P, which must have been
+     returned by a previous call to `PyMem_Malloc()' or
+     `PyMem_Realloc()'.  Otherwise, or if `PyMem_Free(p)' has been
+     called before, undefined behavior occurs. If P is `NULL', no
+     operation is performed.
+
+The following type-oriented macros are provided for convenience.  Note
+that TYPE refers to any C type.
+
+`TYPE* PyMem_New(TYPE, size_t n)'
+     Same as `PyMem_Malloc()', but allocates `(N * sizeof(TYPE))' bytes
+     of memory.  Returns a pointer cast to `TYPE*'.  The memory will
+     not have been initialized in any way.
+
+`TYPE* PyMem_Resize(void *p, TYPE, size_t n)'
+     Same as `PyMem_Realloc()', but the memory block is resized to `(N
+     * sizeof(TYPE))' bytes.  Returns a pointer cast to `TYPE*'.
+
+`void PyMem_Del(void *p)'
+     Same as `PyMem_Free()'.
+
+In addition, the following macro sets are provided for calling the
+Python memory allocator directly, without involving the C API functions
+listed above. However, note that their use does not preserve binary
+compatibility accross Python versions and is therefore deprecated in
+extension modules.
+
+`PyMem_MALLOC()', `PyMem_REALLOC()', `PyMem_FREE()'.
+
+`PyMem_NEW()', `PyMem_RESIZE()', `PyMem_DEL()'.
+
+
+File: python-api.info,  Node: Examples,  Prev: Memory Interface,  Up: Memory Management
+
+Examples
+========
+
+Here is the example from section *Note Overview::, rewritten so that
+the I/O buffer is allocated from the Python heap by using the first
+function set:
+
+         PyObject *res;
+         char *buf = (char *) PyMem_Malloc(BUFSIZ); /* for I/O */
+     
+         if (buf == NULL)
+             return PyErr_NoMemory();
+         /* ...Do some I/O operation involving buf... */
+         res = PyString_FromString(buf);
+         PyMem_Free(buf); /* allocated with PyMem_Malloc */
+         return res;
+
+The same code using the type-oriented function set:
+
+         PyObject *res;
+         char *buf = PyMem_New(char, BUFSIZ); /* for I/O */
+     
+         if (buf == NULL)
+             return PyErr_NoMemory();
+         /* ...Do some I/O operation involving buf... */
+         res = PyString_FromString(buf);
+         PyMem_Del(buf); /* allocated with PyMem_New */
+         return res;
+
+Note that in the two examples above, the buffer is always manipulated
+via functions belonging to the same set. Indeed, it is required to use
+the same memory API family for a given memory block, so that the risk
+of mixing different allocators is reduced to a minimum. The following
+code sequence contains two errors, one of which is labeled as _fatal_
+because it mixes two different allocators operating on different heaps.
+
+     char *buf1 = PyMem_New(char, BUFSIZ);
+     char *buf2 = (char *) malloc(BUFSIZ);
+     char *buf3 = (char *) PyMem_Malloc(BUFSIZ);
+     ...
+     PyMem_Del(buf3);  /* Wrong -- should be PyMem_Free() */
+     free(buf2);       /* Right -- allocated via malloc() */
+     free(buf1);       /* Fatal -- should be PyMem_Del()  */
+
+In addition to the functions aimed at handling raw memory blocks from
+the Python heap, objects in Python are allocated and released with
+`PyObject_New()', `PyObject_NewVar()' and `PyObject_Del()', or with
+their corresponding macros `PyObject_NEW()', `PyObject_NEW_VAR()' and
+`PyObject_DEL()'.
+
+These will be explained in the next chapter on defining and
+implementing new object types in C.
+
+
+File: python-api.info,  Node: Object Implementation Support,  Next: Reporting Bugs,  Prev: Memory Management,  Up: Top
+
+Object Implementation Support
+*****************************
+
+This chapter describes the functions, types, and macros used when
+defining new object types.
+
+* Menu:
+
+* Allocating Objects on the Heap::
+* Common Object Structures::
+* Type Objects 2::
+* Mapping Object Structures::
+* Number Object Structures::
+* Sequence Object Structures::
+* Buffer Object Structures::
+* Supporting the Iterator Protocol::
+* Supporting Cyclic Garbarge Collection::
+
+
+File: python-api.info,  Node: Allocating Objects on the Heap,  Next: Common Object Structures,  Prev: Object Implementation Support,  Up: Object Implementation Support
+
+Allocating Objects on the Heap
+==============================
+
+`PyObject* _PyObject_New(PyTypeObject *type)'
+
+`PyVarObject* _PyObject_NewVar(PyTypeObject *type, int size)'
+
+`void _PyObject_Del(PyObject *op)'
+
+`PyObject* PyObject_Init(PyObject *op, PyTypeObject *type)'
+     Initialize a newly-allocated object OP with its type and initial
+     reference.  Returns the initialized object.  If TYPE indicates
+     that the object participates in the cyclic garbage detector, it is
+     added to the detector's set of observed objects.  Other fields of
+     the object are not affected.
+
+`PyVarObject* PyObject_InitVar(PyVarObject *op, PyTypeObject *type, int size)'
+     This does everything `PyObject_Init()' does, and also initializes
+     the length information for a variable-size object.
+
+`TYPE* PyObject_New(TYPE, PyTypeObject *type)'
+     Allocate a new Python object using the C structure type TYPE and
+     the Python type object TYPE.  Fields not defined by the Python
+     object header are not initialized; the object's reference count
+     will be one.  The size of the memory allocation is determined from
+     the `tp_basicsize' field of the type object.
+
+`TYPE* PyObject_NewVar(TYPE, PyTypeObject *type, int size)'
+     Allocate a new Python object using the C structure type TYPE and
+     the Python type object TYPE.  Fields not defined by the Python
+     object header are not initialized.  The allocated memory allows
+     for the TYPE structure plus SIZE fields of the size given by the
+     `tp_itemsize' field of TYPE.  This is useful for implementing
+     objects like tuples, which are able to determine their size at
+     construction time.  Embedding the array of fields into the same
+     allocation decreases the number of allocations, improving the
+     memory management efficiency.
+
+`void PyObject_Del(PyObject *op)'
+     Releases memory allocated to an object using `PyObject_New()' or
+     `PyObject_NewVar()'.  This is normally called from the
+     `tp_dealloc' handler specified in the object's type.  The fields
+     of the object should not be accessed after this call as the memory
+     is no longer a valid Python object.
+
+`TYPE* PyObject_NEW(TYPE, PyTypeObject *type)'
+     Macro version of `PyObject_New()', to gain performance at the
+     expense of safety.  This does not check TYPE for a `NULL' value.
+
+`TYPE* PyObject_NEW_VAR(TYPE, PyTypeObject *type, int size)'
+     Macro version of `PyObject_NewVar()', to gain performance at the
+     expense of safety.  This does not check TYPE for a `NULL' value.
+
+`void PyObject_DEL(PyObject *op)'
+     Macro version of `PyObject_Del()'.
+
+`PyObject* Py_InitModule(char *name, PyMethodDef *methods)'
+     Create a new module object based on a name and table of functions,
+     returning the new module object.
+
+     _Changed in Python version 2.3_
+
+`PyObject* Py_InitModule3(char *name, PyMethodDef *methods, char *doc)'
+     Create a new module object based on a name and table of functions,
+     returning the new module object.  If DOC is non-`NULL', it will be
+     used to define the docstring for the module.
+
+     _Changed in Python version 2.3_
+
+`PyObject* Py_InitModule4(char *name, PyMethodDef *methods, char *doc, PyObject *self, int apiver)'
+     Create a new module object based on a name and table of functions,
+     returning the new module object.  If DOC is non-`NULL', it will be
+     used to define the docstring for the module.  If SELF is
+     non-`NULL', it will passed to the functions of the module as their
+     (otherwise `NULL') first parameter.  (This was added as an
+     experimental feature, and there are no known uses in the current
+     version of Python.)  For APIVER, the only value which should be
+     passed is defined by the constant `PYTHON_API_VERSION'.
+
+     _Note:_ Most uses of this function should probably be using the
+     `Py_InitModule3()' instead; only use this if you are sure you need
+     it.
+
+     _Changed in Python version 2.3_
+
+DL_IMPORT
+
+`PyObject _Py_NoneStruct'
+     Object which is visible in Python as `None'.  This should only be
+     accessed using the `Py_None' macro, which evaluates to a pointer
+     to this object.
+
+
+File: python-api.info,  Node: Common Object Structures,  Next: Type Objects 2,  Prev: Allocating Objects on the Heap,  Up: Object Implementation Support
+
+Common Object Structures
+========================
+
+There are a large number of structures which are used in the definition
+of object types for Python.  This section describes these structures
+and how they are used.
+
+All Python objects ultimately share a small number of fields at the
+beginning of the object's representation in memory.  These are
+represented by the `PyObject' and `PyVarObject' types, which are
+defined, in turn, by the expansions of some macros also used, whether
+directly or indirectly, in the definition of all other Python objects.
+
+`PyObject'
+     All object types are extensions of this type.  This is a type which
+     contains the information Python needs to treat a pointer to an
+     object as an object.  In a normal "release" build, it contains
+     only the objects reference count and a pointer to the corresponding
+     type object.  It corresponds to the fields defined by the
+     expansion of the `PyObject_HEAD' macro.
+
+`PyVarObject'
+     This is an extension of `PyObject' that adds the `ob_size' field.
+     This is only used for objects that have some notion of _length_.
+     This type does not often appear in the Python/C API.  It
+     corresponds to the fields defined by the expansion of the
+     `PyObject_VAR_HEAD' macro.
+
+These macros are used in the definition of `PyObject' and `PyVarObject':
+
+`PyObject_HEAD'
+     This is a macro which expands to the declarations of the fields of
+     the `PyObject' type; it is used when declaring new types which
+     represent objects without a varying length.  The specific fields it
+     expands to depends on the definition of `Py_TRACE_REFS'.  By
+     default, that macro is not defined, and `PyObject_HEAD' expands to:
+              int ob_refcnt;
+              PyTypeObject *ob_type;
+
+     When `Py_TRACE_REFS' is defined, it expands to:
+              PyObject *_ob_next, *_ob_prev;
+              int ob_refcnt;
+              PyTypeObject *ob_type;
+
+`PyObject_VAR_HEAD'
+     This is a macro which expands to the declarations of the fields of
+     the `PyVarObject' type; it is used when declaring new types which
+     represent objects with a length that varies from instance to
+     instance.  This macro always expands to:
+              PyObject_HEAD
+              int ob_size;
+
+     Note that `PyObject_HEAD' is part of the expansion, and that it's
+     own expansion varies depending on the definition of
+     `Py_TRACE_REFS'.
+
+PyObject_HEAD_INIT
+
+`PyCFunction'
+     Type of the functions used to implement most Python callables in C.
+     Functions of this type take two `PyObject*' parameters and return
+     one such value.  If the return value is `NULL', an exception shall
+     have been set.  If not `NULL', the return value is interpreted as
+     the return value of the function as exposed in Python.  The
+     function must return a new reference.
+
+`PyMethodDef'
+     Structure used to describe a method of an extension type.  This
+     structure has four fields:
+
+     Field                  C Type                 Meaning
+     ------                 -----                  -----
+     ml_name                char *                 name of the method
+     ml_meth                PyCFunction            pointer to the C
+                                                   implementation
+     ml_flags               int                    flag bits indicating
+                                                   how the call should
+                                                   be constructed
+     ml_doc                 char *                 points to the
+                                                   contents of the
+                                                   docstring
+
+The `ml_meth' is a C function pointer.  The functions may be of
+different types, but they always return `PyObject*'.  If the function
+is not of the `PyCFunction', the compiler will require a cast in the
+method table.  Even though `PyCFunction' defines the first parameter as
+`PyObject*', it is common that the method implementation uses a the
+specific C type of the SELF object.
+
+The `ml_flags' field is a bitfield which can include the following
+flags.  The individual flags indicate either a calling convention or a
+binding convention.  Of the calling convention flags, only
+`METH_VARARGS' and `METH_KEYWORDS' can be combined (but note that
+`METH_KEYWORDS' alone is equivalent to ``METH_VARARGS' |
+`METH_KEYWORDS'').  Any of the calling convention flags can be combined
+with a binding flag.
+
+`METH_VARARGS'
+     This is the typical calling convention, where the methods have the
+     type `PyCFunction'. The function expects two `PyObject*' values.
+     The first one is the SELF object for methods; for module
+     functions, it has the value given to `Py_InitModule4()' (or `NULL'
+     if `Py_InitModule()' was used).  The second parameter (often
+     called ARGS) is a tuple object representing all arguments. This
+     parameter is typically processed using `PyArg_ParseTuple()' or
+     `PyArg_UnpackTuple'.
+
+`METH_KEYWORDS'
+     Methods with these flags must be of type
+     `PyCFunctionWithKeywords'.  The function expects three parameters:
+     SELF, ARGS, and a dictionary of all the keyword arguments.  The
+     flag is typically combined with `METH_VARARGS', and the parameters
+     are typically processed using `PyArg_ParseTupleAndKeywords()'.
+
+`METH_NOARGS'
+     Methods without parameters don't need to check whether arguments
+     are given if they are listed with the `METH_NOARGS' flag.  They
+     need to be of type `PyCFunction'.  When used with object methods,
+     the first parameter is typically named `self' and will hold a
+     reference to the object instance.  In all cases the second
+     parameter will be `NULL'.
+
+`METH_O'
+     Methods with a single object argument can be listed with the
+     `METH_O' flag, instead of invoking `PyArg_ParseTuple()' with a
+     `"O"' argument. They have the type `PyCFunction', with the SELF
+     parameter, and a `PyObject*' parameter representing the single
+     argument.
+
+`METH_OLDARGS'
+     This calling convention is deprecated.  The method must be of type
+     `PyCFunction'.  The second argument is `NULL' if no arguments are
+     given, a single object if exactly one argument is given, and a
+     tuple of objects if more than one argument is given.  There is no
+     way for a function using this convention to distinguish between a
+     call with multiple arguments and a call with a tuple as the only
+     argument.
+
+These two constants are not used to indicate the calling convention but
+the binding when use with methods of classes.  These may not be used
+for functions defined for modules.  At most one of these flags may be
+set for any given method.
+
+`METH_CLASS'
+     The method will be passed the type object as the first parameter
+     rather than an instance of the type.  This is used to create
+     _class methods_, similar to what is created when using the
+     `classmethod()'  built-in function.  _Added in Python version 2.3_
+
+`METH_STATIC'
+     The method will be passed `NULL' as the first parameter rather than
+     an instance of the type.  This is used to create _static methods_,
+     similar to what is created when using the `staticmethod()'
+     built-in function.  _Added in Python version 2.3_
+
+`PyObject* Py_FindMethod(PyMethodDef table[], PyObject *ob, char *name)'
+     Return a bound method object for an extension type implemented in
+     C.  This can be useful in the implementation of a `tp_getattro' or
+     `tp_getattr' handler that does not use the
+     `PyObject_GenericGetAttr()' function.
+

@@ -1,0 +1,488 @@
+This is python-api.info, produced by makeinfo version 4.3 from
+python-api.texi.
+
+October 3, 2003
+
+
+File: python-api.info,  Node: Supporting Cyclic Garbarge Collection,  Prev: Supporting the Iterator Protocol,  Up: Object Implementation Support
+
+Supporting Cyclic Garbarge Collection
+=====================================
+
+Python's support for detecting and collecting garbage which involves
+circular references requires support from object types which are
+"containers" for other objects which may also be containers.  Types
+which do not store references to other objects, or which only store
+references to atomic types (such as numbers or strings), do not need to
+provide any explicit support for garbage collection.
+
+An example showing the use of these interfaces can be found in
+"Supporting the Cycle Collector" in .
+
+To create a container type, the `tp_flags' field of the type object
+must include the `Py_TPFLAGS_HAVE_GC' and provide an implementation of
+the `tp_traverse' handler.  If instances of the type are mutable, a
+`tp_clear' implementation must also be provided.
+
+`Py_TPFLAGS_HAVE_GC'
+     Objects with a type with this flag set must conform with the rules
+     documented here.  For convenience these objects will be referred to
+     as container objects.
+
+Constructors for container types must conform to two rules:
+
+  1. The memory for the object must be allocated using
+     `PyObject_GC_New()' or `PyObject_GC_VarNew()'.
+
+  2. Once all the fields which may contain references to other
+     containers are initialized, it must call `PyObject_GC_Track()'.
+
+`TYPE* PyObject_GC_New(TYPE, PyTypeObject *type)'
+     Analogous to `PyObject_New()' but for container objects with the
+     `Py_TPFLAGS_HAVE_GC' flag set.
+
+`TYPE* PyObject_GC_NewVar(TYPE, PyTypeObject *type, int size)'
+     Analogous to `PyObject_NewVar()' but for container objects with
+     the `Py_TPFLAGS_HAVE_GC' flag set.
+
+`PyVarObject * PyObject_GC_Resize(PyVarObject *op, int)'
+     Resize an object allocated by `PyObject_NewVar()'.  Returns the
+     resized object or `NULL' on failure.
+
+`void PyObject_GC_Track(PyObject *op)'
+     Adds the object OP to the set of container objects tracked by the
+     collector.  The collector can run at unexpected times so objects
+     must be valid while being tracked.  This should be called once all
+     the fields followed by the `tp_traverse' handler become valid,
+     usually near the end of the constructor.
+
+`void _PyObject_GC_TRACK(PyObject *op)'
+     A macro version of `PyObject_GC_Track()'.  It should not be used
+     for extension modules.
+
+Similarly, the deallocator for the object must conform to a similar
+pair of rules:
+
+  1. Before fields which refer to other containers are invalidated,
+     `PyObject_GC_UnTrack()' must be called.
+
+  2. The object's memory must be deallocated using `PyObject_GC_Del()'.
+
+`void PyObject_GC_Del(PyObject *op)'
+     Releases memory allocated to an object using `PyObject_GC_New()'
+     or `PyObject_GC_NewVar()'.
+
+`void PyObject_GC_UnTrack(PyObject *op)'
+     Remove the object OP from the set of container objects tracked by
+     the collector.  Note that `PyObject_GC_Track()' can be called
+     again on this object to add it back to the set of tracked objects.
+     The deallocator (`tp_dealloc' handler) should call this for the
+     object before any of the fields used by the `tp_traverse' handler
+     become invalid.
+
+`void _PyObject_GC_UNTRACK(PyObject *op)'
+     A macro version of `PyObject_GC_UnTrack()'.  It should not be used
+     for extension modules.
+
+The `tp_traverse' handler accepts a function parameter of this type:
+
+`int (*visitproc)(PyObject *object, void *arg)'
+     Type of the visitor function passed to the `tp_traverse' handler.
+     The function should be called with an object to traverse as OBJECT
+     and the third parameter to the `tp_traverse' handler as ARG.
+
+The `tp_traverse' handler must have the following type:
+
+`int (*traverseproc)(PyObject *self, visitproc visit, void *arg)'
+     Traversal function for a container object.  Implementations must
+     call the VISIT function for each object directly contained by
+     SELF, with the parameters to VISIT being the contained object and
+     the ARG value passed to the handler.  If VISIT returns a non-zero
+     value then an error has occurred and that value should be returned
+     immediately.
+
+The `tp_clear' handler must be of the `inquiry' type, or `NULL' if the
+object is immutable.
+
+`int (*inquiry)(PyObject *self)'
+     Drop references that may have created reference cycles.  Immutable
+     objects do not have to define this method since they can never
+     directly create reference cycles.  Note that the object must still
+     be valid after calling this method (don't just call `Py_DECREF()'
+     on a reference).  The collector will call this method if it
+     detects that this object is involved in a reference cycle.
+
+
+File: python-api.info,  Node: Reporting Bugs,  Next: History and License,  Prev: Object Implementation Support,  Up: Top
+
+Reporting Bugs
+**************
+
+Python is a mature programming language which has established a
+reputation for stability.  In order to maintain this reputation, the
+developers would like to know of any deficiencies you find in Python or
+its documentation.
+
+Before submitting a report, you will be required to log into
+SourceForge; this will make it possible for the developers to contact
+you for additional information if needed.  It is not possible to submit
+a bug report anonymously.
+
+All bug reports should be submitted via the Python Bug Tracker on
+SourceForge (<http://sourceforge.net/bugs/?group_id=5470>).  The bug
+tracker offers a Web form which allows pertinent information to be
+entered and submitted to the developers.
+
+The first step in filing a report is to determine whether the problem
+has already been reported.  The advantage in doing so, aside from
+saving the developers time, is that you learn what has been done to fix
+it; it may be that the problem has already been fixed for the next
+release, or additional information is needed (in which case you are
+welcome to provide it if you can!).  To do this, search the bug
+database using the search box near the bottom of the page.
+
+If the problem you're reporting is not already in the bug tracker, go
+back to the Python Bug Tracker
+(<http://sourceforge.net/bugs/?group_id=5470>).  Select the "Submit a
+Bug" link at the top of the page to open the bug reporting form.
+
+The submission form has a number of fields.  The only fields that are
+required are the "Summary" and "Details" fields.  For the summary,
+enter a _very_ short description of the problem; less than ten words is
+good.  In the Details field, describe the problem in detail, including
+what you expected to happen and what did happen.  Be sure to include
+the version of Python you used, whether any extension modules were
+involved, and what hardware and software platform you were using
+(including version information as appropriate).
+
+The only other field that you may want to set is the "Category" field,
+which allows you to place the bug report into a broad category (such as
+"Documentation" or "Library").
+
+Each bug report will be assigned to a developer who will determine what
+needs to be done to correct the problem.  You will receive an update
+each time action is taken on the bug.
+
+See also:
+     `How to Report Bugs Effectively'{Article which goes into some
+     detail about how to create a useful bug report.  This describes
+     what kind of information is useful and why it is useful.}
+
+     `Bug Writing Guidelines'{Information about writing a good bug
+     report.  Some of this is specific to the Mozilla project, but
+     describes general good practices.}
+
+
+File: python-api.info,  Node: History and License,  Next: Module Index,  Prev: Reporting Bugs,  Up: Top
+
+History and License
+*******************
+
+* Menu:
+
+* History of the software::
+* Terms and conditions for accessing or otherwise using Python::
+
+
+File: python-api.info,  Node: History of the software,  Next: Terms and conditions for accessing or otherwise using Python,  Prev: History and License,  Up: History and License
+
+History of the software
+=======================
+
+Python was created in the early 1990s by Guido van Rossum at Stichting
+Mathematisch Centrum (CWI, see <http://www.cwi.nl/>) in the Netherlands
+as a successor of a language called ABC.  Guido remains Python's
+principal author, although it includes many contributions from others.
+
+In 1995, Guido continued his work on Python at the Corporation for
+National Research Initiatives (CNRI, see
+<http://www.cnri.reston.va.us/>) in Reston, Virginia where he released
+several versions of the software.
+
+In May 2000, Guido and the Python core development team moved to
+BeOpen.com to form the BeOpen PythonLabs team.  In October of the same
+year, the PythonLabs team moved to Digital Creations (now Zope
+Corporation; see <http://www.zope.com/>).  In 2001, the Python Software
+Foundation (PSF, see <http://www.python.org/psf/>) was formed, a
+non-profit organization created specifically to own Python-related
+Intellectual Property.  Zope Corporation is a sponsoring member of the
+PSF.
+
+All Python releases are Open Source (see <http://www.opensource.org/>
+for the Open Source Definition).  Historically, most, but not all,
+Python releases have also been GPL-compatible; the table below
+summarizes the various releases.
+
+Release        Derived from   Year           Owner          GPL
+                                                            compatible?
+------         ------         ------         ------         ------
+0.9.0 thru     n/a            1991-1995      CWI            yes
+1.2                                                         
+1.3 thru       1.2            1995-1999      CNRI           yes
+1.5.2                                                       
+1.6            1.5.2          2000           CNRI           no
+2.0            1.6            2000           BeOpen.com     no
+1.6.1          1.6            2001           CNRI           no
+2.1            2.0+1.6.1      2001           PSF            no
+2.0.1          2.0+1.6.1      2001           PSF            yes
+2.1.1          2.1+2.0.1      2001           PSF            yes
+2.2            2.1.1          2001           PSF            yes
+2.1.2          2.1.1          2002           PSF            yes
+2.1.3          2.1.2          2002           PSF            yes
+2.2.1          2.2            2002           PSF            yes
+2.2.2          2.2.1          2002           PSF            yes
+2.2.3          2.2.2          2002-2003      PSF            yes
+2.3            2.2.2          2002-2003      PSF            yes
+2.3.1          2.3            2002-2003      PSF            yes
+2.3.2          2.3.1          2003           PSF            yes
+
+_Note:_ GPL-compatible doesn't mean that we're distributing Python
+under the GPL.  All Python licenses, unlike the GPL, let you distribute
+a modified version without making your changes open source. The
+GPL-compatible licenses make it possible to combine Python with other
+software that is released under the GPL; the others don't.
+
+Thanks to the many outside volunteers who have worked under Guido's
+direction to make these releases possible.
+
+
+File: python-api.info,  Node: Terms and conditions for accessing or otherwise using Python,  Prev: History of the software,  Up: History and License
+
+Terms and conditions for accessing or otherwise using Python
+============================================================
+
+               *PSF LICENSE AGREEMENT FOR PYTHON 2.3.2*
+  1. This LICENSE AGREEMENT is between the Python Software Foundation
+     ("PSF"), and the Individual or Organization ("Licensee") accessing
+     and otherwise using Python 2.3.2 software in source or binary form
+     and its associated documentation.
+
+  2. Subject to the terms and conditions of this License Agreement, PSF
+     hereby grants Licensee a nonexclusive, royalty-free, world-wide
+     license to reproduce, analyze, test, perform and/or display
+     publicly, prepare derivative works, distribute, and otherwise use
+     Python 2.3.2 alone or in any derivative version, provided,
+     however, that PSF's License Agreement and PSF's notice of
+     copyright, i.e., "Copyright (C) 2001-2003 Python Software
+     Foundation; All Rights Reserved" are retained in Python 2.3.2
+     alone or in any derivative version prepared by Licensee.
+
+  3. In the event Licensee prepares a derivative work that is based on
+     or incorporates Python 2.3.2 or any part thereof, and wants to
+     make the derivative work available to others as provided herein,
+     then Licensee hereby agrees to include in any such work a brief
+     summary of the changes made to Python 2.3.2.
+
+  4. PSF is making Python 2.3.2 available to Licensee on an "AS IS"
+     basis.  PSF MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+     IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, PSF MAKES NO AND
+     DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR
+     FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF PYTHON 2.3.2
+     WILL NOT INFRINGE ANY THIRD PARTY RIGHTS.
+
+  5. PSF SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF PYTHON
+     2.3.2 FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR
+     LOSS AS A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING
+     PYTHON 2.3.2, OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE
+     POSSIBILITY THEREOF.
+
+  6. This License Agreement will automatically terminate upon a material
+     breach of its terms and conditions.
+
+  7. Nothing in this License Agreement shall be deemed to create any
+     relationship of agency, partnership, or joint venture between PSF
+     and Licensee.  This License Agreement does not grant permission to
+     use PSF trademarks or trade name in a trademark sense to endorse
+     or promote products or services of Licensee, or any third party.
+
+  8. By copying, installing or otherwise using Python 2.3.2, Licensee
+     agrees to be bound by the terms and conditions of this License
+     Agreement.
+
+             *BEOPEN.COM LICENSE AGREEMENT FOR PYTHON 2.0*
+         *BEOPEN PYTHON OPEN SOURCE LICENSE AGREEMENT VERSION 1*
+  1. This LICENSE AGREEMENT is between BeOpen.com ("BeOpen"), having an
+     office at 160 Saratoga Avenue, Santa Clara, CA 95051, and the
+     Individual or Organization ("Licensee") accessing and otherwise
+     using this software in source or binary form and its associated
+     documentation ("the Software").
+
+  2. Subject to the terms and conditions of this BeOpen Python License
+     Agreement, BeOpen hereby grants Licensee a non-exclusive,
+     royalty-free, world-wide license to reproduce, analyze, test,
+     perform and/or display publicly, prepare derivative works,
+     distribute, and otherwise use the Software alone or in any
+     derivative version, provided, however, that the BeOpen Python
+     License is retained in the Software, alone or in any derivative
+     version prepared by Licensee.
+
+  3. BeOpen is making the Software available to Licensee on an "AS IS"
+     basis.  BEOPEN MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+     IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, BEOPEN MAKES NO
+     AND DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR
+     FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SOFTWARE
+     WILL NOT INFRINGE ANY THIRD PARTY RIGHTS.
+
+  4. BEOPEN SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF THE
+     SOFTWARE FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR
+     LOSS AS A RESULT OF USING, MODIFYING OR DISTRIBUTING THE SOFTWARE,
+     OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY
+     THEREOF.
+
+  5. This License Agreement will automatically terminate upon a material
+     breach of its terms and conditions.
+
+  6. This License Agreement shall be governed by and interpreted in all
+     respects by the law of the State of California, excluding conflict
+     of law provisions.  Nothing in this License Agreement shall be
+     deemed to create any relationship of agency, partnership, or joint
+     venture between BeOpen and Licensee.  This License Agreement does
+     not grant permission to use BeOpen trademarks or trade names in a
+     trademark sense to endorse or promote products or services of
+     Licensee, or any third party.  As an exception, the "BeOpen
+     Python" logos available at http://www.pythonlabs.com/logos.html
+     may be used according to the permissions granted on that web page.
+
+  7. By copying, installing or otherwise using the software, Licensee
+     agrees to be bound by the terms and conditions of this License
+     Agreement.
+
+               *CNRI LICENSE AGREEMENT FOR PYTHON 1.6.1*
+  1. This LICENSE AGREEMENT is between the Corporation for National
+     Research Initiatives, having an office at 1895 Preston White Drive,
+     Reston, VA 20191 ("CNRI"), and the Individual or Organization
+     ("Licensee") accessing and otherwise using Python 1.6.1 software in
+     source or binary form and its associated documentation.
+
+  2. Subject to the terms and conditions of this License Agreement, CNRI
+     hereby grants Licensee a nonexclusive, royalty-free, world-wide
+     license to reproduce, analyze, test, perform and/or display
+     publicly, prepare derivative works, distribute, and otherwise use
+     Python 1.6.1 alone or in any derivative version, provided,
+     however, that CNRI's License Agreement and CNRI's notice of
+     copyright, i.e., "Copyright (C) 1995-2001 Corporation for National
+     Research Initiatives; All Rights Reserved" are retained in Python
+     1.6.1 alone or in any derivative version prepared by Licensee.
+     Alternately, in lieu of CNRI's License Agreement, Licensee may
+     substitute the following text (omitting the quotes): "Python 1.6.1
+     is made available subject to the terms and conditions in CNRI's
+     License Agreement.  This Agreement together with Python 1.6.1 may
+     be located on the Internet using the following unique, persistent
+     identifier (known as a handle): 1895.22/1013.  This Agreement may
+     also be obtained from a proxy server on the Internet using the
+     following URL: <http://hdl.handle.net/1895.22/1013>."
+
+  3. In the event Licensee prepares a derivative work that is based on
+     or incorporates Python 1.6.1 or any part thereof, and wants to make
+     the derivative work available to others as provided herein, then
+     Licensee hereby agrees to include in any such work a brief summary
+     of the changes made to Python 1.6.1.
+
+  4. CNRI is making Python 1.6.1 available to Licensee on an "AS IS"
+     basis.  CNRI MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+     IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, CNRI MAKES NO AND
+     DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR
+     FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF PYTHON 1.6.1
+     WILL NOT INFRINGE ANY THIRD PARTY RIGHTS.
+
+  5. CNRI SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF PYTHON
+     1.6.1 FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR
+     LOSS AS A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING
+     PYTHON 1.6.1, OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE
+     POSSIBILITY THEREOF.
+
+  6. This License Agreement will automatically terminate upon a material
+     breach of its terms and conditions.
+
+  7. This License Agreement shall be governed by the federal
+     intellectual property law of the United States, including without
+     limitation the federal copyright law, and, to the extent such U.S.
+     federal law does not apply, by the law of the Commonwealth of
+     Virginia, excluding Virginia's conflict of law provisions.
+     Notwithstanding the foregoing, with regard to derivative works
+     based on Python 1.6.1 that incorporate non-separable material that
+     was previously distributed under the GNU General Public License
+     (GPL), the law of the Commonwealth of Virginia shall govern this
+     License Agreement only as to issues arising under or with respect
+     to Paragraphs 4, 5, and 7 of this License Agreement.  Nothing in
+     this License Agreement shall be deemed to create any relationship
+     of agency, partnership, or joint venture between CNRI and
+     Licensee.  This License Agreement does not grant permission to use
+     CNRI trademarks or trade name in a trademark sense to endorse or
+     promote products or services of Licensee, or any third party.
+
+  8. By clicking on the "ACCEPT" button where indicated, or by copying,
+     installing or otherwise using Python 1.6.1, Licensee agrees to be
+     bound by the terms and conditions of this License Agreement.
+
+                                ACCEPT
+          *CWI LICENSE AGREEMENT FOR PYTHON 0.9.0 THROUGH 1.2*
+ Copyright
+(C) 1991 - 1995, Stichting Mathematisch Centrum Amsterdam, The
+Netherlands.  All rights reserved.
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation, and that the name of Stichting Mathematisch
+Centrum or CWI not be used in advertising or publicity pertaining to
+distribution of the software without specific, written prior permission.
+
+STICHTING MATHEMATISCH CENTRUM DISCLAIMS ALL WARRANTIES WITH REGARD TO
+THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS, IN NO EVENT SHALL STICHTING MATHEMATISCH CENTRUM BE LIABLE FOR
+ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+File: python-api.info,  Node: Module Index,  Next: Class-Exception-Object Index,  Prev: History and License,  Up: Top
+
+Module Index
+************
+
+* Menu:
+
+* __builtin__ <1>:                       Initialization.
+* __builtin__:                           Embedding Python.
+* __main__ <1>:                          Initialization.
+* __main__:                              Embedding Python.
+* exceptions:                            Embedding Python.
+* ihooks:                                Importing Modules.
+* rexec:                                 Importing Modules.
+* signal:                                Exception Handling.
+* sys <1>:                               Initialization.
+* sys:                                   Embedding Python.
+* thread:                                Thread State and the Global Interpreter Lock.
+
+
+File: python-api.info,  Node: Class-Exception-Object Index,  Next: Function-Method-Variable Index,  Prev: Module Index,  Up: Top
+
+Class, Exception, and Object Index
+**********************************
+
+* Menu:
+
+* buffer:                                Buffer Objects.
+* CObject:                               CObjects.
+* complex number:                        Complex Number Objects.
+* dictionary:                            Dictionary Objects.
+* file:                                  File Objects.
+* floating point:                        Floating Point Objects.
+* instance:                              Instance Objects.
+* integer:                               Plain Integer Objects.
+* list:                                  List Objects.
+* long integer:                          Long Integer Objects.
+* mapping:                               Mapping Objects.
+* method:                                Method Objects.
+* module:                                Module Objects.
+* NoneNone:                              None Object.
+* numeric:                               Numeric Objects.
+* sequence:                              Sequence Objects.
+* string:                                String Objects.
+* tuple:                                 Tuple Objects.
+* type <1>:                              Type Objects.
+* type:                                  Objects.
+

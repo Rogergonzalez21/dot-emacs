@@ -1,0 +1,34 @@
+-*- Text -*-
+This is the file .../info/dir, which contains the topmost node of the
+Info hierarchy.  The first time you invoke Info you start off
+looking at that node, which is (dir)Top.
+
+File: dir	Node: Top	This is the top of the INFO tree
+
+The Info Directory
+******************
+
+* Menu:
+
+Favourites
+* Emacs: (emacs).       The extensible self-documenting text editor.
+* Elisp: (elisp).       The Emacs Lisp Reference Manual.
+* Dired-X: (dired-x).   Dired Extra Features.
+* Ediff: (ediff).       A visual interface for comparing and merging programs.
+
+---
+
+Various
+* html-helper-mode: (html-helper-mode). The html-helper-mode.
+* elib: (elib).  Emacs Lisp Library.
+* cvs: (cvs).           The Concurrent Versions System.
+
+Python Standard Documentation
+* What's New: (python-whatsnew23).      What's New in Python 2.3?
+* Python Library: (python-lib).         Python Library Reference
+* Python Mac Modules: (python-mac).     Python Macintosh Modules
+* Python Reference: (python-ref).       Python Reference Manual
+* Python API: (python-api).             Python/C API Reference Manual
+* Python Extending: (python-ext).       Extending & Embedding Python
+* Python Tutorial: (python-tut).        Python Tutorial
+* Distributing Modules: (python-dist).  Distributing Python Modules

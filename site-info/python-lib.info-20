@@ -1,0 +1,1276 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: Terminology,  Next: What are options for?,  Prev: Philosophy,  Up: Philosophy
+
+Terminology
+...........
+
+First, we need to establish some terminology.
+
+"argument"
+     a chunk of text that a user enters on the command-line, and that
+     the shell passes to `execl()' or `execv()'.  In Python, arguments
+     are elements of `sys.argv[1:]'. (`sys.argv[0]' is the name of the
+     program being executed; in the context of parsing arguments, it's
+     not very important.)  UNIX shells also use the term "word".
+
+     It is occasionally desirable to use an argument list other than
+     `sys.argv[1:]', so you should read "argument" as "an element of
+     `sys.argv[1:]', or of some other list provided as a substitute for
+     `sys.argv[1:]'".
+
+"option"
+     an argument used to supply extra information to guide or customize
+     the execution of a program.  There are many different syntaxes for
+     options; the traditional UNIX syntax is `-' followed by a single
+     letter, e.g. `-x' or `-F'.  Also, traditional UNIX syntax allows
+     multiple options to be merged into a single argument, e.g.  `-x
+     -F' is equivalent to `-xF'.  The GNU project introduced `--'
+     followed by a series of hyphen-separated words, e.g. `--file' or
+     `--dry-run'.  These are the only two option syntaxes provided by
+     `optparse'.
+
+     Some other option syntaxes that the world has seen include:
+
+        * a hyphen followed by a few letters, e.g. `-pf' (this is _not_
+          the same as multiple options merged into a single argument.)
+
+        * a hyphen followed by a whole word, e.g. `-file' (this is
+          technically equivalent to the previous syntax, but they aren't
+          usually seen in the same program.)
+
+        * a plus sign followed by a single letter, or a few letters, or
+          a word, e.g. `+f', `+rgb'.
+
+        * a slash followed by a letter, or a few letters, or a word,
+          e.g.  `/f', `/file'.
+
+     `optparse' does not support these option syntaxes, and it never
+     will.  (If you really want to use one of those option syntaxes,
+     you'll have to subclass `OptionParser' and override all the
+     difficult bits.  But please don't!  `optparse' does things the
+     traditional UNIX/GNU way deliberately; the first three are
+     non-standard anywhere, and the last one makes sense only if you're
+     exclusively targeting MS-DOS/Windows and/or VMS.)
+
+"option argument"
+     an argument that follows an option, is closely associated with that
+     option, and is consumed from the argument list when the option is.
+     Often, option arguments may also be included in the same argument
+     as the option, e.g. :
+
+              ["-f", "foo"]
+
+     may be equivalent to:
+
+              ["-ffoo"]
+
+     (`optparse' supports this syntax.)
+
+     Some options never take an argument.  Some options always take an
+     argument.  Lots of people want an "optional option arguments"
+     feature, meaning that some options will take an argument if they
+     see it, and won't if they don't.  This is somewhat controversial,
+     because it makes parsing ambiguous: if `-a' and `-b' are both
+     options, and `-a' takes an optional argument, how do we interpret
+     `-ab'?  `optparse' does not support optional option arguments.
+
+"positional argument"
+     something leftover in the argument list after options have been
+     parsed, i.e., after options and their arguments have been parsed
+     and removed from the argument list.
+
+"required option"
+     an option that must be supplied on the command-line.  The phrase
+     "required option" is an oxymoron; the presence of "required
+     options" in a program is usually a sign of careless user interface
+     design.  `optparse' doesn't prevent you from implementing required
+     options, but doesn't give you much help with it either.  See
+     "Extending Examples" (section~*Note shutil::) for two ways to
+     implement required options with `optparse'.
+
+For example, consider this hypothetical command-line:
+
+       prog -v --report /tmp/report.txt foo bar
+
+`-v' and `--report' are both options.  Assuming the `--report' option
+takes one argument, `/tmp/report.txt' is an option argument.  `foo' and
+`bar' are positional arguments.
+
+
+File: python-lib.info,  Node: What are options for?,  Next: What are positional arguments for?,  Prev: Terminology,  Up: Philosophy
+
+What are options for?
+.....................
+
+Options are used to provide extra information to tune or customize the
+execution of a program.  In case it wasn't clear, options should be
+_optional_.  A program should be able to run just fine with no options
+whatsoever.  (Pick a random program from the UNIX or GNU toolsets.  Can
+it run without any options at all and still make sense?  The only
+exceptions I can think of are `find', `tar', and `dd'--all of which are
+mutant oddballs that have been rightly criticized for their
+non-standard syntax and confusing interfaces.)
+
+Lots of people want their programs to have "required options".  Think
+about it.  If it's required, then it's _not optional_!  If there is a
+piece of information that your program absolutely requires in order to
+run successfully, that's what positional arguments are for.  (However,
+if you insist on adding "required options" to your programs, look in
+"Extending Examples" (section~*Note shutil::) for two ways of
+implementing them with `optparse'.)
+
+Consider the humble `cp' utility, for copying files.  It doesn't make
+much sense to try to copy files without supplying a destination and at
+least one source.  Hence, `cp' fails if you run it with no arguments.
+However, it has a flexible, useful syntax that does not rely on options
+at all:
+
+     $ cp SOURCE DEST
+     $ cp SOURCE ... DEST-DIR
+
+You can get pretty far with just that.  Most `cp' implementations
+provide a bunch of options to tweak exactly how the files are copied:
+you can preserve mode and modification time, avoid following symlinks,
+ask before clobbering existing files, etc.  But none of this distracts
+from the core mission of `cp', which is to copy one file to another, or
+N files to another directory.
+
+
+File: python-lib.info,  Node: What are positional arguments for?,  Prev: What are options for?,  Up: Philosophy
+
+What are positional arguments for?
+..................................
+
+In case it wasn't clear from the above example: positional arguments
+are for those pieces of information that your program absolutely,
+positively requires to run.
+
+A good user interface should have as few absolute requirements as
+possible.  If your program requires 17 distinct pieces of information in
+order to run successfully, it doesn't much matter _how_ you get that
+information from the user--most people will give up and walk away
+before they successfully run the program.  This applies whether the user
+interface is a command-line, a configuration file, a GUI, or whatever:
+if you make that many demands on your users, most of them will just give
+up.
+
+In short, try to minimize the amount of information that users are
+absolutely required to supply--use sensible defaults whenever possible.
+Of course, you also want to make your programs reasonably flexible.
+That's what options are for.  Again, it doesn't matter if they are
+entries in a config file, checkboxes in the "Preferences" dialog of a
+GUI, or command-line options--the more options you implement, the more
+flexible your program is, and the more complicated its implementation
+becomes.  It's quite easy to overwhelm users (and yourself!) with too
+much flexibility, so be careful there.
+
+
+File: python-lib.info,  Node: Basic Usage,  Next: Advanced Usage 2,  Prev: Philosophy,  Up: optparse
+
+Basic Usage
+-----------
+
+While `optparse' is quite flexible and powerful, you don't have to jump
+through hoops or read reams of documentation to get it working in basic
+cases.  This document aims to demonstrate some simple usage patterns
+that will get you started using `optparse' in your scripts.
+
+To parse a command line with `optparse', you must create an
+`OptionParser' instance and populate it.  Obviously, you'll have to
+import the `OptionParser' classes in any script that uses `optparse':
+
+     from optparse import OptionParser
+
+Early on in the main program, create a parser:
+
+     parser = OptionParser()
+
+Then you can start populating the parser with options.  Each option is
+really a set of synonymous option strings; most commonly, you'll have
+one short option string and one long option string -- e.g. `-f' and
+`--file':
+
+     parser.add_option("-f", "--file", ...)
+
+The interesting stuff, of course, is what comes after the option
+strings.  For now, we'll only cover four of the things you can put
+there: _action_, _type_, _dest_ (destination), and _help_.
+
+* Menu:
+
+* store action::
+* Other store_* actions::
+* Setting default values::
+* Generating help::
+* Print a version number::
+* Error-handling::
+* Putting it all together::
+
+
+File: python-lib.info,  Node: store action,  Next: Other store_* actions,  Prev: Basic Usage,  Up: Basic Usage
+
+The _store_ action
+..................
+
+The action tells `optparse' what to do when it sees one of the option
+strings for this option on the command-line.  For example, the action
+_store_ means: take the next argument (or the remainder of the current
+argument), ensure that it is of the correct type, and store it to your
+chosen destination.
+
+For example, let's fill in the "..." of that last option:
+
+     parser.add_option("-f", "--file",
+                       action="store", type="string", dest="filename")
+
+Now let's make up a fake command-line and ask `optparse' to parse it:
+
+     args = ["-f", "foo.txt"]
+     (options, args) = parser.parse_args(args)
+
+(Note that if you don't pass an argument list to `parse_args()', it
+automatically uses `sys.argv[1:]'.)
+
+When `optparse' sees the `-f', it consumes the next
+argument--`foo.txt'--and stores it in the `filename' attribute of a
+special object.  That object is the first return value from
+`parse_args()', so:
+
+     print options.filename
+
+will print `foo.txt'.
+
+Other option types supported by `optparse' are `int' and `float'.
+Here's an option that expects an integer argument:
+
+     parser.add_option("-n", type="int", dest="num")
+
+This example doesn't provide a long option, which is perfectly
+acceptable.  It also doesn't specify the action--it defaults to "store".
+
+Let's parse another fake command-line.  This time, we'll jam the option
+argument right up against the option, since `-n42' (one argument) is
+equivalent to `-n 42' (two arguments).
+
+     (options, args) = parser.parse_args(["-n42"])
+     print options.num
+
+This prints `42'.
+
+Trying out the "float" type is left as an exercise for the reader.
+
+If you don't specify a type, `optparse' assumes "string".  Combined
+with the fact that the default action is "store", that means our first
+example can be a lot shorter:
+
+     parser.add_option("-f", "--file", dest="filename")
+
+If you don't supply a destination, `optparse' figures out a sensible
+default from the option strings: if the first long option string is
+`--foo-bar', then the default destination is `foo_bar'.  If there are
+no long option strings, `optparse' looks at the first short option: the
+default destination for `-f' is `f'.
+
+Adding types is fairly easy; please refer to section~*Note Adding new
+types::, "Adding new types."
+
+
+File: python-lib.info,  Node: Other store_* actions,  Next: Setting default values,  Prev: store action,  Up: Basic Usage
+
+Other _store_*_ actions
+.......................
+
+Flag options--set a variable to true or false when a particular option
+is seen--are quite common.  `optparse' supports them with two separate
+actions, "store_true" and "store_false".  For example, you might have a
+VERBOSE flag that is turned on with `-v' and off with `-q':
+
+     parser.add_option("-v", action="store_true", dest="verbose")
+     parser.add_option("-q", action="store_false", dest="verbose")
+
+Here we have two different options with the same destination, which is
+perfectly OK.  (It just means you have to be a bit careful when setting
+default values--see below.)
+
+When `optparse' sees `-v' on the command line, it sets
+`options.verbose' to `True'; when it sees `-q', it sets
+`options.verbose' to `False'.
+
+
+File: python-lib.info,  Node: Setting default values,  Next: Generating help,  Prev: Other store_* actions,  Up: Basic Usage
+
+Setting default values
+......................
+
+All of the above examples involve setting some variable (the
+"destination") when certain command-line options are seen.  What
+happens if those options are never seen?  Since we didn't supply any
+defaults, they are all set to `None'.  Sometimes, this is just fine
+(which is why it's the default), but sometimes, you want more control.
+To address that need, `optparse' lets you supply a default value for
+each destination, which is assigned before the command-line is parsed.
+
+First, consider the verbose/quiet example.  If we want `optparse' to
+set `verbose' to `True' unless `-q' is seen, then we can do this:
+
+     parser.add_option("-v", action="store_true", dest="verbose", default=True)
+     parser.add_option("-q", action="store_false", dest="verbose")
+
+Oddly enough, this is exactly equivalent:
+
+     parser.add_option("-v", action="store_true", dest="verbose")
+     parser.add_option("-q", action="store_false", dest="verbose", default=True)
+
+Those are equivalent because you're supplying a default value for the
+option's _destination_, and these two options happen to have the same
+destination (the `verbose' variable).
+
+Consider this:
+
+     parser.add_option("-v", action="store_true", dest="verbose", default=False)
+     parser.add_option("-q", action="store_false", dest="verbose", default=True)
+
+Again, the default value for `verbose' will be `True': the last default
+value supplied for any particular destination is the one that counts.
+
+
+File: python-lib.info,  Node: Generating help,  Next: Print a version number,  Prev: Setting default values,  Up: Basic Usage
+
+Generating help
+...............
+
+The last feature that you will use in every script is `optparse''s
+ability to generate help messages.  All you have to do is supply a HELP
+argument when you add an option.  Let's create a new parser and
+populate it with user-friendly (documented) options:
+
+     usage = "usage: %prog [options] arg1 arg2"
+     parser = OptionParser(usage=usage)
+     parser.add_option("-v", "--verbose",
+                       action="store_true", dest="verbose", default=True,
+                       help="make lots of noise [default]")
+     parser.add_option("-q", "--quiet",
+                       action="store_false", dest="verbose",
+                       help="be vewwy quiet (I'm hunting wabbits)")
+     parser.add_option("-f", "--file", dest="filename",
+                       metavar="FILE", help="write output to FILE"),
+     parser.add_option("-m", "--mode",
+                       default="intermediate",
+                       help="interaction mode: one of 'novice', "
+                            "'intermediate' [default], 'expert'")
+
+If `optparse' encounters either `-h' or `--help' on the command-line,
+or if you just call `parser.print_help()', it prints the following to
+stdout:
+
+     usage: <yourscript> [options] arg1 arg2
+     
+     options:
+       -h, --help           show this help message and exit
+       -v, --verbose        make lots of noise [default]
+       -q, --quiet          be vewwy quiet (I'm hunting wabbits)
+       -fFILE, --file=FILE  write output to FILE
+       -mMODE, --mode=MODE  interaction mode: one of 'novice', 'intermediate'
+                            [default], 'expert'
+
+There's a lot going on here to help `optparse' generate the best
+possible help message:
+
+   * the script defines its own usage message:
+
+          usage = "usage: %prog [options] arg1 arg2"
+
+     `optparse' expands `%prog' in the usage string to the name of the
+     current script, i.e. `os.path.basename(sys.argv[0])'.  The
+     expanded string is then printed before the detailed option help.
+
+     If you don't supply a usage string, `optparse' uses a bland but
+     sensible default: `"usage: %prog [options]"', which is fine if your
+     script doesn't take any positional arguments.
+
+   * every option defines a help string, and doesn't worry about
+     line-wrapping--`optparse' takes care of wrapping lines and making
+     the help output look good.
+
+   * options that take a value indicate this fact in their
+     automatically-generated help message, e.g. for the "mode" option:
+
+          -mMODE, --mode=MODE
+
+     Here, "MODE" is called the meta-variable: it stands for the
+     argument that the user is expected to supply to `-m'/`--mode'.  By
+     default, `optparse' converts the destination variable name to
+     uppercase and uses that for the meta-variable.  Sometimes, that's
+     not what you want--for example, the FILENAME option explicitly sets
+     `metavar="FILE"', resulting in this automatically-generated option
+     description:
+
+          -fFILE, --file=FILE
+
+     This is important for more than just saving space, though: the
+     manually written help text uses the meta-variable "FILE", to clue
+     the user in that there's a connection between the formal syntax
+     "-fFILE" and the informal semantic description "write output to
+     FILE".  This is a simple but effective way to make your help text a
+     lot clearer and more useful for end users.
+
+When dealing with many options, it is convenient to group these options
+for better help output.  An `OptionParser' can contain several option
+groups, each of which can contain several options.
+
+Continuing with the parser defined above, adding an `OptionGroup' to a
+parser is easy:
+
+     group = OptionGroup(parser, "Dangerous Options",
+                         "Caution: use these options at your own risk.  "
+                         "It is believed that some of them bite.")
+     group.add_option("-g", action="store_true", help="Group option.")
+     parser.add_option_group(group)
+
+This would result in the following help output:
+
+     usage:  [options] arg1 arg2
+     
+     options:
+       -h, --help           show this help message and exit
+       -v, --verbose        make lots of noise [default]
+       -q, --quiet          be vewwy quiet (I'm hunting wabbits)
+       -fFILE, --file=FILE  write output to FILE
+       -mMODE, --mode=MODE  interaction mode: one of 'novice', 'intermediate'
+                            [default], 'expert'
+     
+       Dangerous Options:
+         Caution: use of these options is at your own risk.  It is believed that
+         some of them bite.
+         -g                 Group option.
+
+
+File: python-lib.info,  Node: Print a version number,  Next: Error-handling,  Prev: Generating help,  Up: Basic Usage
+
+Print a version number
+......................
+
+Similar to the brief usage string, `optparse' can also print a version
+string for your program.  You have to supply the string, as the VERSION
+argument to `OptionParser':
+
+     parser = OptionParser(usage="%prog [-f] [-q]", version="%prog 1.0")
+
+VERSION can contain anything you like; `%prog' is expanded in VERSION
+just as with USAGE.  When you supply it, `optparse' automatically adds
+a `--version' option to your parser. If it encounters this option on
+the command line, it expands your VERSION string (by replacing
+`%prog'), prints it to stdout, and exits.
+
+For example, if your script is called /usr/bin/foo, a user might do:
+
+     $ /usr/bin/foo --version
+     foo 1.0
+
+
+File: python-lib.info,  Node: Error-handling,  Next: Putting it all together,  Prev: Print a version number,  Up: Basic Usage
+
+Error-handling
+..............
+
+The one thing you need to know for basic usage is how `optparse'
+behaves when it encounters an error on the command-line--e.g. `-n 4x'
+where `-n' is an integer-valued option.  In this case, `optparse'
+prints your usage message to stderr, followed by a useful and
+human-readable error message.  Then it terminates (calls `sys.exit()')
+with a non-zero exit status.
+
+If you don't like this, subclass `OptionParser' and override the
+`error()' method.  See section~*Note Extending optparse::, "Extending
+`optparse'."
+
+
+File: python-lib.info,  Node: Putting it all together,  Prev: Error-handling,  Up: Basic Usage
+
+Putting it all together
+.......................
+
+Here's what `optparse'-based scripts typically look like:
+
+     from optparse import OptionParser
+     [...]
+     def main():
+         usage = "usage: \%prog [-f] [-v] [-q] firstarg secondarg"
+         parser = OptionParser(usage)
+         parser.add_option("-f", "--file", type="string", dest="filename",
+                           help="read data from FILENAME")
+         parser.add_option("-v", "--verbose",
+                           action="store_true", dest="verbose")
+         parser.add_option("-q", "--quiet",
+                           action="store_false", dest="verbose")
+     
+         (options, args) = parser.parse_args()
+         if len(args) != 1:
+             parser.error("incorrect number of arguments")
+     
+         if options.verbose:
+             print "reading \%s..." \% options.filename
+         [... go to work ...]
+     
+     if __name__ == "__main__":
+         main()
+
+
+File: python-lib.info,  Node: Advanced Usage 2,  Next: Callback Options,  Prev: Basic Usage,  Up: optparse
+
+Advanced Usage
+--------------
+
+* Menu:
+
+* Creating and populating the parser::
+* Defining options::
+* Option actions::
+* Option types::
+* Querying and manipulating your option parser::
+* Conflicts between options::
+
+
+File: python-lib.info,  Node: Creating and populating the parser,  Next: Defining options,  Prev: Advanced Usage 2,  Up: Advanced Usage 2
+
+Creating and populating the parser
+..................................
+
+There are several ways to populate the parser with options.  One way is
+to pass a list of `Options' to the `OptionParser' constructor:
+
+     from optparse import OptionParser, make_option
+     [...]
+     parser = OptionParser(option_list=[
+         make_option("-f", "--filename",
+                     action="store", type="string", dest="filename"),
+         make_option("-q", "--quiet",
+                     action="store_false", dest="verbose")])
+
+(`make_option()' is a factory function for generating `Option' objects.)
+
+For long option lists, it may be more convenient/readable to create the
+list separately:
+
+     option_list = [make_option("-f", "--filename",
+                                action="store", type="string", dest="filename"),
+                    [... more options ...]
+                    make_option("-q", "--quiet",
+                                action="store_false", dest="verbose")]
+     parser = OptionParser(option_list=option_list)
+
+Or, you can use the `add_option()' method of `OptionParser' to add
+options one-at-a-time:
+
+     parser = OptionParser()
+     parser.add_option("-f", "--filename",
+                       action="store", type="string", dest="filename")
+     parser.add_option("-q", "--quiet",
+                       action="store_false", dest="verbose")
+
+This method makes it easier to track down exceptions raised by the
+`Option' constructor, which are common because of the complicated
+interdependencies among the various keyword arguments.  (If you get it
+wrong, `optparse' raises `OptionError'.)
+
+`add_option()' can be called in one of two ways:
+
+   * pass it an `Option' instance  (as returned by `make_option()')
+
+   * pass it any combination of positional and keyword arguments that
+     are acceptable to `make_option()' (i.e., to the `Option'
+     constructor), and it will create the `Option' instance for you
+     (shown above).
+
+
+File: python-lib.info,  Node: Defining options,  Next: Option actions,  Prev: Creating and populating the parser,  Up: Advanced Usage 2
+
+Defining options
+................
+
+Each `Option' instance represents a set of synonymous command-line
+options, i.e. options that have the same meaning and effect, but
+different spellings.  You can specify any number of short or long
+option strings, but you must specify at least one option string.
+
+To define an option with only a short option string:
+
+     make_option("-f", ...)
+
+And to define an option with only a long option string:
+
+     make_option("--foo", ...)
+
+The "..." represents a set of keyword arguments that define attributes
+of the `Option' object.  The rules governing which keyword args you
+must supply for a given `Option' are fairly complicated, but you always
+have to supply _some_.  If you get it wrong, `optparse' raises an
+`OptionError' exception explaining your mistake.
+
+The most important attribute of an option is its action, i.e. what to do
+when we encounter this option on the command-line.  The possible actions
+are:
+
+Action                               Meaning
+------                               -----
+store                                store this option's argument
+                                     (default)
+store_const                          store a constant value
+store_true                           store a true value
+store_false                          store a false value
+append                               append this option's argument to a
+                                     list
+count                                increment a counter by one
+callback                             call a specified function
+help                                 print a usage message including all
+                                     options and the documentation for
+                                     them
+
+(If you don't supply an action, the default is "store".  For this
+action, you may also supply TYPE and DEST keywords; see below.)
+
+As you can see, most actions involve storing or updating a value
+somewhere. `optparse' always creates a particular object (an instance
+of the `Values' class) specifically for this purpose. Option arguments
+(and various other values) are stored as attributes of this object,
+according to the DEST (destination) argument to
+`make_option()'/`add_option()'.
+
+For example, when you call:
+
+     parser.parse_args()
+
+one of the first things `optparse' does is create a `values' object:
+
+     values = Values()
+
+If one of the options in this parser is defined with:
+
+     make_option("-f", "--file", action="store", type="string", dest="filename")
+
+and the command-line being parsed includes any of the following:
+
+     -ffoo
+     -f foo
+     --file=foo
+     --file foo
+
+then `optparse', on seeing the `-f' or `--file' option, will do the
+equivalent of this:
+
+       values.filename = "foo"
+
+Clearly, the TYPE and DEST arguments are almost as important as ACTION.
+ACTION is the only attribute that is meaningful for _all_ options,
+though, so it is the most important.
+
+
+File: python-lib.info,  Node: Option actions,  Next: Option types,  Prev: Defining options,  Up: Advanced Usage 2
+
+Option actions
+..............
+
+The various option actions all have slightly different requirements and
+effects.  Except for the "help" action, you must supply at least one
+other keyword argument when creating the `Option'; the exact
+requirements for each action are listed here.
+
+"store [relevant: TYPE, DEST, NARGS, CHOICES]"
+     The option must be followed by an argument, which is converted to a
+     value according to TYPE and stored in DEST.  If `nargs > 1',
+     multiple arguments will be consumed from the command line; all
+     will be converted according to TYPE and stored to DEST as a tuple.
+     See section~*Note Option types::, "Option types," below.
+
+     If CHOICES (a sequence of strings) is supplied, the type defaults
+     to "choice".
+
+     If TYPE is not supplied, it defaults to "string".
+
+     If DEST is not supplied, `optparse' derives a destination from the
+     first long option strings (e.g., `--foo-bar' becomes `foo_bar').
+     If there are no long option strings, `optparse' derives a
+     destination from the first short option string (e.g., `-f' becomes
+     `f').
+
+     Example:
+
+          make_option("-f")
+          make_option("-p", type="float", nargs=3, dest="point")
+
+     Given the following command line:
+
+          -f foo.txt -p 1 -3.5 4 -fbar.txt
+
+     `optparse' will set:
+
+          values.f = "bar.txt"
+          values.point = (1.0, -3.5, 4.0)
+
+     (Actually, `values.f' will be set twice, but only the second time
+     is visible in the end.)
+
+"store_const [required: CONST, DEST]"
+     The CONST value supplied to the `Option' constructor is stored in
+     DEST.
+
+     Example:
+
+          make_option("-q", "--quiet",
+                 action="store_const", const=0, dest="verbose"),
+          make_option("-v", "--verbose",
+                 action="store_const", const=1, dest="verbose"),
+          make_option("--noisy",
+                 action="store_const", const=2, dest="verbose"),
+
+     If `--noisy' is seen, `optparse' will set:
+
+          values.verbose = 2
+
+"store_true [required: DEST]"
+     A special case of "store_const" that stores `True' to DEST.
+
+"store_false [required: DEST]"
+     Like "store_true", but stores `False'
+
+     Example:
+
+          make_option(None, "--clobber", action="store_true", dest="clobber")
+          make_option(None, "--no-clobber", action="store_false", dest="clobber")
+
+"append [relevant: TYPE, DEST, NARGS, CHOICES]"
+     The option must be followed by an argument, which is appended to
+     the list in DEST. If no default value for DEST is supplied (i.e.
+     the default is `None'), an empty list is automatically created when
+     `optparse' first encounters this option on the command-line.  If
+     `nargs > 1', multiple arguments are consumed, and a tuple of
+     length NARGS is appended to DEST.
+
+     The defaults for TYPE and DEST are the same as for the "store"
+     action.
+
+     Example:
+
+          make_option("-t", "--tracks", action="append", type="int")
+
+     If `-t3' is seen on the command-line, `optparse' does the
+     equivalent of:
+
+          values.tracks = []
+          values.tracks.append(int("3"))
+
+     If, a little later on, `--tracks=4' is seen, it does:
+
+          values.tracks.append(int("4"))
+
+     See "Error handling" (section~*Note Error-handling::) for
+     information on how `optparse' deals with something like
+     `--tracks=x'.
+
+"count [required: DEST]"
+     Increment the integer stored at DEST. DEST is set to zero before
+     being incremented the first time (unless you supply a default
+     value).
+
+     Example:
+
+          make_option("-v", action="count", dest="verbosity")
+
+     The first time `-v' is seen on the command line, `optparse' does
+     the equivalent of:
+
+          values.verbosity = 0
+          values.verbosity += 1
+
+     Every subsequent occurrence of `-v' results in:
+
+          values.verbosity += 1
+
+"callback [required: CALLBACK;"
+     relevant: TYPE, NARGS, CALLBACK_ARGS, CALLBACK_KWARGS]
+
+     Call the function specified by CALLBACK.  The signature of this
+     function should be:
+
+          func(option : Option,
+               opt : string,
+               value : any,
+               parser : OptionParser,
+               *args, **kwargs)
+
+     Callback options are covered in detail in section~*Note Callback
+     Options::, "Callback Options."
+
+"help [required: none]"
+     Prints a complete help message for all the options in the current
+     option parser.  The help message is constructed from the USAGE
+     string passed to `OptionParser''s constructor and the HELP string
+     passed to every option.
+
+     If no HELP string is supplied for an option, it will still be
+     listed in the help message.  To omit an option entirely, use the
+     special value `optparse.SUPPRESS_HELP'.
+
+     Example:
+
+          from optparse import Option, OptionParser, SUPPRESS_HELP
+          
+          usage = "usage: %prog [options]"
+          parser = OptionParser(usage, option_list=[
+            make_option("-h", "--help", action="help"),
+            make_option("-v", action="store_true", dest="verbose",
+                        help="Be moderately verbose")
+            make_option("--file", dest="filename",
+                        help="Input file to read data from"),
+            make_option("--secret", help=SUPPRESS_HELP)
+          ])
+
+     If `optparse' sees either `-h' or `--help' on the command line, it
+     will print something like the following help message to stdout:
+
+          usage: <yourscript> [options]
+          
+          options:
+            -h, --help        Show this help message and exit
+            -v                Be moderately verbose
+            --file=FILENAME   Input file to read data from
+
+     After printing the help message, `optparse' terminates your process
+     with `sys.exit(0)'.
+
+"version [required: none]"
+     Prints the version number supplied to the `OptionParser' to stdout
+     and exits.  The version number is actually formatted and printed
+     by the `print_version()' method of `OptionParser'.  Generally only
+     relevant if the VERSION argument is supplied to the `OptionParser'
+     constructor.
+
+
+File: python-lib.info,  Node: Option types,  Next: Querying and manipulating your option parser,  Prev: Option actions,  Up: Advanced Usage 2
+
+Option types
+............
+
+`optparse' supports six option types out of the box: "string", "int",
+"long", "choice", "float" and "complex".  (Of these, string, int,
+float, and choice are the most commonly used --long and complex are
+there mainly for completeness.)  It's easy to add new option types by
+subclassing the `Option' class; see section~*Note Extending optparse::,
+"Extending `optparse'."
+
+Arguments to string options are not checked or converted in any way:
+the text on the command line is stored in the destination (or passed to
+the callback) as-is.
+
+Integer arguments are passed to `int()' to convert them to Python
+integers.  If `int()' fails, so will `optparse', although with a more
+useful error message.  Internally, `optparse' raises `OptionValueError'
+in `optparse.check_builtin()'; at a higher level (in `OptionParser'),
+`optparse' catches this exception and terminates your program with a
+useful error message.
+
+Likewise, float arguments are passed to `float()' for conversion, long
+arguments to `long()', and complex arguments to `complex()'.  Apart
+from that, they are handled identically to integer arguments.
+
+Choice options are a subtype of string options. A master list or tuple
+of choices (strings) must be passed to the option constructor
+(`make_option()' or `OptionParser.add_option()') as the CHOICES keyword
+argument.  Choice option arguments are compared against this master
+list in `optparse.check_choice()', and `OptionValueError' is raised if
+an unknown string is given.
+
+
+File: python-lib.info,  Node: Querying and manipulating your option parser,  Next: Conflicts between options,  Prev: Option types,  Up: Advanced Usage 2
+
+Querying and manipulating your option parser
+............................................
+
+Sometimes, it's useful to poke around your option parser and see what's
+there. `OptionParser' provides a couple of methods to help you out:
+
+`has_option(opt_str)'
+     Given an option string such as `-q' or `--verbose', returns true
+     if the `OptionParser' has an option with that option string.
+
+`get_option(opt_str)'
+     Returns the `Option' instance that implements the option string
+     you supplied, or `None' if no options implement it.
+
+`remove_option(opt_str)'
+     If the `OptionParser' has an option corresponding to OPT_STR, that
+     option is removed.  If that option provided any other option
+     strings, all of those option strings become invalid.
+
+     If OPT_STR does not occur in any option belonging to this
+     `OptionParser', raises `ValueError'.
+
+
+File: python-lib.info,  Node: Conflicts between options,  Prev: Querying and manipulating your option parser,  Up: Advanced Usage 2
+
+Conflicts between options
+.........................
+
+If you're not careful, it's easy to define conflicting options:
+
+     parser.add_option("-n", "--dry-run", ...)
+     ...
+     parser.add_option("-n", "--noisy", ...)
+
+(This is even easier to do if you've defined your own `OptionParser'
+subclass with some standard options.)
+
+On the assumption that this is usually a mistake, `optparse' raises an
+exception (`OptionConflictError') by default when this happens.  Since
+this is an easily-fixed programming error, you shouldn't try to catch
+this exception--fix your mistake and get on with life.
+
+Sometimes, you want newer options to deliberately replace the option
+strings used by older options.  You can achieve this by calling:
+
+     parser.set_conflict_handler("resolve")
+
+which instructs `optparse' to resolve option conflicts intelligently.
+
+Here's how it works: every time you add an option, `optparse' checks
+for conflicts with previously-added options.  If it finds any, it
+invokes the conflict-handling mechanism you specify either to the
+`OptionParser' constructor:
+
+     parser = OptionParser(..., conflict_handler="resolve")
+
+or via the `set_conflict_handler()' method.
+
+The default conflict-handling mechanism is `error'.
+
+Here's an example: first, define an `OptionParser' set to resolve
+conflicts intelligently:
+
+     parser = OptionParser(conflict_handler="resolve")
+
+Now add all of our options:
+
+     parser.add_option("-n", "--dry-run", ..., help="original dry-run option")
+     ...
+     parser.add_option("-n", "--noisy", ..., help="be noisy")
+
+At this point, `optparse' detects that a previously-added option is
+already using the `-n' option string.  Since `conflict_handler ==
+"resolve"', it resolves the situation by removing `-n' from the earlier
+option's list of option strings.  Now, `--dry-run' is the only way for
+the user to activate that option.  If the user asks for help, the help
+message will reflect that, e.g.:
+
+     options:
+       --dry-run     original dry-run option
+       ...
+       -n, --noisy   be noisy
+
+Note that it's possible to whittle away the option strings for a
+previously-added option until there are none left, and the user has no
+way of invoking that option from the command-line.  In that case,
+`optparse' removes that option completely, so it doesn't show up in
+help text or anywhere else.  E.g. if we carry on with our existing
+`OptionParser':
+
+     parser.add_option("--dry-run", ..., help="new dry-run option")
+
+At this point, the first `-n'/`--dry-run' option is no longer
+accessible, so `optparse' removes it.  If the user asks for help,
+they'll get something like this:
+
+     options:
+       ...
+       -n, --noisy   be noisy
+       --dry-run     new dry-run option
+
+
+File: python-lib.info,  Node: Callback Options,  Next: Extending optparse,  Prev: Advanced Usage 2,  Up: optparse
+
+Callback Options
+----------------
+
+If `optparse''s built-in actions and types just don't fit the bill for
+you, but it's not worth extending `optparse' to define your own actions
+or types, you'll probably need to define a callback option.  Defining
+callback options is quite easy; the tricky part is writing a good
+callback (the function that is called when `optparse' encounters the
+option on the command line).
+
+* Menu:
+
+* Defining a callback option::
+* How callbacks are called::
+* Error handling::
+* Examples 4::
+
+
+File: python-lib.info,  Node: Defining a callback option,  Next: How callbacks are called,  Prev: Callback Options,  Up: Callback Options
+
+Defining a callback option
+..........................
+
+As always, you can define a callback option either by directly
+instantiating the `Option' class, or by using the `add_option()' method
+of your `OptionParser' object. The only option attribute you must
+specify is CALLBACK, the function to call:
+
+     parser.add_option("-c", callback=my_callback)
+
+Note that you supply a function object here--so you must have already
+defined a function `my_callback()' when you define the callback option.
+In this simple case, `optparse' knows nothing about the arguments the
+`-c' option expects to take.  Usually, this means that the option
+doesn't take any arguments - the mere presence of `-c' on the
+command-line is all it needs to know.  In some circumstances, though,
+you might want your callback to consume an arbitrary number of
+command-line arguments.  This is where writing callbacks gets tricky;
+it's covered later in this document.
+
+There are several other option attributes that you can supply when you
+define an option attribute:
+
+"type"
+     has its usual meaning: as with the "store" or "append" actions, it
+     instructs `optparse' to consume one argument that must be
+     convertible to TYPE.  Rather than storing the value(s) anywhere,
+     though, `optparse' converts it to TYPE and passes it to your
+     callback function.
+
+"nargs"
+     also has its usual meaning: if it is supplied and `nargs > 1',
+     `optparse' will consume NARGS arguments, each of which must be
+     convertible to TYPE.  It then passes a tuple of converted values
+     to your callback.
+
+"callback_args"
+     a tuple of extra positional arguments to pass to the callback.
+
+"callback_kwargs"
+     a dictionary of extra keyword arguments to pass to the callback.
+
+
+File: python-lib.info,  Node: How callbacks are called,  Next: Error handling,  Prev: Defining a callback option,  Up: Callback Options
+
+How callbacks are called
+........................
+
+All callbacks are called as follows:
+
+     func(option, opt, value, parser, *args, **kwargs)
+
+where
+
+"option"
+     is the `Option' instance that's calling the callback.
+
+"opt"
+     is the option string seen on the command-line that's triggering the
+     callback.  (If an abbreviated long option was used, OPT will be
+     the full, canonical option string--for example, if the user puts
+     `--foo' on the command-line as an abbreviation for `--foobar',
+     then OPT will be `--foobar'.)
+
+"value"
+     is the argument to this option seen on the command-line.
+     `optparse' will only expect an argument if TYPE is set; the type
+     of VALUE will be the type implied by the option's type (see~*Note
+     Option types::, "Option types").  If TYPE for this option is
+     `None' (no argument expected), then VALUE will be `None'.  If
+     `nargs > 1', VALUE will be a tuple of values of the appropriate
+     type.
+
+"parser"
+     is the `OptionParser' instance driving the whole thing, mainly
+     useful because you can access some other interesting data through
+     it, as instance attributes:
+
+    "parser.rargs"
+          the current remaining argument list, i.e. with OPT (and
+          VALUE, if any) removed, and only the arguments following them
+          still there.  Feel free to modify `parser.rargs', e.g. by
+          consuming more arguments.
+
+    "parser.largs"
+          the current set of leftover arguments, i.e. arguments that
+          have been processed but have not been consumed as options (or
+          arguments to options).  Feel free to modify `parser.largs'
+          e.g. by adding more arguments to it.
+
+    "parser.values"
+          the object where option values are by default stored.  This
+          is useful because it lets callbacks use the same mechanism as
+          the rest of `optparse' for storing option values; you don't
+          need to mess around with globals or closures.  You can also
+          access the value(s) of any options already encountered on the
+          command-line.
+
+"args"
+     is a tuple of arbitrary positional arguments supplied via the
+     CALLBACK_args option attribute.
+
+"kwargs"
+     is a dictionary of arbitrary keyword arguments supplied via
+     CALLBACK_KWARGS.
+
+Since ARGS and KWARGS are optional (they are only passed if you supply
+CALLBACK_ARGS and/or CALLBACK_KWARGS when you define your callback
+option), the minimal callback function is:
+
+     def my_callback (option, opt, value, parser):
+         pass
+
+
+File: python-lib.info,  Node: Error handling,  Next: Examples 4,  Prev: How callbacks are called,  Up: Callback Options
+
+Error handling
+..............
+
+The callback function should raise `OptionValueError' if there are any
+problems with the option or its argument(s). `optparse' catches this
+and terminates the program, printing the error message you supply to
+stderr.  Your message should be clear, concise, accurate, and mention
+the option at fault.  Otherwise, the user will have a hard time
+figuring out what he did wrong.
+
+
+File: python-lib.info,  Node: Examples 4,  Prev: Error handling,  Up: Callback Options
+
+Examples
+........
+
+Here's an example of a callback option that takes no arguments, and
+simply records that the option was seen:
+
+     def record_foo_seen (option, opt, value, parser):
+         parser.saw_foo = 1
+     
+     parser.add_option("--foo", action="callback", callback=record_foo_seen)
+
+Of course, you could do that with the "store_true" action.  Here's a
+slightly more interesting example: record the fact that `-a' is seen,
+but blow up if it comes after `-b' in the command-line.
+
+     def check_order (option, opt, value, parser):
+         if parser.values.b:
+             raise OptionValueError("can't use -a after -b")
+         parser.values.a = 1
+     ...
+     parser.add_option("-a", action="callback", callback=check_order)
+     parser.add_option("-b", action="store_true", dest="b")
+
+If you want to reuse this callback for several similar options (set a
+flag, but blow up if `-b' has already been seen), it needs a bit of
+work: the error message and the flag that it sets must be generalized.
+
+     def check_order (option, opt, value, parser):
+         if parser.values.b:
+             raise OptionValueError("can't use %s after -b" % opt)
+         setattr(parser.values, option.dest, 1)
+     ...
+     parser.add_option("-a", action="callback", callback=check_order, dest='a')
+     parser.add_option("-b", action="store_true", dest="b")
+     parser.add_option("-c", action="callback", callback=check_order, dest='c')
+
+Of course, you could put any condition in there--you're not limited to
+checking the values of already-defined options.  For example, if you
+have options that should not be called when the moon is full, all you
+have to do is this:
+
+     def check_moon (option, opt, value, parser):
+         if is_full_moon():
+             raise OptionValueError("%s option invalid when moon full" % opt)
+         setattr(parser.values, option.dest, 1)
+     ...
+     parser.add_option("--foo",
+                       action="callback", callback=check_moon, dest="foo")
+
+(The definition of `is_full_moon()' is left as an exercise for the
+reader.)
+
+*Fixed arguments*
+
+Things get slightly more interesting when you define callback options
+that take a fixed number of arguments.  Specifying that a callback
+option takes arguments is similar to defining a "store" or "append"
+option: if you define TYPE, then the option takes one argument that
+must be convertible to that type; if you further define NARGS, then the
+option takes that many arguments.
+
+Here's an example that just emulates the standard "store" action:
+
+     def store_value (option, opt, value, parser):
+         setattr(parser.values, option.dest, value)
+     ...
+     parser.add_option("--foo",
+                       action="callback", callback=store_value,
+                       type="int", nargs=3, dest="foo")
+
+Note that `optparse' takes care of consuming 3 arguments and converting
+them to integers for you; all you have to do is store them.  (Or
+whatever: obviously you don't need a callback for this example.  Use
+your imagination!)
+
+*Variable arguments*
+
+Things get hairy when you want an option to take a variable number of
+arguments.  For this case, you have to write a callback; `optparse'
+doesn't provide any built-in capabilities for it.  You have to deal
+with the full-blown syntax for conventional UNIX command-line parsing.
+(Previously, `optparse' took care of this for you, but I got it wrong.
+It was fixed at the cost of making this kind of callback more complex.)
+In particular, callbacks have to worry about bare `--' and `-'
+arguments; the convention is:
+
+   * bare `--', if not the argument to some option, causes command-line
+     processing to halt and the `--' itself is lost.
+
+   * bare `-' similarly causes command-line processing to halt, but the
+     `-' itself is kept.
+
+   * either `--' or `-' can be option arguments.
+
+If you want an option that takes a variable number of arguments, there
+are several subtle, tricky issues to worry about.  The exact
+implementation you choose will be based on which trade-offs you're
+willing to make for your application (which is why `optparse' doesn't
+support this sort of thing directly).
+
+Nevertheless, here's a stab at a callback for an option with variable
+arguments:
+
+     def varargs (option, opt, value, parser):
+         assert value is None
+         done = 0
+         value = []
+         rargs = parser.rargs
+         while rargs:
+             arg = rargs[0]
+     
+             # Stop if we hit an arg like "--foo", "-a", "-fx", "--file=f",
+             # etc.  Note that this also stops on "-3" or "-3.0", so if
+             # your option takes numeric values, you will need to handle
+             # this.
+             if ((arg[:2] == "--" and len(arg) > 2) or
+                 (arg[:1] == "-" and len(arg) > 1 and arg[1] != "-")):
+                 break
+             else:
+                 value.append(arg)
+                 del rargs[0]
+     
+          setattr(parser.values, option.dest, value)
+     
+     ...
+     parser.add_option("-c", "--callback",
+                       action="callback", callback=varargs)
+
+The main weakness with this particular implementation is that negative
+numbers in the arguments following `-c' will be interpreted as further
+options, rather than as arguments to `-c'.  Fixing this is left as an
+exercise for the reader.
+

@@ -1,0 +1,786 @@
+This is python-api.info, produced by makeinfo version 4.3 from
+python-api.texi.
+
+October 3, 2003
+
+
+File: python-api.info,  Node: Function-Method-Variable Index,  Next: Miscellaneous Index,  Prev: Class-Exception-Object Index,  Up: Top
+
+Function, Method, and Variable Index
+************************************
+
+* Menu:
+
+* __import__:                            Importing Modules.
+* _Py_c_diff:                            Complex Numbers as C Structures.
+* _Py_c_neg:                             Complex Numbers as C Structures.
+* _Py_c_pow:                             Complex Numbers as C Structures.
+* _Py_c_prod:                            Complex Numbers as C Structures.
+* _Py_c_quot:                            Complex Numbers as C Structures.
+* _Py_c_sum:                             Complex Numbers as C Structures.
+* _Py_NoneStruct:                        Allocating Objects on the Heap.
+* _PyImport_FindExtension:               Importing Modules.
+* _PyImport_Fini:                        Importing Modules.
+* _PyImport_FixupExtension:              Importing Modules.
+* _PyImport_Init:                        Importing Modules.
+* _PyObject_Del:                         Allocating Objects on the Heap.
+* _PyObject_GC_TRACK:                    Supporting Cyclic Garbarge Collection.
+* _PyObject_GC_UNTRACK:                  Supporting Cyclic Garbarge Collection.
+* _PyObject_New:                         Allocating Objects on the Heap.
+* _PyObject_NewVar:                      Allocating Objects on the Heap.
+* _PyString_Resize:                      String Objects.
+* _PyTuple_Resize:                       Tuple Objects.
+* abs:                                   Number Protocol.
+* apply:                                 Object Protocol.
+* classmethod:                           Common Object Structures.
+* cmp:                                   Object Protocol.
+* coerce:                                Number Protocol.
+* compile:                               Importing Modules.
+* divmod:                                Number Protocol.
+* float:                                 Number Protocol.
+* hash <1>:                              Type Objects 2.
+* hash:                                  Object Protocol.
+* int:                                   Number Protocol.
+* len <1>:                               Dictionary Objects.
+* len <2>:                               List Objects.
+* len <3>:                               Mapping Protocol.
+* len <4>:                               Sequence Protocol.
+* len:                                   Object Protocol.
+* long:                                  Number Protocol.
+* METH_CLASS:                            Common Object Structures.
+* METH_KEYWORDS:                         Common Object Structures.
+* METH_NOARGS:                           Common Object Structures.
+* METH_O:                                Common Object Structures.
+* METH_OLDARGS:                          Common Object Structures.
+* METH_STATIC:                           Common Object Structures.
+* METH_VARARGS:                          Common Object Structures.
+* pow:                                   Number Protocol.
+* Py_AtExit:                             Process Control.
+* Py_BuildValue:                         Parsing arguments and building values.
+* Py_CompileString:                      Very High Level Layer.
+* Py_DECREF:                             Reference Counting.
+* Py_END_OF_BUFFER:                      Buffer Objects.
+* Py_EndInterpreter:                     Initialization.
+* Py_eval_input:                         Very High Level Layer.
+* Py_Exit:                               Process Control.
+* Py_FatalError:                         Process Control.
+* Py_FdIsInteractive:                    Operating System Utilities.
+* Py_file_input:                         Very High Level Layer.
+* Py_Finalize:                           Initialization.
+* Py_FindMethod:                         Common Object Structures.
+* Py_GetBuildInfo:                       Initialization.
+* Py_GetCompiler:                        Initialization.
+* Py_GetCopyright:                       Initialization.
+* Py_GetExecPrefix:                      Initialization.
+* Py_GetPath:                            Initialization.
+* Py_GetPlatform:                        Initialization.
+* Py_GetPrefix:                          Initialization.
+* Py_GetProgramFullPath:                 Initialization.
+* Py_GetProgramName:                     Initialization.
+* Py_GetVersion:                         Initialization.
+* Py_INCREF:                             Reference Counting.
+* Py_Initialize:                         Initialization.
+* Py_InitModule:                         Allocating Objects on the Heap.
+* Py_InitModule3:                        Allocating Objects on the Heap.
+* Py_InitModule4:                        Allocating Objects on the Heap.
+* Py_IsInitialized:                      Initialization.
+* Py_Main:                               Very High Level Layer.
+* Py_NewInterpreter:                     Initialization.
+* Py_None:                               None Object.
+* Py_SetProgramName:                     Initialization.
+* Py_single_input:                       Very High Level Layer.
+* Py_TPFLAGS_BASETYPE:                   Type Objects 2.
+* Py_TPFLAGS_CHECKTYPES:                 Type Objects 2.
+* Py_TPFLAGS_DEFAULT:                    Type Objects 2.
+* Py_TPFLAGS_GC:                         Type Objects 2.
+* Py_TPFLAGS_HAVE_CLASS:                 Type Objects 2.
+* Py_TPFLAGS_HAVE_GC <1>:                Supporting Cyclic Garbarge Collection.
+* Py_TPFLAGS_HAVE_GC:                    Type Objects 2.
+* Py_TPFLAGS_HAVE_GETCHARBUFFER <1>:     Buffer Object Structures.
+* Py_TPFLAGS_HAVE_GETCHARBUFFER:         Type Objects 2.
+* Py_TPFLAGS_HAVE_INPLACEOPS:            Type Objects 2.
+* Py_TPFLAGS_HAVE_ITER:                  Type Objects 2.
+* Py_TPFLAGS_HAVE_RICHCOMPARE:           Type Objects 2.
+* Py_TPFLAGS_HAVE_SEQUENCE_IN:           Type Objects 2.
+* Py_TPFLAGS_HAVE_WEAKREFS:              Type Objects 2.
+* Py_TPFLAGS_HEAPTYPE:                   Type Objects 2.
+* Py_TPFLAGS_READY:                      Type Objects 2.
+* Py_TPFLAGS_READYING:                   Type Objects 2.
+* Py_UNICODE_ISALNUM:                    Unicode Objects.
+* Py_UNICODE_ISALPHA:                    Unicode Objects.
+* Py_UNICODE_ISDECIMAL:                  Unicode Objects.
+* Py_UNICODE_ISDIGIT:                    Unicode Objects.
+* Py_UNICODE_ISLINEBREAK:                Unicode Objects.
+* Py_UNICODE_ISLOWER:                    Unicode Objects.
+* Py_UNICODE_ISNUMERIC:                  Unicode Objects.
+* Py_UNICODE_ISSPACE:                    Unicode Objects.
+* Py_UNICODE_ISTITLE:                    Unicode Objects.
+* Py_UNICODE_ISUPPER:                    Unicode Objects.
+* Py_UNICODE_TODECIMAL:                  Unicode Objects.
+* Py_UNICODE_TODIGIT:                    Unicode Objects.
+* Py_UNICODE_TOLOWER:                    Unicode Objects.
+* Py_UNICODE_TONUMERIC:                  Unicode Objects.
+* Py_UNICODE_TOTITLE:                    Unicode Objects.
+* Py_UNICODE_TOUPPER:                    Unicode Objects.
+* Py_XDECREF:                            Reference Counting.
+* Py_XINCREF:                            Reference Counting.
+* PyArg_Parse:                           Parsing arguments and building values.
+* PyArg_ParseTuple:                      Parsing arguments and building values.
+* PyArg_ParseTupleAndKeywords:           Parsing arguments and building values.
+* PyArg_UnpackTuple:                     Parsing arguments and building values.
+* PyBuffer_Check:                        Buffer Objects.
+* PyBuffer_FromMemory:                   Buffer Objects.
+* PyBuffer_FromObject:                   Buffer Objects.
+* PyBuffer_FromReadWriteMemory:          Buffer Objects.
+* PyBuffer_FromReadWriteObject:          Buffer Objects.
+* PyBuffer_New:                          Buffer Objects.
+* PyBuffer_Type:                         Buffer Objects.
+* PyCallable_Check:                      Object Protocol.
+* PyCallIter_Check:                      Iterator Objects.
+* PyCallIter_New:                        Iterator Objects.
+* PyCallIter_Type:                       Iterator Objects.
+* PyCell_Check:                          Cell Objects.
+* PyCell_GET:                            Cell Objects.
+* PyCell_Get:                            Cell Objects.
+* PyCell_New:                            Cell Objects.
+* PyCell_SET:                            Cell Objects.
+* PyCell_Set:                            Cell Objects.
+* PyCell_Type:                           Cell Objects.
+* PyCObject_AsVoidPtr:                   CObjects.
+* PyCObject_Check:                       CObjects.
+* PyCObject_FromVoidPtr:                 CObjects.
+* PyCObject_FromVoidPtrAndDesc:          CObjects.
+* PyCObject_GetDesc:                     CObjects.
+* PyComplex_AsCComplex:                  Complex Numbers as Python Objects.
+* PyComplex_Check:                       Complex Numbers as Python Objects.
+* PyComplex_CheckExact:                  Complex Numbers as Python Objects.
+* PyComplex_FromCComplex:                Complex Numbers as Python Objects.
+* PyComplex_FromDoubles:                 Complex Numbers as Python Objects.
+* PyComplex_ImagAsDouble:                Complex Numbers as Python Objects.
+* PyComplex_RealAsDouble:                Complex Numbers as Python Objects.
+* PyComplex_Type:                        Complex Numbers as Python Objects.
+* PyDescr_IsData:                        Descriptor Objects.
+* PyDescr_NewGetSet:                     Descriptor Objects.
+* PyDescr_NewMember:                     Descriptor Objects.
+* PyDescr_NewMethod:                     Descriptor Objects.
+* PyDescr_NewWrapper:                    Descriptor Objects.
+* PyDict_Check:                          Dictionary Objects.
+* PyDict_Clear:                          Dictionary Objects.
+* PyDict_Copy:                           Dictionary Objects.
+* PyDict_DelItem:                        Dictionary Objects.
+* PyDict_DelItemString:                  Dictionary Objects.
+* PyDict_GetItem:                        Dictionary Objects.
+* PyDict_GetItemString:                  Dictionary Objects.
+* PyDict_Items:                          Dictionary Objects.
+* PyDict_Keys:                           Dictionary Objects.
+* PyDict_Merge:                          Dictionary Objects.
+* PyDict_MergeFromSeq2:                  Dictionary Objects.
+* PyDict_New:                            Dictionary Objects.
+* PyDict_Next:                           Dictionary Objects.
+* PyDict_SetItem:                        Dictionary Objects.
+* PyDict_SetItemString:                  Dictionary Objects.
+* PyDict_Size:                           Dictionary Objects.
+* PyDict_Type:                           Dictionary Objects.
+* PyDict_Update:                         Dictionary Objects.
+* PyDict_Values:                         Dictionary Objects.
+* PyDictProxy_New:                       Dictionary Objects.
+* PyErr_BadArgument:                     Exception Handling.
+* PyErr_BadInternalCall:                 Exception Handling.
+* PyErr_CheckSignals:                    Exception Handling.
+* PyErr_Clear:                           Exception Handling.
+* PyErr_ExceptionMatches:                Exception Handling.
+* PyErr_Fetch:                           Exception Handling.
+* PyErr_Format:                          Exception Handling.
+* PyErr_GivenExceptionMatches:           Exception Handling.
+* PyErr_NewException:                    Exception Handling.
+* PyErr_NoMemory:                        Exception Handling.
+* PyErr_NormalizeException:              Exception Handling.
+* PyErr_Occurred:                        Exception Handling.
+* PyErr_Print:                           Exception Handling.
+* PyErr_Restore:                         Exception Handling.
+* PyErr_SetExcFromWindowsErr:            Exception Handling.
+* PyErr_SetExcFromWindowsErrWithFilename: Exception Handling.
+* PyErr_SetFromErrno:                    Exception Handling.
+* PyErr_SetFromErrnoWithFilename:        Exception Handling.
+* PyErr_SetFromWindowsErr:               Exception Handling.
+* PyErr_SetFromWindowsErrWithFilename:   Exception Handling.
+* PyErr_SetInterrupt:                    Exception Handling.
+* PyErr_SetNone:                         Exception Handling.
+* PyErr_SetObject:                       Exception Handling.
+* PyErr_SetString:                       Exception Handling.
+* PyErr_Warn:                            Exception Handling.
+* PyErr_WarnExplicit:                    Exception Handling.
+* PyErr_WriteUnraisable:                 Exception Handling.
+* PyEval_AcquireLock:                    Thread State and the Global Interpreter Lock.
+* PyEval_AcquireThread:                  Thread State and the Global Interpreter Lock.
+* PyEval_InitThreads:                    Thread State and the Global Interpreter Lock.
+* PyEval_ReleaseLock:                    Thread State and the Global Interpreter Lock.
+* PyEval_ReleaseThread:                  Thread State and the Global Interpreter Lock.
+* PyEval_RestoreThread:                  Thread State and the Global Interpreter Lock.
+* PyEval_SaveThread:                     Thread State and the Global Interpreter Lock.
+* PyEval_SetProfile:                     Profiling and Tracing.
+* PyEval_SetTrace:                       Profiling and Tracing.
+* PyFile_AsFile:                         File Objects.
+* PyFile_Check:                          File Objects.
+* PyFile_CheckExact:                     File Objects.
+* PyFile_Encoding:                       File Objects.
+* PyFile_FromFile:                       File Objects.
+* PyFile_FromString:                     File Objects.
+* PyFile_GetLine:                        File Objects.
+* PyFile_Name:                           File Objects.
+* PyFile_SetBufSize:                     File Objects.
+* PyFile_SoftSpace:                      File Objects.
+* PyFile_Type:                           File Objects.
+* PyFile_WriteObject:                    File Objects.
+* PyFile_WriteString:                    File Objects.
+* PyFloat_AS_DOUBLE:                     Floating Point Objects.
+* PyFloat_AsDouble:                      Floating Point Objects.
+* PyFloat_Check:                         Floating Point Objects.
+* PyFloat_CheckExact:                    Floating Point Objects.
+* PyFloat_FromDouble:                    Floating Point Objects.
+* PyFloat_FromString:                    Floating Point Objects.
+* PyFloat_Type:                          Floating Point Objects.
+* PyImport_AddModule:                    Importing Modules.
+* PyImport_AppendInittab:                Importing Modules.
+* PyImport_Cleanup:                      Importing Modules.
+* PyImport_ExecCodeModule:               Importing Modules.
+* PyImport_ExtendInittab:                Importing Modules.
+* PyImport_FrozenModules:                Importing Modules.
+* PyImport_GetMagicNumber:               Importing Modules.
+* PyImport_GetModuleDict:                Importing Modules.
+* PyImport_Import:                       Importing Modules.
+* PyImport_ImportFrozenModule:           Importing Modules.
+* PyImport_ImportModule:                 Importing Modules.
+* PyImport_ImportModuleEx:               Importing Modules.
+* PyImport_ReloadModule:                 Importing Modules.
+* PyInstance_Check:                      Instance Objects.
+* PyInstance_New:                        Instance Objects.
+* PyInstance_NewRaw:                     Instance Objects.
+* PyInstance_Type:                       Instance Objects.
+* PyInt_AS_LONG:                         Plain Integer Objects.
+* PyInt_AsLong:                          Plain Integer Objects.
+* PyInt_AsUnsignedLongLongMask:          Plain Integer Objects.
+* PyInt_AsUnsignedLongMask:              Plain Integer Objects.
+* PyInt_Check:                           Plain Integer Objects.
+* PyInt_CheckExact:                      Plain Integer Objects.
+* PyInt_FromLong:                        Plain Integer Objects.
+* PyInt_FromString:                      Plain Integer Objects.
+* PyInt_GetMax:                          Plain Integer Objects.
+* PyInt_Type:                            Plain Integer Objects.
+* PyInterpreterState_Clear:              Thread State and the Global Interpreter Lock.
+* PyInterpreterState_Delete:             Thread State and the Global Interpreter Lock.
+* PyInterpreterState_Head:               Advanced Debugger Support.
+* PyInterpreterState_New:                Thread State and the Global Interpreter Lock.
+* PyInterpreterState_Next:               Advanced Debugger Support.
+* PyInterpreterState_ThreadHead:         Advanced Debugger Support.
+* PyIter_Check:                          Iterator Protocol.
+* PyIter_Next:                           Iterator Protocol.
+* PyList_Append:                         List Objects.
+* PyList_AsTuple:                        List Objects.
+* PyList_Check:                          List Objects.
+* PyList_GET_ITEM:                       List Objects.
+* PyList_GET_SIZE:                       List Objects.
+* PyList_GetItem:                        List Objects.
+* PyList_GetSlice:                       List Objects.
+* PyList_Insert:                         List Objects.
+* PyList_New:                            List Objects.
+* PyList_Reverse:                        List Objects.
+* PyList_SET_ITEM:                       List Objects.
+* PyList_SetItem:                        List Objects.
+* PyList_SetSlice:                       List Objects.
+* PyList_Size:                           List Objects.
+* PyList_Sort:                           List Objects.
+* PyList_Type:                           List Objects.
+* PyLong_AsDouble:                       Long Integer Objects.
+* PyLong_AsLong:                         Long Integer Objects.
+* PyLong_AsLongLong:                     Long Integer Objects.
+* PyLong_AsUnsignedLong:                 Long Integer Objects.
+* PyLong_AsUnsignedLongLong:             Long Integer Objects.
+* PyLong_AsUnsignedLongLongMask:         Long Integer Objects.
+* PyLong_AsUnsignedLongMask:             Long Integer Objects.
+* PyLong_AsVoidPtr:                      Long Integer Objects.
+* PyLong_Check:                          Long Integer Objects.
+* PyLong_CheckExact:                     Long Integer Objects.
+* PyLong_FromDouble:                     Long Integer Objects.
+* PyLong_FromLong:                       Long Integer Objects.
+* PyLong_FromLongLong:                   Long Integer Objects.
+* PyLong_FromString:                     Long Integer Objects.
+* PyLong_FromUnicode:                    Long Integer Objects.
+* PyLong_FromUnsignedLong:               Long Integer Objects.
+* PyLong_FromUnsignedLongLong:           Long Integer Objects.
+* PyLong_FromVoidPtr:                    Long Integer Objects.
+* PyLong_Type:                           Long Integer Objects.
+* PyMapping_Check:                       Mapping Protocol.
+* PyMapping_DelItem:                     Mapping Protocol.
+* PyMapping_DelItemString:               Mapping Protocol.
+* PyMapping_GetItemString:               Mapping Protocol.
+* PyMapping_HasKey:                      Mapping Protocol.
+* PyMapping_HasKeyString:                Mapping Protocol.
+* PyMapping_Items:                       Mapping Protocol.
+* PyMapping_Keys:                        Mapping Protocol.
+* PyMapping_Length:                      Mapping Protocol.
+* PyMapping_SetItemString:               Mapping Protocol.
+* PyMapping_Values:                      Mapping Protocol.
+* PyMarshal_ReadLastObjectFromFile:      Data marshalling support.
+* PyMarshal_ReadLongFromFile:            Data marshalling support.
+* PyMarshal_ReadObjectFromFile:          Data marshalling support.
+* PyMarshal_ReadObjectFromString:        Data marshalling support.
+* PyMarshal_ReadShortFromFile:           Data marshalling support.
+* PyMarshal_WriteLongToFile:             Data marshalling support.
+* PyMarshal_WriteObjectToFile:           Data marshalling support.
+* PyMarshal_WriteObjectToString:         Data marshalling support.
+* PyMem_Del:                             Memory Interface.
+* PyMem_Free:                            Memory Interface.
+* PyMem_Malloc:                          Memory Interface.
+* PyMem_New:                             Memory Interface.
+* PyMem_Realloc:                         Memory Interface.
+* PyMem_Resize:                          Memory Interface.
+* PyMethod_Check:                        Method Objects.
+* PyMethod_Class:                        Method Objects.
+* PyMethod_Function:                     Method Objects.
+* PyMethod_GET_CLASS:                    Method Objects.
+* PyMethod_GET_FUNCTION:                 Method Objects.
+* PyMethod_GET_SELF:                     Method Objects.
+* PyMethod_New:                          Method Objects.
+* PyMethod_Self:                         Method Objects.
+* PyMethod_Type:                         Method Objects.
+* PyModule_AddIntConstant:               Module Objects.
+* PyModule_AddObject:                    Module Objects.
+* PyModule_AddStringConstant:            Module Objects.
+* PyModule_Check:                        Module Objects.
+* PyModule_CheckExact:                   Module Objects.
+* PyModule_GetDict:                      Module Objects.
+* PyModule_GetFilename:                  Module Objects.
+* PyModule_GetName:                      Module Objects.
+* PyModule_New:                          Module Objects.
+* PyModule_Type:                         Module Objects.
+* PyNumber_Absolute:                     Number Protocol.
+* PyNumber_Add:                          Number Protocol.
+* PyNumber_And:                          Number Protocol.
+* PyNumber_Check:                        Number Protocol.
+* PyNumber_Coerce:                       Number Protocol.
+* PyNumber_Divide:                       Number Protocol.
+* PyNumber_Divmod:                       Number Protocol.
+* PyNumber_Float:                        Number Protocol.
+* PyNumber_FloorDivide:                  Number Protocol.
+* PyNumber_InPlaceAdd:                   Number Protocol.
+* PyNumber_InPlaceAnd:                   Number Protocol.
+* PyNumber_InPlaceDivide:                Number Protocol.
+* PyNumber_InPlaceFloorDivide:           Number Protocol.
+* PyNumber_InPlaceLshift:                Number Protocol.
+* PyNumber_InPlaceMultiply:              Number Protocol.
+* PyNumber_InPlaceOr:                    Number Protocol.
+* PyNumber_InPlacePower:                 Number Protocol.
+* PyNumber_InPlaceRemainder:             Number Protocol.
+* PyNumber_InPlaceRshift:                Number Protocol.
+* PyNumber_InPlaceSubtract:              Number Protocol.
+* PyNumber_InPlaceTrueDivide:            Number Protocol.
+* PyNumber_InPlaceXor:                   Number Protocol.
+* PyNumber_Int:                          Number Protocol.
+* PyNumber_Invert:                       Number Protocol.
+* PyNumber_Long:                         Number Protocol.
+* PyNumber_Lshift:                       Number Protocol.
+* PyNumber_Multiply:                     Number Protocol.
+* PyNumber_Negative:                     Number Protocol.
+* PyNumber_Or:                           Number Protocol.
+* PyNumber_Positive:                     Number Protocol.
+* PyNumber_Power:                        Number Protocol.
+* PyNumber_Remainder:                    Number Protocol.
+* PyNumber_Rshift:                       Number Protocol.
+* PyNumber_Subtract:                     Number Protocol.
+* PyNumber_TrueDivide:                   Number Protocol.
+* PyNumber_Xor:                          Number Protocol.
+* PyObject_AsCharBuffer:                 Buffer Protocol.
+* PyObject_AsFileDescriptor:             Object Protocol.
+* PyObject_AsReadBuffer:                 Buffer Protocol.
+* PyObject_AsWriteBuffer:                Buffer Protocol.
+* PyObject_Call:                         Object Protocol.
+* PyObject_CallFunction:                 Object Protocol.
+* PyObject_CallFunctionObjArgs:          Object Protocol.
+* PyObject_CallMethod:                   Object Protocol.
+* PyObject_CallMethodObjArgs:            Object Protocol.
+* PyObject_CallObject:                   Object Protocol.
+* PyObject_CheckReadBuffer:              Buffer Protocol.
+* PyObject_Cmp:                          Object Protocol.
+* PyObject_Compare:                      Object Protocol.
+* PyObject_DEL:                          Allocating Objects on the Heap.
+* PyObject_Del:                          Allocating Objects on the Heap.
+* PyObject_DelAttr:                      Object Protocol.
+* PyObject_DelAttrString:                Object Protocol.
+* PyObject_DelItem:                      Object Protocol.
+* PyObject_Dir:                          Object Protocol.
+* PyObject_GC_Del:                       Supporting Cyclic Garbarge Collection.
+* PyObject_GC_New:                       Supporting Cyclic Garbarge Collection.
+* PyObject_GC_NewVar:                    Supporting Cyclic Garbarge Collection.
+* PyObject_GC_Resize:                    Supporting Cyclic Garbarge Collection.
+* PyObject_GC_Track:                     Supporting Cyclic Garbarge Collection.
+* PyObject_GC_UnTrack:                   Supporting Cyclic Garbarge Collection.
+* PyObject_GetAttr:                      Object Protocol.
+* PyObject_GetAttrString:                Object Protocol.
+* PyObject_GetItem:                      Object Protocol.
+* PyObject_GetIter:                      Object Protocol.
+* PyObject_HasAttr:                      Object Protocol.
+* PyObject_HasAttrString:                Object Protocol.
+* PyObject_Hash:                         Object Protocol.
+* PyObject_Init:                         Allocating Objects on the Heap.
+* PyObject_InitVar:                      Allocating Objects on the Heap.
+* PyObject_IsInstance:                   Object Protocol.
+* PyObject_IsSubclass:                   Object Protocol.
+* PyObject_IsTrue:                       Object Protocol.
+* PyObject_Length:                       Object Protocol.
+* PyObject_NEW:                          Allocating Objects on the Heap.
+* PyObject_New:                          Allocating Objects on the Heap.
+* PyObject_NEW_VAR:                      Allocating Objects on the Heap.
+* PyObject_NewVar:                       Allocating Objects on the Heap.
+* PyObject_Not:                          Object Protocol.
+* PyObject_Print:                        Object Protocol.
+* PyObject_Repr:                         Object Protocol.
+* PyObject_RichCompare:                  Object Protocol.
+* PyObject_RichCompareBool:              Object Protocol.
+* PyObject_SetAttr:                      Object Protocol.
+* PyObject_SetAttrString:                Object Protocol.
+* PyObject_SetItem:                      Object Protocol.
+* PyObject_Size:                         Object Protocol.
+* PyObject_Str:                          Object Protocol.
+* PyObject_Type:                         Object Protocol.
+* PyObject_TypeCheck:                    Object Protocol.
+* PyObject_Unicode:                      Object Protocol.
+* PyOS_AfterFork:                        Operating System Utilities.
+* PyOS_CheckStack:                       Operating System Utilities.
+* PyOS_GetLastModificationTime:          Operating System Utilities.
+* PyOS_getsig:                           Operating System Utilities.
+* PyOS_setsig:                           Operating System Utilities.
+* PyParser_SimpleParseFile:              Very High Level Layer.
+* PyParser_SimpleParseString:            Very High Level Layer.
+* PyProperty_Type:                       Descriptor Objects.
+* PyRun_AnyFile:                         Very High Level Layer.
+* PyRun_File:                            Very High Level Layer.
+* PyRun_InteractiveLoop:                 Very High Level Layer.
+* PyRun_InteractiveOne:                  Very High Level Layer.
+* PyRun_SimpleFile:                      Very High Level Layer.
+* PyRun_SimpleString:                    Very High Level Layer.
+* PyRun_String:                          Very High Level Layer.
+* PySeqIter_Check:                       Iterator Objects.
+* PySeqIter_New:                         Iterator Objects.
+* PySeqIter_Type:                        Iterator Objects.
+* PySequence_Check:                      Sequence Protocol.
+* PySequence_Concat:                     Sequence Protocol.
+* PySequence_Contains:                   Sequence Protocol.
+* PySequence_Count:                      Sequence Protocol.
+* PySequence_DelItem:                    Sequence Protocol.
+* PySequence_DelSlice:                   Sequence Protocol.
+* PySequence_Fast:                       Sequence Protocol.
+* PySequence_Fast_GET_ITEM:              Sequence Protocol.
+* PySequence_Fast_GET_SIZE:              Sequence Protocol.
+* PySequence_GetItem:                    Sequence Protocol.
+* PySequence_GetSlice:                   Sequence Protocol.
+* PySequence_Index:                      Sequence Protocol.
+* PySequence_InPlaceConcat:              Sequence Protocol.
+* PySequence_InPlaceRepeat:              Sequence Protocol.
+* PySequence_ITEM:                       Sequence Protocol.
+* PySequence_Length:                     Sequence Protocol.
+* PySequence_List:                       Sequence Protocol.
+* PySequence_Repeat:                     Sequence Protocol.
+* PySequence_SetItem:                    Sequence Protocol.
+* PySequence_SetSlice:                   Sequence Protocol.
+* PySequence_Size:                       Sequence Protocol.
+* PySequence_Tuple:                      Sequence Protocol.
+* PySlice_Check:                         Slice Objects.
+* PySlice_GetIndices:                    Slice Objects.
+* PySlice_GetIndicesEx:                  Slice Objects.
+* PySlice_New:                           Slice Objects.
+* PySlice_Type:                          Slice Objects.
+* PyString_AS_STRING:                    String Objects.
+* PyString_AsDecodedObject:              String Objects.
+* PyString_AsEncodedObject:              String Objects.
+* PyString_AsString:                     String Objects.
+* PyString_AsStringAndSize:              String Objects.
+* PyString_Check:                        String Objects.
+* PyString_CheckExact:                   String Objects.
+* PyString_Concat:                       String Objects.
+* PyString_ConcatAndDel:                 String Objects.
+* PyString_Decode:                       String Objects.
+* PyString_Encode:                       String Objects.
+* PyString_Format:                       String Objects.
+* PyString_FromFormat:                   String Objects.
+* PyString_FromFormatV:                  String Objects.
+* PyString_FromString:                   String Objects.
+* PyString_FromStringAndSize:            String Objects.
+* PyString_GET_SIZE:                     String Objects.
+* PyString_InternFromString:             String Objects.
+* PyString_InternInPlace:                String Objects.
+* PyString_Size:                         String Objects.
+* PyString_Type:                         String Objects.
+* PySys_SetArgv:                         Initialization.
+* PyThreadState_Clear:                   Thread State and the Global Interpreter Lock.
+* PyThreadState_Delete:                  Thread State and the Global Interpreter Lock.
+* PyThreadState_Get:                     Thread State and the Global Interpreter Lock.
+* PyThreadState_GetDict:                 Thread State and the Global Interpreter Lock.
+* PyThreadState_New:                     Thread State and the Global Interpreter Lock.
+* PyThreadState_Next:                    Advanced Debugger Support.
+* PyThreadState_SetAsyncExc:             Thread State and the Global Interpreter Lock.
+* PyThreadState_Swap:                    Thread State and the Global Interpreter Lock.
+* PyTrace_CALL:                          Profiling and Tracing.
+* PyTrace_EXCEPT:                        Profiling and Tracing.
+* PyTrace_LINE:                          Profiling and Tracing.
+* PyTrace_RETURN:                        Profiling and Tracing.
+* PyTuple_Check:                         Tuple Objects.
+* PyTuple_CheckExact:                    Tuple Objects.
+* PyTuple_GET_ITEM:                      Tuple Objects.
+* PyTuple_GET_SIZE:                      Tuple Objects.
+* PyTuple_GetItem:                       Tuple Objects.
+* PyTuple_GetSlice:                      Tuple Objects.
+* PyTuple_New:                           Tuple Objects.
+* PyTuple_SET_ITEM:                      Tuple Objects.
+* PyTuple_SetItem:                       Tuple Objects.
+* PyTuple_Size:                          Tuple Objects.
+* PyTuple_Type:                          Tuple Objects.
+* PyType_Check:                          Type Objects.
+* PyType_CheckExact:                     Type Objects.
+* PyType_GenericAlloc:                   Type Objects.
+* PyType_GenericNew:                     Type Objects.
+* PyType_HasFeature:                     Type Objects.
+* PyType_IS_GC:                          Type Objects.
+* PyType_IsSubtype:                      Type Objects.
+* PyType_Ready:                          Type Objects.
+* PyType_Type:                           Type Objects.
+* PyUnicode_AS_DATA:                     Unicode Objects.
+* PyUnicode_AS_UNICODE:                  Unicode Objects.
+* PyUnicode_AsASCIIString:               Built-in Codecs.
+* PyUnicode_AsCharmapString:             Built-in Codecs.
+* PyUnicode_AsEncodedString:             Built-in Codecs.
+* PyUnicode_AsLatin1String:              Built-in Codecs.
+* PyUnicode_AsMBCSString:                Built-in Codecs.
+* PyUnicode_AsRawUnicodeEscapeString:    Built-in Codecs.
+* PyUnicode_AsUnicode:                   Unicode Objects.
+* PyUnicode_AsUnicodeEscapeString:       Built-in Codecs.
+* PyUnicode_AsUTF16String:               Built-in Codecs.
+* PyUnicode_AsUTF8String:                Built-in Codecs.
+* PyUnicode_AsWideChar:                  Unicode Objects.
+* PyUnicode_Check:                       Unicode Objects.
+* PyUnicode_CheckExact:                  Unicode Objects.
+* PyUnicode_Compare:                     Methods and Slot Functions.
+* PyUnicode_Concat:                      Methods and Slot Functions.
+* PyUnicode_Contains:                    Methods and Slot Functions.
+* PyUnicode_Count:                       Methods and Slot Functions.
+* PyUnicode_Decode:                      Built-in Codecs.
+* PyUnicode_DecodeASCII:                 Built-in Codecs.
+* PyUnicode_DecodeCharmap:               Built-in Codecs.
+* PyUnicode_DecodeLatin1:                Built-in Codecs.
+* PyUnicode_DecodeMBCS:                  Built-in Codecs.
+* PyUnicode_DecodeRawUnicodeEscape:      Built-in Codecs.
+* PyUnicode_DecodeUnicodeEscape:         Built-in Codecs.
+* PyUnicode_DecodeUTF16:                 Built-in Codecs.
+* PyUnicode_DecodeUTF8:                  Built-in Codecs.
+* PyUnicode_Encode:                      Built-in Codecs.
+* PyUnicode_EncodeASCII:                 Built-in Codecs.
+* PyUnicode_EncodeCharmap:               Built-in Codecs.
+* PyUnicode_EncodeLatin1:                Built-in Codecs.
+* PyUnicode_EncodeMBCS:                  Built-in Codecs.
+* PyUnicode_EncodeRawUnicodeEscape:      Built-in Codecs.
+* PyUnicode_EncodeUnicodeEscape:         Built-in Codecs.
+* PyUnicode_EncodeUTF16:                 Built-in Codecs.
+* PyUnicode_EncodeUTF8:                  Built-in Codecs.
+* PyUnicode_Find:                        Methods and Slot Functions.
+* PyUnicode_Format:                      Methods and Slot Functions.
+* PyUnicode_FromEncodedObject:           Unicode Objects.
+* PyUnicode_FromObject:                  Unicode Objects.
+* PyUnicode_FromUnicode:                 Unicode Objects.
+* PyUnicode_FromWideChar:                Unicode Objects.
+* PyUnicode_GET_DATA_SIZE:               Unicode Objects.
+* PyUnicode_GET_SIZE:                    Unicode Objects.
+* PyUnicode_GetSize:                     Unicode Objects.
+* PyUnicode_Join:                        Methods and Slot Functions.
+* PyUnicode_Replace:                     Methods and Slot Functions.
+* PyUnicode_Split:                       Methods and Slot Functions.
+* PyUnicode_Splitlines:                  Methods and Slot Functions.
+* PyUnicode_Tailmatch:                   Methods and Slot Functions.
+* PyUnicode_Translate:                   Methods and Slot Functions.
+* PyUnicode_TranslateCharmap:            Built-in Codecs.
+* PyUnicode_Type:                        Unicode Objects.
+* PyWeakref_Check:                       Weak Reference Objects.
+* PyWeakref_CheckProxy:                  Weak Reference Objects.
+* PyWeakref_CheckRef:                    Weak Reference Objects.
+* PyWeakref_GET_OBJECT:                  Weak Reference Objects.
+* PyWeakref_GetObject:                   Weak Reference Objects.
+* PyWeakref_NewProxy:                    Weak Reference Objects.
+* PyWeakref_NewRef:                      Weak Reference Objects.
+* PyWrapper_New:                         Descriptor Objects.
+* reload:                                Importing Modules.
+* repr <1>:                              Type Objects 2.
+* repr:                                  Object Protocol.
+* staticmethod:                          Common Object Structures.
+* str:                                   Object Protocol.
+* tuple <1>:                             List Objects.
+* tuple:                                 Sequence Protocol.
+* type:                                  Object Protocol.
+* unicode:                               Object Protocol.
+
+
+File: python-api.info,  Node: Miscellaneous Index,  Prev: Function-Method-Variable Index,  Up: Top
+
+Miscellaneous Index
+*******************
+
+* Menu:
+
+* __all__:                               Importing Modules.
+* __dict__:                              Module Objects.
+* __doc__:                               Module Objects.
+* __file__:                              Module Objects.
+* __name__:                              Module Objects.
+* abort():                               Process Control.
+* argv:                                  Initialization.
+* buffer interface:                      Buffer Objects.
+* BufferType:                            Buffer Objects.
+* calloc():                              Overview.
+* cleanup functions:                     Process Control.
+* close():                               Initialization.
+* copyright:                             Initialization.
+* DictionaryType:                        Dictionary Objects.
+* DictType:                              Dictionary Objects.
+* EOFError:                              File Objects.
+* errno:                                 Thread State and the Global Interpreter Lock.
+* exc_info() <1>:                        Thread State and the Global Interpreter Lock.
+* exc_info():                            Exceptions.
+* exc_traceback <1>:                     Exception Handling.
+* exc_traceback:                         Exceptions.
+* exc_type <1>:                          Exception Handling.
+* exc_type:                              Exceptions.
+* exc_value <1>:                         Exception Handling.
+* exc_value:                             Exceptions.
+* Exception:                             Deprecation of String Exceptions.
+* executable:                            Initialization.
+* exit():                                Process Control.
+* FileType:                              File Objects.
+* FloatType:                             Floating Point Objects.
+* fopen():                               File Objects.
+* free():                                Overview.
+* freeze utility:                        Importing Modules.
+* global interpreter lock:               Thread State and the Global Interpreter Lock.
+* incr_item():                           Exceptions.
+* int (*getcharbufferproc) (PyObject *self, int segment, const char **ptrptr): Buffer Object Structures.
+* int (*getreadbufferproc) (PyObject *self, int segment, void **ptrptr): Buffer Object Structures.
+* int (*getsegcountproc) (PyObject *self, int *lenp): Buffer Object Structures.
+* int (*getwritebufferproc) (PyObject *self, int segment, void **ptrptr): Buffer Object Structures.
+* int (*inquiry)(PyObject *self):        Supporting Cyclic Garbarge Collection.
+* int (*Py_tracefunc)(PyObject *obj, PyFrameObject *frame, int what, PyObject *arg): Profiling and Tracing.
+* int (*traverseproc)(PyObject *self, visitproc visit, void *arg): Supporting Cyclic Garbarge Collection.
+* int (*visitproc)(PyObject *object, void *arg): Supporting Cyclic Garbarge Collection.
+* interpreter lock:                      Thread State and the Global Interpreter Lock.
+* IntType:                               Plain Integer Objects.
+* KeyboardInterrupt:                     Exception Handling.
+* ListType:                              List Objects.
+* lock, interpreter:                     Thread State and the Global Interpreter Lock.
+* LONG_MAX <1>:                          Long Integer Objects.
+* LONG_MAX:                              Plain Integer Objects.
+* LongType:                              Long Integer Objects.
+* main():                                Initialization.
+* malloc():                              Overview.
+* MethodType:                            Method Objects.
+* module search path <1>:                Initialization.
+* module search path:                    Embedding Python.
+* modules <1>:                           Initialization.
+* modules:                               Importing Modules.
+* ModuleType:                            Module Objects.
+* OverflowError:                         Long Integer Objects.
+* package variable!__all__:              Importing Modules.
+* path <1>:                              Initialization.
+* path:                                  Embedding Python.
+* platform:                              Initialization.
+* Py_BEGIN_ALLOW_THREADS:                Thread State and the Global Interpreter Lock.
+* Py_BLOCK_THREADS:                      Thread State and the Global Interpreter Lock.
+* Py_CompileString():                    Very High Level Layer.
+* Py_complex:                            Complex Numbers as C Structures.
+* Py_DECREF():                           Reference Counts.
+* Py_END_ALLOW_THREADS:                  Thread State and the Global Interpreter Lock.
+* Py_FatalError():                       Initialization.
+* Py_Finalize() <1>:                     Initialization.
+* Py_Finalize():                         Process Control.
+* Py_GetExecPrefix():                    Embedding Python.
+* Py_GetPath() <1>:                      Initialization.
+* Py_GetPath():                          Embedding Python.
+* Py_GetPrefix():                        Embedding Python.
+* Py_GetProgramFullPath():               Embedding Python.
+* Py_INCREF():                           Reference Counts.
+* Py_Initialize() <1>:                   Thread State and the Global Interpreter Lock.
+* Py_Initialize() <2>:                   Initialization.
+* Py_Initialize():                       Embedding Python.
+* Py_IsInitialized():                    Embedding Python.
+* Py_PRINT_RAW:                          File Objects.
+* Py_SetProgramName() <1>:               Initialization.
+* Py_SetProgramName():                   Embedding Python.
+* Py_UNBLOCK_THREADS:                    Thread State and the Global Interpreter Lock.
+* Py_UNICODE:                            Unicode Objects.
+* Py_XDECREF():                          Exceptions.
+* PyBufferObject:                        Buffer Objects.
+* PyBufferProcs <1>:                     Buffer Object Structures.
+* PyBufferProcs:                         Buffer Objects.
+* PyCellObject:                          Cell Objects.
+* PyCFunction:                           Common Object Structures.
+* PyCObject:                             CObjects.
+* PyComplexObject:                       Complex Numbers as Python Objects.
+* PyDictObject:                          Dictionary Objects.
+* PyErr_Clear():                         Exceptions.
+* PyErr_ExceptionMatches():              Exceptions.
+* PyErr_Occurred():                      Exceptions.
+* PyErr_SetString():                     Exceptions.
+* PyEval_AcquireLock() <1>:              Thread State and the Global Interpreter Lock.
+* PyEval_AcquireLock():                  Initialization.
+* PyEval_InitThreads():                  Initialization.
+* PyEval_ReleaseLock() <1>:              Thread State and the Global Interpreter Lock.
+* PyEval_ReleaseLock():                  Initialization.
+* PyEval_ReleaseThread():                Thread State and the Global Interpreter Lock.
+* PyEval_RestoreThread():                Thread State and the Global Interpreter Lock.
+* PyEval_SaveThread():                   Thread State and the Global Interpreter Lock.
+* PyFileObject:                          File Objects.
+* PyFloatObject:                         Floating Point Objects.
+* PyInterpreterState:                    Thread State and the Global Interpreter Lock.
+* PyIntObject:                           Plain Integer Objects.
+* PyList_GetItem():                      Reference Count Details.
+* PyList_SetItem():                      Reference Count Details.
+* PyListObject:                          List Objects.
+* PyLongObject:                          Long Integer Objects.
+* PyMappingMethods:                      Mapping Object Structures.
+* PyMethodDef:                           Common Object Structures.
+* PyNumberMethods:                       Number Object Structures.
+* PyObject:                              Common Object Structures.
+* PyObject_HEAD:                         Common Object Structures.
+* PyObject_VAR_HEAD:                     Common Object Structures.
+* PySequence_GetItem():                  Reference Count Details.
+* PySequenceMethods:                     Sequence Object Structures.
+* PyString_FromString():                 Dictionary Objects.
+* PyStringObject:                        String Objects.
+* PySys_SetArgv() <1>:                   Initialization.
+* PySys_SetArgv():                       Embedding Python.
+* PyThreadState:                         Thread State and the Global Interpreter Lock.
+* PyTuple_SetItem():                     Reference Count Details.
+* PyTupleObject:                         Tuple Objects.
+* PyType_HasFeature():                   Buffer Object Structures.
+* PyTypeObject:                          Type Objects.
+* PyUnicodeObject:                       Unicode Objects.
+* PyVarObject:                           Common Object Structures.
+* realloc():                             Overview.
+* set_all():                             Reference Count Details.
+* setcheckinterval():                    Thread State and the Global Interpreter Lock.
+* setvbuf():                             File Objects.
+* SIGINT:                                Exception Handling.
+* SliceType:                             Slice Objects.
+* softspace:                             File Objects.
+* stderr:                                Initialization.
+* stdin:                                 Initialization.
+* stdout:                                Initialization.
+* strerror():                            Exception Handling.
+* StringType:                            String Objects.
+* struct _frozen:                        Importing Modules.
+* struct _inittab:                       Importing Modules.
+* sum_list():                            Reference Count Details.
+* sum_sequence() <1>:                    Exceptions.
+* sum_sequence():                        Reference Count Details.
+* SystemError:                           Module Objects.
+* TupleType:                             Tuple Objects.
+* TypeType:                              Type Objects.
+* ULONG_MAX:                             Long Integer Objects.
+* version:                               Initialization.
+
+

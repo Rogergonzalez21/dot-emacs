@@ -1,0 +1,937 @@
+This is python-ref.info, produced by makeinfo version 4.3 from
+python-ref.texi.
+
+October 3, 2003
+
+
+File: python-ref.info,  Node: standard type hierarchy,  Next: Special method names,  Prev: Objects,  Up: Data model
+
+The standard type hierarchy
+===========================
+
+Below is a list of the types that are built into Python.  Extension
+modules (written in C, Java, or other languages, depending on the
+implementation) can define additional types.  Future versions of Python
+may add types to the type hierarchy (e.g., rational numbers,
+efficiently stored arrays of integers, etc.).
+
+Some of the type descriptions below contain a paragraph listing
+`special attributes.'  These are attributes that provide access to the
+implementation and are not intended for general use.  Their definition
+may change in the future.
+
+`None'
+     This type has a single value.  There is a single object with this
+     value.  This object is accessed through the built-in name `None'.
+     It is used to signify the absence of a value in many situations,
+     e.g., it is returned from functions that don't explicitly return
+     anything.  Its truth value is false.
+
+`NotImplemented'
+     This type has a single value.  There is a single object with this
+     value.  This object is accessed through the built-in name
+     `NotImplemented'.  Numeric methods and rich comparison methods may
+     return this value if they do not implement the operation for the
+     operands provided.  (The interpreter will then try the reflected
+     operation, or some other fallback, depending on the operator.)
+     Its truth value is true.
+
+`Ellipsis'
+     This type has a single value.  There is a single object with this
+     value.  This object is accessed through the built-in name
+     `Ellipsis'.  It is used to indicate the presence of the `...'
+     syntax in a slice.  Its truth value is true.
+
+`Numbers'
+     These are created by numeric literals and returned as results by
+     arithmetic operators and arithmetic built-in functions.  Numeric
+     objects are immutable; once created their value never changes.
+     Python numbers are of course strongly related to mathematical
+     numbers, but subject to the limitations of numerical
+     representation in computers.
+
+     Python distinguishes between integers, floating point numbers, and
+     complex numbers:
+
+    `Integers'
+          These represent elements from the mathematical set of whole
+          numbers.
+
+          There are three types of integers:
+
+         `Plain integers'
+               These represent numbers in the range -2147483648 through
+               2147483647.  (The range may be larger on machines with a
+               larger natural word size, but not smaller.)  When the
+               result of an operation would fall outside this range, the
+               result is normally returned as a long integer (in some
+               cases, the exception `OverflowError' is raised instead).
+               For the purpose of shift and mask operations, integers
+               are assumed to have a binary, 2's complement notation
+               using 32 or more bits, and hiding no bits from the user
+               (i.e., all 4294967296 different bit patterns correspond
+               to different values).
+
+         `Long integers'
+               These represent numbers in an unlimited range, subject
+               to available (virtual) memory only.  For the purpose of
+               shift and mask operations, a binary representation is
+               assumed, and negative numbers are represented in a
+               variant of 2's complement which gives the illusion of an
+               infinite string of sign bits extending to the left.
+
+         `Booleans'
+               These represent the truth values False and True.  The
+               two objects representing the values False and True are
+               the only Boolean objects.  The Boolean type is a subtype
+               of plain integers, and Boolean values behave like the
+               values 0 and 1, respectively, in almost all contexts,
+               the exception being that when converted to a string, the
+               strings `"False"' or `"True"' are returned, respectively.
+
+          The rules for integer representation are intended to give the
+          most meaningful interpretation of shift and mask operations
+          involving negative integers and the least surprises when
+          switching between the plain and long integer domains.  Any
+          operation except left shift, if it yields a result in the
+          plain integer domain without causing overflow, will yield the
+          same result in the long integer domain or when using mixed
+          operands.
+
+    `Floating point numbers'
+          These represent machine-level double precision floating point
+          numbers.  You are at the mercy of the underlying machine
+          architecture (and C or Java implementation) for the accepted
+          range and handling of overflow.  Python does not support
+          single-precision floating point numbers; the savings in
+          processor and memory usage that are usually the reason for
+          using these is dwarfed by the overhead of using objects in
+          Python, so there is no reason to complicate the language with
+          two kinds of floating point numbers.
+
+    `Complex numbers'
+          These represent complex numbers as a pair of machine-level
+          double precision floating point numbers.  The same caveats
+          apply as for floating point numbers.  The real and imaginary
+          parts of a complex number `z' can be retrieved through the
+          read-only attributes `z.real' and `z.imag'.
+
+`Sequences'
+     These represent finite ordered sets indexed by non-negative
+     numbers.  The built-in function `len()'  returns the number of
+     items of a sequence.  When the length of a sequence is N, the
+     index set contains the numbers 0, 1, ..., N-1.  Item I of sequence
+     A is selected by `A[I]'.
+
+     Sequences also support slicing: `A[I:J]' selects all items with
+     index K such that I `<=' K `<' J.  When used as an expression, a
+     slice is a sequence of the same type.  This implies that the index
+     set is renumbered so that it starts at 0.
+
+     Some sequences also support "extended slicing" with a third "step"
+     parameter: `A[I:J:K]' selects all items of A with index X where `X
+     = I + N*K', N `>=' `0' and I `<=' X `<' J.
+
+     Sequences are distinguished according to their mutability:
+
+    `Immutable sequences'
+          An object of an immutable sequence type cannot change once it
+          is created.  (If the object contains references to other
+          objects, these other objects may be mutable and may be
+          changed; however, the collection of objects directly
+          referenced by an immutable object cannot change.)
+
+          The following types are immutable sequences:
+
+         `Strings'
+               The items of a string are characters.  There is no
+               separate character type; a character is represented by a
+               string of one item.  Characters represent (at least)
+               8-bit bytes.  The built-in functions `chr()'  and `ord()'
+               convert between characters and nonnegative integers
+               representing the byte values.  Bytes with the values
+               0-127 usually represent the corresponding ASCII values,
+               but the interpretation of values is up to the program.
+               The string data type is also used to represent arrays of
+               bytes, e.g., to hold data read from a file.
+
+               (On systems whose native character set is not ASCII,
+               strings may use EBCDIC in their internal representation,
+               provided the functions `chr()' and `ord()' implement a
+               mapping between ASCII and EBCDIC, and string comparison
+               preserves the ASCII order.  Or perhaps someone can
+               propose a better rule?)
+
+         `Unicode'
+               The items of a Unicode object are Unicode code units.  A
+               Unicode code unit is represented by a Unicode object of
+               one item and can hold either a 16-bit or 32-bit value
+               representing a Unicode ordinal (the maximum value for
+               the ordinal is given in `sys.maxunicode', and depends on
+               how Python is configured at compile time).  Surrogate
+               pairs may be present in the Unicode object, and will be
+               reported as two separate items.  The built-in functions
+               `unichr()'  and `ord()'  convert between code units and
+               nonnegative integers representing the Unicode ordinals
+               as defined in the Unicode Standard 3.0. Conversion from
+               and to other encodings are possible through the Unicode
+               method `encode' and the built-in function `unicode()'.
+
+         `Tuples'
+               The items of a tuple are arbitrary Python objects.
+               Tuples of two or more items are formed by
+               comma-separated lists of expressions.  A tuple of one
+               item (a `singleton') can be formed by affixing a comma
+               to an expression (an expression by itself does not
+               create a tuple, since parentheses must be usable for
+               grouping of expressions).  An empty tuple can be formed
+               by an empty pair of parentheses.
+
+    `Mutable sequences'
+          Mutable sequences can be changed after they are created.  The
+          subscription and slicing notations can be used as the target
+          of assignment and `del' (delete) statements.
+
+          There is currently a single intrinsic mutable sequence type:
+
+         `Lists'
+               The items of a list are arbitrary Python objects.  Lists
+               are formed by placing a comma-separated list of
+               expressions in square brackets.  (Note that there are no
+               special cases needed to form lists of length 0 or 1.)
+
+          The extension module `array'  provides an additional example
+          of a mutable sequence type.
+
+`Mappings'
+     These represent finite sets of objects indexed by arbitrary index
+     sets.  The subscript notation `a[k]' selects the item indexed by
+     `k' from the mapping `a'; this can be used in expressions and as
+     the target of assignments or `del' statements.  The built-in
+     function `len()' returns the number of items in a mapping.
+
+     There is currently a single intrinsic mapping type:
+
+    `Dictionaries'
+          These  represent finite sets of objects indexed by nearly
+          arbitrary values.  The only types of values not acceptable as
+          keys are values containing lists or dictionaries or other
+          mutable types that are compared by value rather than by
+          object identity, the reason being that the efficient
+          implementation of dictionaries requires a key's hash value to
+          remain constant.  Numeric types used for keys obey the normal
+          rules for numeric comparison: if two numbers compare equal
+          (e.g., `1' and `1.0') then they can be used interchangeably
+          to index the same dictionary entry.
+
+          Dictionaries are mutable; they can be created by the `{...}'
+          notation (see section~*Note Dictionary displays::, "Dictionary
+          Displays").
+
+          The extension modules `dbm' , `gdbm' , `bsddb' provide
+          additional examples of mapping types.
+
+`Callable types'
+     These  are the types to which the function call operation (see
+     section~*Note Calls::, "Calls") can be applied:
+
+    `User-defined functions'
+          A user-defined function object is created by a function
+          definition (see section~*Note Function definitions::,
+          "Function definitions").  It should be called with an argument
+          list containing the same number of items as the function's
+          formal parameter list.
+
+          Special attributes: `func_doc' or `__doc__' is the function's
+          documentation string, or `None' if unavailable; `func_name'
+          or `__name__' is the function's name; `__module__' is the
+          name of the module the function was defined in, or `None' if
+          unavailable; `func_defaults' is a tuple containing default
+          argument values for those arguments that have defaults, or
+          `None' if no arguments have a default value; `func_code' is
+          the code object representing the compiled function body;
+          `func_globals' is (a reference to) the dictionary that holds
+          the function's global variables -- it defines the global
+          namespace of the module in which the function was defined;
+          `func_dict' or `__dict__' contains the namespace supporting
+          arbitrary function attributes; `func_closure' is `None' or a
+          tuple of cells that contain bindings for the function's free
+          variables.
+
+          Of these, `func_code', `func_defaults', `func_doc'/`__doc__',
+          and `func_dict'/`__dict__' may be writable; the others can
+          never be changed.  Additional information about a function's
+          definition can be retrieved from its code object; see the
+          description of internal types below.
+
+    `User-defined methods'
+          A user-defined method object combines a class, a class
+          instance (or `None') and any callable object (normally a
+          user-defined function).
+
+          Special read-only attributes: `im_self' is the class instance
+          object, `im_func' is the function object; `im_class' is the
+          class of `im_self' for bound methods or the class that asked
+          for the method for unbound methods; `__doc__' is the method's
+          documentation (same as `im_func.__doc__'); `__name__' is the
+          method name (same as `im_func.__name__'); `__module__' is the
+          name of the module the method was defined in, or `None' if
+          unavailable.  _Changed in Python version 2.2_
+
+          Methods also support accessing (but not setting) the arbitrary
+          function attributes on the underlying function object.
+
+          User-defined method objects may be created when getting an
+          attribute of a class (perhaps via an instance of that class),
+          if that attribute is a user-defined function object, an
+          unbound user-defined method object, or a class method object.
+          When the attribute is a user-defined method object, a new
+          method object is only created if the class from which it is
+          being retrieved is the same as, or a derived class of, the
+          class stored in the original method object; otherwise, the
+          original method object is used as it is.
+
+          When a user-defined method object is created by retrieving a
+          user-defined function object from a class, its `im_self'
+          attribute is `None' and the method object is said to be
+          unbound.  When one is created by retrieving a user-defined
+          function object from a class via one of its instances, its
+          `im_self' attribute is the instance, and the method object is
+          said to be bound.  In either case, the new method's
+          `im_class' attribute is the class from which the retrieval
+          takes place, and its `im_func' attribute is the original
+          function object.
+
+          When a user-defined method object is created by retrieving
+          another method object from a class or instance, the behaviour
+          is the same as for a function object, except that the
+          `im_func' attribute of the new instance is not the original
+          method object but its `im_func' attribute.
+
+          When a user-defined method object is created by retrieving a
+          class method object from a class or instance, its `im_self'
+          attribute is the class itself (the same as the `im_class'
+          attribute), and its `im_func' attribute is the function
+          object underlying the class method.
+
+          When an unbound user-defined method object is called, the
+          underlying function (`im_func') is called, with the
+          restriction that the first argument must be an instance of
+          the proper class (`im_class') or of a derived class thereof.
+
+          When a bound user-defined method object is called, the
+          underlying function (`im_func') is called, inserting the
+          class instance (`im_self') in front of the argument list.
+          For instance, when `C' is a class which contains a definition
+          for a function `f()', and `x' is an instance of `C', calling
+          `x.f(1)' is equivalent to calling `C.f(x, 1)'.
+
+          When a user-defined method object is derived from a class
+          method object, the "class instance" stored in `im_self' will
+          actually be the class itself, so that calling either `x.f(1)'
+          or `C.f(1)' is equivalent to calling `f(C,1)' where `f' is
+          the underlying function.
+
+          Note that the transformation from function object to (unbound
+          or bound) method object happens each time the attribute is
+          retrieved from the class or instance.  In some cases, a
+          fruitful optimization is to assign the attribute to a local
+          variable and call that local variable.  Also notice that this
+          transformation only happens for user-defined functions; other
+          callable objects (and all non-callable objects) are retrieved
+          without transformation.  It is also important to note that
+          user-defined functions which are attributes of a class
+          instance are not converted to bound methods; this _only_
+          happens when the function is an attribute of the class.
+
+    `Generator functions'
+          A function or method which uses the `yield' statement (see
+          section~*Note yield statement::, "The `yield' statement") is
+          called a "generator function".  Such a function, when called,
+          always returns an iterator object which can be used to
+          execute the body of the function:  calling the iterator's
+          `next()' method will cause the function to execute until it
+          provides a value using the `yield' statement.  When the
+          function executes a `return' statement or falls off the end, a
+          `StopIteration' exception is raised and the iterator will
+          have reached the end of the set of values to be returned.
+
+    `Built-in functions'
+          A built-in function object is a wrapper around a C function.
+          Examples of built-in functions are `len()' and `math.sin()'
+          (`math' is a standard built-in module).  The number and type
+          of the arguments are determined by the C function.  Special
+          read-only attributes: `__doc__' is the function's
+          documentation string, or `None' if unavailable; `__name__' is
+          the function's name; `__self__' is set to `None' (but see the
+          next item); `__module__' is the name of the module the
+          function was defined in or `None' if unavailable.
+
+    `Built-in methods'
+          This is really a different disguise of a built-in function,
+          this time containing an object passed to the C function as an
+          implicit extra argument.  An example of a built-in method is
+          `ALIST.append()', assuming ALIST is a list object.  In this
+          case, the special read-only attribute `__self__' is set to
+          the object denoted by LIST.
+
+    `Class Types'
+          Class types, or "new-style classes," are callable.  These
+          objects normally act as factories for new instances of
+          themselves, but variations are possible for class types that
+          override `__new__()'.  The arguments of the call are passed to
+          `__new__()' and, in the typical case, to `__init__()' to
+          initialize the new instance.
+
+    `Classic Classes'
+          Class objects are described below.  When a class object is
+          called, a new class instance (also described below) is
+          created and returned.  This implies a call to the class's
+          `__init__()' method if it has one.  Any arguments are passed
+          on to the `__init__()' method.  If there is no `__init__()'
+          method, the class must be called without arguments.
+
+    `Class instances'
+          Class instances are described below.  Class instances are
+          callable only when the class has a `__call__()' method;
+          `x(arguments)' is a shorthand for `x.__call__(arguments)'.
+
+`Modules'
+     Modules are imported by the `import' statement (see section~*Note
+     import statement::, "The `import' statement").  A module object
+     has a namespace implemented by a dictionary object (this is the
+     dictionary referenced by the func_globals attribute of functions
+     defined in the module).  Attribute references are translated to
+     lookups in this dictionary, e.g., `m.x' is equivalent to
+     `m.__dict__["x"]'.  A module object does not contain the code
+     object used to initialize the module (since it isn't needed once
+     the initialization is done).
+
+     Attribute assignment updates the module's namespace dictionary,
+     e.g., `m.x = 1' is equivalent to `m.__dict__["x"] = 1'.
+
+     Special read-only attribute: `__dict__' is the module's namespace
+     as a dictionary object.
+
+     Predefined (writable) attributes: `__name__' is the module's name;
+     `__doc__' is the module's documentation string, or `None' if
+     unavailable; `__file__' is the pathname of the file from which the
+     module was loaded, if it was loaded from a file.  The `__file__'
+     attribute is not present for C{} modules that are statically
+     linked into the interpreter; for extension modules loaded
+     dynamically from a shared library, it is the pathname of the shared
+     library file.
+
+`Classes'
+     Class objects are created by class definitions (see section~*Note
+     Class definitions::, "Class definitions").  A class has a
+     namespace implemented by a dictionary object.  Class attribute
+     references are translated to lookups in this dictionary, e.g.,
+     `C.x' is translated to `C.__dict__["x"]'.  When the attribute name
+     is not found there, the attribute search continues in the base
+     classes.  The search is depth-first, left-to-right in the order of
+     occurrence in the base class list.
+
+     When a class attribute reference (for class `C', say) would yield
+     a user-defined function object or an unbound user-defined method
+     object whose associated class is either `C' or one of its base
+     classes, it is transformed into an unbound user-defined method
+     object whose `im_class' attribute is~`C'.  When it would yield a
+     class method object, it is transformed into a bound user-defined
+     method object whose `im_class' and `im_self' attributes are
+     both~`C'.  When it would yield a static method object, it is
+     transformed into the object wrapped by the static method object.
+     See section~*Note Implementing Descriptors:: for another way in
+     which attributes retrieved from a class may differ from those
+     actually contained in its `__dict__'.
+
+     Class attribute assignments update the class's dictionary, never
+     the dictionary of a base class.
+
+     A class object can be called (see above) to yield a class instance
+     (see below).
+
+     Special attributes: `__name__' is the class name; `__module__' is
+     the module name in which the class was defined; `__dict__' is the
+     dictionary containing the class's namespace; `__bases__' is a
+     tuple (possibly empty or a singleton) containing the base classes,
+     in the order of their occurrence in the base class list; `__doc__'
+     is the class's documentation string, or None if undefined.
+
+`Class instances'
+     A class instance is created by calling a class object (see above).
+     A class instance has a namespace implemented as a dictionary which
+     is the first place in which attribute references are searched.
+     When an attribute is not found there, and the instance's class has
+     an attribute by that name, the search continues with the class
+     attributes.  If a class attribute is found that is a user-defined
+     function object or an unbound user-defined method object whose
+     associated class is the class (call it~`C') of the instance for
+     which the attribute reference was initiated or one of its bases,
+     it is transformed into a bound user-defined method object whose
+     `im_class' attribute is~`C' whose `im_self' attribute is the
+     instance. Static method and class method objects are also
+     transformed, as if they had been retrieved from class~`C'; see
+     above under "Classes". See section~*Note Implementing
+     Descriptors:: for another way in which attributes of a class
+     retrieved via its instances may differ from the objects actually
+     stored in the class's `__dict__'.  If no class attribute is found,
+     and the object's class has a `__getattr__()' method, that is
+     called to satisfy the lookup.
+
+     Attribute assignments and deletions update the instance's
+     dictionary, never a class's dictionary.  If the class has a
+     `__setattr__()' or `__delattr__()' method, this is called instead
+     of updating the instance dictionary directly.
+
+     Class instances can pretend to be numbers, sequences, or mappings
+     if they have methods with certain special names.  See
+     section~*Note Special method names::, "Special method names."
+
+     Special attributes: `__dict__' is the attribute dictionary;
+     `__class__' is the instance's class.
+
+`Files'
+     A file  object represents an open file.  File objects are created
+     by the `open()'  built-in function, and also by `os.popen()',
+     `os.fdopen()', and the `makefile()' method of socket objects (and
+     perhaps by other functions or methods provided by extension
+     modules).  The objects `sys.stdin', `sys.stdout' and `sys.stderr'
+     are initialized to file objects corresponding to the interpreter's
+     standard  input, output and error streams.  See the  for complete
+     documentation of file objects.
+
+`Internal types'
+     A few types used internally by the interpreter are exposed to the
+     user.  Their definitions may change with future versions of the
+     interpreter, but they are mentioned here for completeness.
+
+    `Code objects'
+          Code objects represent _byte-compiled_ executable Python
+          code, or _bytecode_.  The difference between a code object
+          and a function object is that the function object contains an
+          explicit reference to the function's globals (the module in
+          which it was defined), while a code object contains no
+          context; also the default argument values are stored in the
+          function object, not in the code object (because they
+          represent values calculated at run-time).  Unlike function
+          objects, code objects are immutable and contain no references
+          (directly or indirectly) to mutable objects.
+
+          Special read-only attributes: `co_name' gives the function
+          name; `co_argcount' is the number of positional arguments
+          (including arguments with default values); `co_nlocals' is the
+          number of local variables used by the function (including
+          arguments); `co_varnames' is a tuple containing the names of
+          the local variables (starting with the argument names);
+          `co_cellvars' is a tuple containing the names of local
+          variables that are referenced by nested functions;
+          `co_freevars' is a tuple containing the names of free
+          variables; `co_code' is a string representing the sequence of
+          bytecode instructions; `co_consts' is a tuple containing the
+          literals used by the bytecode; `co_names' is a tuple
+          containing the names used by the bytecode; `co_filename' is
+          the filename from which the code was compiled;
+          `co_firstlineno' is the first line number of the function;
+          `co_lnotab' is a string encoding the mapping from byte code
+          offsets to line numbers (for details see the source code of
+          the interpreter); `co_stacksize' is the required stack size
+          (including local variables); `co_flags' is an integer encoding
+          a number of flags for the interpreter.
+
+          The following flag bits are defined for `co_flags': bit
+          `0x04' is set if the function uses the `*arguments' syntax to
+          accept an arbitrary number of positional arguments; bit
+          `0x08' is set if the function uses the `**keywords' syntax to
+          accept arbitrary keyword arguments; bit `0x20' is set if the
+          function is a generator.
+
+          Future feature declarations (`from __future__ import
+          division') also use bits in `co_flags' to indicate whether a
+          code object was compiled with a particular feature enabled:
+          bit `0x2000' is set if the function was compiled with future
+          division enabled; bits `0x10' and `0x1000' were used in
+          earlier versions of Python.
+
+          Other bits in `co_flags' are reserved for internal use.
+
+          If  a code object represents a function, the first item in
+          `co_consts' is the documentation string of the function, or
+          `None' if undefined.
+
+    `Frame objects'
+          Frame objects represent execution frames.  They may occur in
+          traceback objects (see below).
+
+          Special read-only attributes: `f_back' is to the previous
+          stack frame (towards the caller), or `None' if this is the
+          bottom stack frame; `f_code' is the code object being
+          executed in this frame; `f_locals' is the dictionary used to
+          look up local variables; `f_globals' is used for global
+          variables; `f_builtins' is used for built-in (intrinsic)
+          names; `f_restricted' is a flag indicating whether the
+          function is executing in restricted execution mode; `f_lasti'
+          gives the precise instruction (this is an index into the
+          bytecode string of the code object).
+
+          Special writable attributes: `f_trace', if not `None', is a
+          function called at the start of each source code line (this
+          is used by the debugger); `f_exc_type', `f_exc_value',
+          `f_exc_traceback' represent the most recent exception caught
+          in this frame; `f_lineno' is the current line number of the
+          frame -- writing to this from within a trace function jumps
+          to the given line (only for the bottom-most frame).  A
+          debugger can implement a Jump command (aka Set Next
+          Statement) by writing to f_lineno.
+
+    `Traceback objects'
+          Traceback objects represent a stack trace of an exception.  A
+          traceback object is created when an exception occurs.  When
+          the search for an exception handler unwinds the execution
+          stack, at each unwound level a traceback object is inserted
+          in front of the current traceback.  When an exception handler
+          is entered, the stack trace is made available to the program.
+          (See section~*Note try statement::, "The `try' statement.")
+          It is accessible as `sys.exc_traceback', and also as the third
+          item of the tuple returned by `sys.exc_info()'.  The latter is
+          the preferred interface, since it works correctly when the
+          program is using multiple threads.  When the program contains
+          no suitable handler, the stack trace is written (nicely
+          formatted) to the standard error stream; if the interpreter is
+          interactive, it is also made available to the user as
+          `sys.last_traceback'.
+
+          Special read-only attributes: `tb_next' is the next level in
+          the stack trace (towards the frame where the exception
+          occurred), or `None' if there is no next level; `tb_frame'
+          points to the execution frame of the current level;
+          `tb_lineno' gives the line number where the exception
+          occurred; `tb_lasti' indicates the precise instruction.  The
+          line number and last instruction in the traceback may differ
+          from the line number of its frame object if the exception
+          occurred in a `try' statement with no matching except clause
+          or with a finally clause.
+
+    `Slice objects'
+          Slice objects are used to represent slices when _extended
+          slice syntax_ is used.  This is a slice using two colons, or
+          multiple slices or ellipses separated by commas, e.g.,
+          `a[i:j:step]', `a[i:j, k:l]', or `a[..., i:j]'.  They are
+          also created by the built-in `slice()'  function.
+
+          Special read-only attributes: `start' is the lower bound;
+          `stop' is the upper bound; `step' is the step value; each is
+          `None' if omitted. These attributes can have any type.
+
+          Slice objects support one method:
+
+         `indices(self, length)'
+               This method takes a single integer argument LENGTH and
+               computes information about the extended slice that the
+               slice object would describe if applied to a sequence of
+               LENGTH items.  It returns a tuple of three integers;
+               respectively these are the START and STOP indices and
+               the STEP or stride length of the slice.  Missing or
+               out-of-bounds indices are handled in a manner consistent
+               with regular slices.  _Added in Python version 2.3_
+
+    `Static method objects'
+          Static method objects provide a way of defeating the
+          transformation of function objects to method objects
+          described above. A static method object is a wrapper around
+          any other object, usually a user-defined method object. When
+          a static method object is retrieved from a class or a class
+          instance, the object actually returned is the wrapped object,
+          which is not subject to any further transformation. Static
+          method objects are not themselves callable, although the
+          objects they wrap usually are. Static method objects are
+          created by the built-in `staticmethod()' constructor.
+
+    `Class method objects'
+          A class method object, like a static method object, is a
+          wrapper around another object that alters the way in which
+          that object is retrieved from classes and class instances.
+          The behaviour of class method objects upon such retrieval is
+          described above, under "User-defined methods". Class method
+          objects are created by the built-in `classmethod()'
+          constructor.
+
+
+File: python-ref.info,  Node: Special method names,  Prev: standard type hierarchy,  Up: Data model
+
+Special method names
+====================
+
+A class can implement certain operations that are invoked by special
+syntax (such as arithmetic operations or subscripting and slicing) by
+defining methods with special names.  This is Python's approach to
+"operator overloading", allowing classes to define their own behavior
+with respect to language operators.  For instance, if a class defines a
+method named `__getitem__()', and `x' is an instance of this class,
+then `x[i]' is equivalent to `x.__getitem__(i)'.  Except where
+mentioned, attempts to execute an operation raise an exception when no
+appropriate method is defined.
+
+When implementing a class that emulates any built-in type, it is
+important that the emulation only be implemented to the degree that it
+makes sense for the object being modelled.  For example, some sequences
+may work well with retrieval of individual elements, but extracting a
+slice may not make sense.  (One example of this is the `NodeList'
+interface in the W3C's Document Object Model.)
+
+* Menu:
+
+* Basic customization::
+* Customizing attribute access::
+* Customizing class creation::
+* Emulating callable objects::
+* Emulating container types::
+* Additional methods for emulation of sequence types::
+* Emulating numeric types::
+* Coercion rules::
+
+
+File: python-ref.info,  Node: Basic customization,  Next: Customizing attribute access,  Prev: Special method names,  Up: Special method names
+
+Basic customization
+-------------------
+
+`__init__(self[, ...])'
+     Called  when the instance is created.  The arguments are those
+     passed to the class constructor expression.  If a base class has
+     an `__init__()' method, the derived class's `__init__()' method,
+     if any, must explicitly call it to ensure proper initialization of
+     the base class part of the instance; for example:
+     `BaseClass.__init__(SELF, [ARGS...])'.  As a special contraint on
+     constructors, no value may be returned; doing so will cause a
+     `TypeError' to be raised at runtime.
+
+`__del__(self)'
+     Called when the instance is about to be destroyed.  This is also
+     called a destructor .  If a base class has a `__del__()' method,
+     the derived class's `__del__()' method, if any, must explicitly
+     call it to ensure proper deletion of the base class part of the
+     instance.  Note that it is possible (though not recommended!)  for
+     the `__del__()' method to postpone destruction of the instance by
+     creating a new reference to it.  It may then be called at a later
+     time when this new reference is deleted.  It is not guaranteed that
+     `__del__()' methods are called for objects that still exist when
+     the interpreter exits.
+
+     _Notice:_ `del x' doesn't directly call `x.__del__()' -- the
+     former decrements the reference count for `x' by one, and the
+     latter is only called when `x''s reference count reaches zero.
+     Some common situations that may prevent the reference count of an
+     object from going to zero include: circular references between
+     objects (e.g., a doubly-linked list or a tree data structure with
+     parent and child pointers); a reference to the object on the stack
+     frame of a function that caught an exception (the traceback stored
+     in `sys.exc_traceback' keeps the stack frame alive); or a
+     reference to the object on the stack frame that raised an
+     unhandled exception in interactive mode (the traceback stored in
+     `sys.last_traceback' keeps the stack frame alive).  The first
+     situation can only be remedied by explicitly breaking the cycles;
+     the latter two situations can be resolved by storing `None' in
+     `sys.exc_traceback' or `sys.last_traceback'.  Circular references
+     which are garbage are detected when the option cycle detector is
+     enabled (it's on by default), but can only be cleaned up if there
+     are no Python-level `__del__()' methods involved.  Refer to the
+     documentation for the `gc' module for more information about how
+     `__del__()' methods are handled by the cycle detector,
+     particularly the description of the `garbage' value.
+
+     _Notice:_ [warning] Due to the precarious circumstances under which
+     `__del__()' methods are invoked, exceptions that occur during their
+     execution are ignored, and a warning is printed to `sys.stderr'
+     instead.  Also, when `__del__()' is invoked in response to a module
+     being deleted (e.g., when execution of the program is done), other
+     globals referenced by the `__del__()' method may already have been
+     deleted.  For this reason, `__del__()' methods should do the
+     absolute minimum needed to maintain external invariants.  Starting
+     with version 1.5, Python guarantees that globals whose name begins
+     with a single underscore are deleted from their module before
+     other globals are deleted; if no other references to such globals
+     exist, this may help in assuring that imported modules are still
+     available at the time when the `__del__()' method is called.
+
+`__repr__(self)'
+     Called by the `repr()'  built-in function and by string
+     conversions (reverse quotes) to compute the "official" string
+     representation of an object.  If at all possible, this should look
+     like a valid Python expression that could be used to recreate an
+     object with the same value (given an appropriate environment).  If
+     this is not possible, a string of the form `<...SOME USEFUL
+     DESCRIPTION...>' should be returned.  The return value must be a
+     string object.  If a class defines `__repr__()' but not
+     `__str__()', then `__repr__()' is also used when an "informal"
+     string representation of instances of that class is required.
+
+     This is typically used for debugging, so it is important that the
+     representation is information-rich and unambiguous.
+
+`__str__(self)'
+     Called by the `str()'  built-in function and by the `print'
+     statement to compute the "informal" string representation of an
+     object.  This differs from `__repr__()' in that it does not have
+     to be a valid Python expression: a more convenient or concise
+     representation may be used instead.  The return value must be a
+     string object.
+
+`__lt__(self, other)'
+
+`__le__(self, other)'
+
+`__eq__(self, other)'
+
+`__ne__(self, other)'
+
+`__gt__(self, other)'
+
+`__ge__(self, other)'
+     _Added in Python version 2.1_ These are the so-called "rich
+     comparison" methods, and are called for comparison operators in
+     preference to `__cmp__()' below.  The correspondence between
+     operator symbols and method names is as follows: `X<Y' calls
+     `X.__lt__(Y)', `X<=Y' calls `X.__le__(Y)', `X==Y' calls
+     `X.__eq__(Y)', `X!=Y' and `X<>Y' call `X.__ne__(Y)', `X>Y' calls
+     `X.__gt__(Y)', and `X>=Y' calls `X.__ge__(Y)'.  These methods can
+     return any value, but if the comparison operator is used in a
+     Boolean context, the return value should be interpretable as a
+     Boolean value, else a `TypeError' will be raised.  By convention,
+     `False' is used for false and `True' for true.
+
+     There are no implied relationships among the comparison operators.
+     The truth of `X==Y' does not imply that `X!=Y' is false.
+     Accordingly, when defining `__eq__', one should also define
+     `__ne__' so that the operators will behave as expected.
+
+     There are no reflected (swapped-argument) versions of these methods
+     (to be used when the left argument does not support the operation
+     but the right argument does); rather, `__lt__()' and `__gt__()'
+     are each other's reflection, `__le__()' and `__ge__()' are each
+     other's reflection, and `__eq__()' and `__ne__()' are their own
+     reflection.
+
+     Arguments to rich comparison methods are never coerced.  A rich
+     comparison method may return `NotImplemented' if it does not
+     implement the operation for a given pair of arguments.
+
+`__cmp__(self, other)'
+     Called by comparison operations if rich comparison (see above) is
+     not defined.  Should return a negative integer if `self < other',
+     zero if `self == other', a positive integer if `self > other'.  If
+     no `__cmp__()', `__eq__()' or `__ne__()' operation is defined,
+     class instances are compared by object identity ("address").  See
+     also the description of `__hash__()' for some important notes on
+     creating objects which support custom comparison operations and
+     are usable as dictionary keys.  (Note: the restriction that
+     exceptions are not propagated by `__cmp__()' has been removed
+     since Python 1.5.)
+
+`__rcmp__(self, other)'
+     _Changed in Python version 2.1_
+
+`__hash__(self)'
+     Called for the key object for dictionary operations, and by the
+     built-in function `hash()' .  Should return a 32-bit integer
+     usable as a hash value for dictionary operations.  The only
+     required property is that objects which compare equal have the
+     same hash value; it is advised to somehow mix together (e.g.,
+     using exclusive or) the hash values for the components of the
+     object that also play a part in comparison of objects.  If a class
+     does not define a `__cmp__()' method it should not define a
+     `__hash__()' operation either; if it defines `__cmp__()' or
+     `__eq__()' but not `__hash__()', its instances will not be usable
+     as dictionary keys.  If a class defines mutable objects and
+     implements a `__cmp__()' or `__eq__()' method, it should not
+     implement `__hash__()', since the dictionary implementation
+     requires that a key's hash value is immutable (if the object's
+     hash value changes, it will be in the wrong hash bucket).
+
+`__nonzero__(self)'
+     Called to implement truth value testing, and the built-in operation
+     `bool()'; should return `False' or `True', or their integer
+     equivalents `0' or `1'.  When this method is not defined,
+     `__len__()' is called, if it is defined (see below).  If a class
+     defines neither `__len__()' nor `__nonzero__()', all its instances
+     are considered true.
+
+`__unicode__(self)'
+     Called to implement `unicode()'  builtin; should return a Unicode
+     object. When this method is not defined, string conversion is
+     attempted, and the result of string conversion is converted to
+     Unicode using the system default encoding.
+
+
+File: python-ref.info,  Node: Customizing attribute access,  Next: Customizing class creation,  Prev: Basic customization,  Up: Special method names
+
+Customizing attribute access
+----------------------------
+
+The following methods can be defined to customize the meaning of
+attribute access (use of, assignment to, or deletion of `x.name') for
+class instances.
+
+`__getattr__(self, name)'
+     Called when an attribute lookup has not found the attribute in the
+     usual places (i.e. it is not an instance attribute nor is it found
+     in the class tree for `self').  `name' is the attribute name.
+     This method should return the (computed) attribute value or raise
+     an `AttributeError' exception.
+
+     Note that if the attribute is found through the normal mechanism,
+     `__getattr__()' is not called.  (This is an intentional asymmetry
+     between `__getattr__()' and `__setattr__()'.)  This is done both
+     for efficiency reasons and because otherwise `__setattr__()' would
+     have no way to access other attributes of the instance.  Note that
+     at least for instance variables, you can fake total control by not
+     inserting any values in the instance attribute dictionary (but
+     instead inserting them in another object).  See the
+     `__getattribute__()' method below for a way to actually get total
+     control in new-style classes.
+
+`__setattr__(self, name, value)'
+     Called when an attribute assignment is attempted.  This is called
+     instead of the normal mechanism (i.e. store the value in the
+     instance dictionary).  NAME is the attribute name, VALUE is the
+     value to be assigned to it.
+
+     If `__setattr__()' wants to assign to an instance attribute, it
+     should not simply execute `self.NAME = value' -- this would cause
+     a recursive call to itself.  Instead, it should insert the value
+     in the dictionary of instance attributes, e.g.,
+     `self.__dict__[NAME] = value'.  For new-style classes, rather than
+     accessing the instance dictionary, it should call the base class
+     method with the same name, for example, `object.__setattr__(self,
+     name, value)'.
+
+`__delattr__(self, name)'
+     Like `__setattr__()' but for attribute deletion instead of
+     assignment.  This should only be implemented if `del obj.NAME' is
+     meaningful for the object.
+
+* Menu:
+
+* More attribute access for new-style classes::
+* Implementing Descriptors::
+* Invoking Descriptors::
+* __slots__::
+
+
+File: python-ref.info,  Node: More attribute access for new-style classes,  Next: Implementing Descriptors,  Prev: Customizing attribute access,  Up: Customizing attribute access
+
+More attribute access for new-style classes
+...........................................
+
+The following methods only apply to new-style classes.
+
+`__getattribute__(self, name)'
+     Called unconditionally to implement attribute accesses for
+     instances of the class. If the class also defines `__getattr__',
+     it will never be called (unless called explicitly).  This method
+     should return the (computed) attribute value or raise an
+     `AttributeError' exception.  In order to avoid infinite recursion
+     in this method, its implementation should always call the base
+     class method with the same name to access any attributes it needs,
+     for example, `object.__getattribute__(self, name)'.
+

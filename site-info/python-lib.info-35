@@ -1,0 +1,1216 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: Representing character sets,  Next: Encoders,  Prev: Internationalized headers,  Up: email
+
+Representing character sets
+---------------------------
+
+Character Sets
+
+This module provides a class `Charset' for representing character sets
+and character set conversions in email messages, as well as a character
+set registry and several convenience methods for manipulating this
+registry.  Instances of `Charset' are used in several other modules
+within the `email' package.
+
+_Added in Python version 2.2.2_
+
+`Charset([input_charset])'
+     Map character sets to their email properties.
+
+     This class provides information about the requirements imposed on
+     email for a specific character set.  It also provides convenience
+     routines for converting between character sets, given the
+     availability of the applicable codecs.  Given a character set, it
+     will do its best to provide information on how to use that
+     character set in an email message in an RFC-compliant way.
+
+     Certain character sets must be encoded with quoted-printable or
+     base64 when used in email headers or bodies.  Certain character
+     sets must be converted outright, and are not allowed in email.
+
+     Optional INPUT_CHARSET is as described below; it is always coerced
+     to lower case.  After being alias normalized it is also used as a
+     lookup into the registry of character sets to find out the header
+     encoding, body encoding, and output conversion codec to be used for
+     the character set.  For example, if INPUT_CHARSET is `iso-8859-1',
+     then headers and bodies will be encoded using quoted-printable and
+     no output conversion codec is necessary.  If INPUT_CHARSET is
+     `euc-jp', then headers will be encoded with base64, bodies will
+     not be encoded, but output text will be converted from the
+     `euc-jp' character set to the `iso-2022-jp' character set.
+
+`Charset' instances have the following data attributes:
+
+`input_charset'
+     The initial character set specified.  Common aliases are converted
+     to their _official_ email names (e.g. `latin_1' is converted to
+     `iso-8859-1').  Defaults to 7-bit `us-ascii'.
+
+`header_encoding'
+     If the character set must be encoded before it can be used in an
+     email header, this attribute will be set to `Charset.QP' (for
+     quoted-printable), `Charset.BASE64' (for base64 encoding), or
+     `Charset.SHORTEST' for the shortest of QP or BASE64 encoding.
+     Otherwise, it will be `None'.
+
+`body_encoding'
+     Same as HEADER_ENCODING, but describes the encoding for the mail
+     message's body, which indeed may be different than the header
+     encoding.  `Charset.SHORTEST' is not allowed for BODY_ENCODING.
+
+`output_charset'
+     Some character sets must be converted before they can be used in
+     email headers or bodies.  If the INPUT_CHARSET is one of them,
+     this attribute will contain the name of the character set output
+     will be converted to.  Otherwise, it will be `None'.
+
+`input_codec'
+     The name of the Python codec used to convert the INPUT_CHARSET to
+     Unicode.  If no conversion codec is necessary, this attribute will
+     be `None'.
+
+`output_codec'
+     The name of the Python codec used to convert Unicode to the
+     OUTPUT_CHARSET.  If no conversion codec is necessary, this
+     attribute will have the same value as the INPUT_CODEC.
+
+`Charset' instances also have the following methods:
+
+`get_body_encoding()'
+     Return the content transfer encoding used for body encoding.
+
+     This is either the string `quoted-printable' or `base64' depending
+     on the encoding used, or it is a function, in which case you
+     should call the function with a single argument, the Message object
+     being encoded.  The function should then set the
+     `Content-Transfer-Encoding' header itself to whatever is
+     appropriate.
+
+     Returns the string `quoted-printable' if BODY_ENCODING is `QP',
+     returns the string `base64' if BODY_ENCODING is `BASE64', and
+     returns the string `7bit' otherwise.
+
+`convert(s)'
+     Convert the string S from the INPUT_CODEC to the OUTPUT_CODEC.
+
+`to_splittable(s)'
+     Convert a possibly multibyte string to a safely splittable format.
+     S is the string to split.
+
+     Uses the INPUT_CODEC to try and convert the string to Unicode, so
+     it can be safely split on character boundaries (even for multibyte
+     characters).
+
+     Returns the string as-is if it isn't known how to convert S to
+     Unicode with the INPUT_CHARSET.
+
+     Characters that could not be converted to Unicode will be replaced
+     with the Unicode replacement character `U+FFFD'.
+
+`from_splittable(ustr[, to_output])'
+     Convert a splittable string back into an encoded string.  USTR is
+     a Unicode string to "unsplit".
+
+     This method uses the proper codec to try and convert the string
+     from Unicode back into an encoded format.  Return the string as-is
+     if it is not Unicode, or if it could not be converted from Unicode.
+
+     Characters that could not be converted from Unicode will be
+     replaced with an appropriate character (usually `?').
+
+     If TO_OUTPUT is `True' (the default), uses OUTPUT_CODEC to convert
+     to an encoded format.  If TO_OUTPUT is `False', it uses
+     INPUT_CODEC.
+
+`get_output_charset()'
+     Return the output character set.
+
+     This is the OUTPUT_CHARSET attribute if that is not `None',
+     otherwise it is INPUT_CHARSET.
+
+`encoded_header_len()'
+     Return the length of the encoded header string, properly
+     calculating for quoted-printable or base64 encoding.
+
+`header_encode(s[, convert])'
+     Header-encode the string S.
+
+     If CONVERT is `True', the string will be converted from the input
+     charset to the output charset automatically.  This is not useful
+     for multibyte character sets, which have line length issues
+     (multibyte characters must be split on a character, not a byte
+     boundary); use the higher-level `Header' class to deal with these
+     issues (see `email.Header').  CONVERT defaults to `False'.
+
+     The type of encoding (base64 or quoted-printable) will be based on
+     the HEADER_ENCODING attribute.
+
+`body_encode(s[, convert])'
+     Body-encode the string S.
+
+     If CONVERT is `True' (the default), the string will be converted
+     from the input charset to output charset automatically.  Unlike
+     `header_encode()', there are no issues with byte boundaries and
+     multibyte charsets in email bodies, so this is usually pretty safe.
+
+     The type of encoding (base64 or quoted-printable) will be based on
+     the BODY_ENCODING attribute.
+
+The `Charset' class also provides a number of methods to support
+standard operations and built-in functions.
+
+`__str__()'
+     Returns INPUT_CHARSET as a string coerced to lower case.
+     `__repr__()' is an alias for `__str__()'.
+
+`__eq__(other)'
+     This method allows you to compare two `Charset' instances for
+     equality.
+
+`__ne__(other)'
+     This method allows you to compare two `Charset' instances for
+     inequality.
+
+The `email.Charset' module also provides the following functions for
+adding new entries to the global character set, alias, and codec
+registries:
+
+`add_charset(charset[, header_enc[, body_enc[, output_charset]]])'
+     Add character properties to the global registry.
+
+     CHARSET is the input character set, and must be the canonical name
+     of a character set.
+
+     Optional HEADER_ENC and BODY_ENC is either `Charset.QP' for
+     quoted-printable, `Charset.BASE64' for base64 encoding,
+     `Charset.SHORTEST' for the shortest of quoted-printable or base64
+     encoding, or `None' for no encoding.  `SHORTEST' is only valid for
+     HEADER_ENC. The default is `None' for no encoding.
+
+     Optional OUTPUT_CHARSET is the character set that the output
+     should be in.  Conversions will proceed from input charset, to
+     Unicode, to the output charset when the method `Charset.convert()'
+     is called.  The default is to output in the same character set as
+     the input.
+
+     Both INPUT_CHARSET and OUTPUT_CHARSET must have Unicode codec
+     entries in the module's character set-to-codec mapping; use
+     `add_codec()' to add codecs the module does not know about.  See
+     the `codecs' module's documentation for more information.
+
+     The global character set registry is kept in the module global
+     dictionary `CHARSETS'.
+
+`add_alias(alias, canonical)'
+     Add a character set alias.  ALIAS is the alias name, e.g.
+     `latin-1'.  CANONICAL is the character set's canonical name, e.g.
+     `iso-8859-1'.
+
+     The global charset alias registry is kept in the module global
+     dictionary `ALIASES'.
+
+`add_codec(charset, codecname)'
+     Add a codec that map characters in the given character set to and
+     from Unicode.
+
+     CHARSET is the canonical name of a character set.  CODECNAME is
+     the name of a Python codec, as appropriate for the second argument
+     to the `unicode()' built-in, or to the `encode()' method of a
+     Unicode string.
+
+
+File: python-lib.info,  Node: Encoders,  Next: Exception classes,  Prev: Representing character sets,  Up: email
+
+Encoders
+--------
+
+Encoders for email message payloads.
+
+When creating `Message' objects from scratch, you often need to encode
+the payloads for transport through compliant mail servers.  This is
+especially true for `image/*' and `text/*' type messages containing
+binary data.
+
+The `email' package provides some convenient encodings in its
+`Encoders' module.  These encoders are actually used by the `MIMEImage'
+and `MIMEText' class constructors to provide default encodings.  All
+encoder functions take exactly one argument, the message object to
+encode.  They usually extract the payload, encode it, and reset the
+payload to this newly encoded value.  They should also set the
+`Content-Transfer-Encoding' header as appropriate.
+
+Here are the encoding functions provided:
+
+`encode_quopri(msg)'
+     Encodes the payload into quoted-printable form and sets the
+     `Content-Transfer-Encoding' header to `quoted-printable'(1).  This
+     is a good encoding to use when most of your payload is normal
+     printable data, but contains a few unprintable characters.
+
+`encode_base64(msg)'
+     Encodes the payload into base64 form and sets the
+     `Content-Transfer-Encoding' header to `base64'.  This is a good
+     encoding to use when most of your payload is unprintable data
+     since it is a more compact form than quoted-printable.  The
+     drawback of base64 encoding is that it renders the text non-human
+     readable.
+
+`encode_7or8bit(msg)'
+     This doesn't actually modify the message's payload, but it does set
+     the `Content-Transfer-Encoding' header to either `7bit' or `8bit'
+     as appropriate, based on the payload data.
+
+`encode_noop(msg)'
+     This does nothing; it doesn't even set the
+     `Content-Transfer-Encoding' header.
+
+---------- Footnotes ----------
+
+(1) Note that encoding with `encode_quopri()' also encodes all tabs and
+space characters in the data.
+
+
+File: python-lib.info,  Node: Exception classes,  Next: Miscellaneous utilities,  Prev: Encoders,  Up: email
+
+Exception classes
+-----------------
+
+The exception classes used by the email package.
+
+The following exception classes are defined in the `email.Errors'
+module:
+
+`MessageError()'
+     This is the base class for all exceptions that the `email' package
+     can raise.  It is derived from the standard `Exception' class and
+     defines no additional methods.
+
+`MessageParseError()'
+     This is the base class for exceptions thrown by the `Parser'
+     class.  It is derived from `MessageError'.
+
+`HeaderParseError()'
+     Raised under some error conditions when parsing the RFC 2822
+     headers of a message, this class is derived from
+     `MessageParseError'.  It can be raised from the `Parser.parse()' or
+     `Parser.parsestr()' methods.
+
+     Situations where it can be raised include finding an envelope
+     header after the first RFC 2822 header of the message, finding a
+     continuation line before the first RFC 2822 header is found, or
+     finding a line in the headers which is neither a header or a
+     continuation line.
+
+`BoundaryError()'
+     Raised under some error conditions when parsing the RFC 2822
+     headers of a message, this class is derived from
+     `MessageParseError'.  It can be raised from the `Parser.parse()' or
+     `Parser.parsestr()' methods.
+
+     Situations where it can be raised include not being able to find
+     the starting or terminating boundary in a `multipart/*' message
+     when strict parsing is used.
+
+`MultipartConversionError()'
+     Raised when a payload is added to a `Message' object using
+     `add_payload()', but the payload is already a scalar and the
+     message's `Content-Type' main type is not either `multipart' or
+     missing.  `MultipartConversionError' multiply inherits from
+     `MessageError' and the built-in `TypeError'.
+
+     Since `Message.add_payload()' is deprecated, this exception is
+     rarely raised in practice.  However the exception may also be
+     raised if the `attach()' method is called on an instance of a class
+     derived from `MIMENonMultipart' (e.g. `MIMEImage').
+
+
+File: python-lib.info,  Node: Miscellaneous utilities,  Next: Iterators,  Prev: Exception classes,  Up: email
+
+Miscellaneous utilities
+-----------------------
+
+Miscellaneous email package utilities.
+
+There are several useful utilities provided with the `email' package.
+
+`quote(str)'
+     Return a new string with backslashes in STR replaced by two
+     backslashes, and double quotes replaced by backslash-double quote.
+
+`unquote(str)'
+     Return a new string which is an _unquoted_ version of STR.  If STR
+     ends and begins with double quotes, they are stripped off.
+     Likewise if STR ends and begins with angle brackets, they are
+     stripped off.
+
+`parseaddr(address)'
+     Parse address - which should be the value of some
+     address-containing field such as `To' or `Cc' - into its
+     constituent _realname_ and _email address_ parts.  Returns a tuple
+     of that information, unless the parse fails, in which case a
+     2-tuple of `('', '')' is returned.
+
+`formataddr(pair)'
+     The inverse of `parseaddr()', this takes a 2-tuple of the form
+     `(realname, email_address)' and returns the string value suitable
+     for a `To' or `Cc' header.  If the first element of PAIR is false,
+     then the second element is returned unmodified.
+
+`getaddresses(fieldvalues)'
+     This method returns a list of 2-tuples of the form returned by
+     `parseaddr()'.  FIELDVALUES is a sequence of header field values
+     as might be returned by `Message.get_all()'.  Here's a simple
+     example that gets all the recipients of a message:
+
+          from email.Utils import getaddresses
+          
+          tos = msg.get_all('to', [])
+          ccs = msg.get_all('cc', [])
+          resent_tos = msg.get_all('resent-to', [])
+          resent_ccs = msg.get_all('resent-cc', [])
+          all_recipients = getaddresses(tos + ccs + resent_tos + resent_ccs)
+
+`parsedate(date)'
+     Attempts to parse a date according to the rules in RFC 2822 .
+     however, some mailers don't follow that format as specified, so
+     `parsedate()' tries to guess correctly in such cases.  DATE is a
+     string containing an RFC 2822 date, such as `"Mon, 20 Nov 1995
+     19:12:08 -0500"'.  If it succeeds in parsing the date,
+     `parsedate()' returns a 9-tuple that can be passed directly to
+     `time.mktime()'; otherwise `None' will be returned.  Note that
+     fields 6, 7, and 8 of the result tuple are not usable.
+
+`parsedate_tz(date)'
+     Performs the same function as `parsedate()', but returns either
+     `None' or a 10-tuple; the first 9 elements make up a tuple that
+     can be passed directly to `time.mktime()', and the tenth is the
+     offset of the date's timezone from UTC (which is the official term
+     for Greenwich Mean Time)(1).  If the input string has no timezone,
+     the last element of the tuple returned is `None'.  Note that
+     fields 6, 7, and 8 of the result tuple are not usable.
+
+`mktime_tz(tuple)'
+     Turn a 10-tuple as returned by `parsedate_tz()' into a UTC
+     timestamp.  It the timezone item in the tuple is `None', assume
+     local time.  Minor deficiency: `mktime_tz()' interprets the first
+     8 elements of TUPLE as a local time and then compensates for the
+     timezone difference.  This may yield a slight error around changes
+     in daylight savings time, though not worth worrying about for
+     common use.
+
+`formatdate([timeval[, localtime]])'
+     Returns a date string as per RFC 2822 , e.g.:
+
+          Fri, 09 Nov 2001 01:08:47 -0000
+
+     Optional TIMEVAL if given is a floating point time value as
+     accepted by `time.gmtime()' and `time.localtime()', otherwise the
+     current time is used.
+
+     Optional LOCALTIME is a flag that when `True', interprets TIMEVAL,
+     and returns a date relative to the local timezone instead of UTC,
+     properly taking daylight savings time into account.  The default
+     is `False' meaning UTC is used.
+
+`make_msgid([idstring])'
+     Returns a string suitable for an RFC 2822 -compliant `Message-ID'
+     header.  Optional IDSTRING if given, is a string used to
+     strengthen the uniqueness of the message id.
+
+`decode_rfc2231(s)'
+     Decode the string S according to RFC 2231 .
+
+`encode_rfc2231(s[, charset[, language]])'
+     Encode the string S according to RFC 2231 .  Optional CHARSET and
+     LANGUAGE, if given is the character set name and language name to
+     use.  If neither is given, S is returned as-is.  If CHARSET is
+     given but LANGUAGE is not, the string is encoded using the empty
+     string for LANGUAGE.
+
+`decode_params(params)'
+     Decode parameters list according to RFC 2231 .  PARAMS is a
+     sequence of 2-tuples containing elements of the form
+     `(content-type, string-value)'.
+
+The following functions have been deprecated:
+
+`dump_address_pair(pair)'
+     _This is deprecated in Python 2.2.2.  Use `formataddr()' instead._
+
+`decode(s)'
+     _This is deprecated in Python 2.2.2.  Use `Header.decode_header()'
+     instead._
+
+`encode(s[, charset[, encoding]])'
+     _This is deprecated in Python 2.2.2.  Use `Header.encode()'
+     instead._
+
+---------- Footnotes ----------
+
+(1) Note that the sign of the timezone offset is the opposite of the
+sign of the `time.timezone' variable for the same timezone; the latter
+variable follows the POSIX standard while this module follows RFC 2822 .
+
+
+File: python-lib.info,  Node: Iterators,  Next: Differences from email v1 up to Python 221,  Prev: Miscellaneous utilities,  Up: email
+
+Iterators
+---------
+
+Iterate over a  message object tree.
+
+Iterating over a message object tree is fairly easy with the
+`Message.walk()' method.  The `email.Iterators' module provides some
+useful higher level iterations over message object trees.
+
+`body_line_iterator(msg[, decode])'
+     This iterates over all the payloads in all the subparts of MSG,
+     returning the string payloads line-by-line.  It skips over all the
+     subpart headers, and it skips over any subpart with a payload that
+     isn't a Python string.  This is somewhat equivalent to reading the
+     flat text representation of the message from a file using
+     `readline()', skipping over all the intervening headers.
+
+     Optional DECODE is passed through to `Message.get_payload()'.
+
+`typed_subpart_iterator(msg[, maintype[, subtype]])'
+     This iterates over all the subparts of MSG, returning only those
+     subparts that match the MIME type specified by MAINTYPE and
+     SUBTYPE.
+
+     Note that SUBTYPE is optional; if omitted, then subpart MIME type
+     matching is done only with the main type.  MAINTYPE is optional
+     too; it defaults to `text'.
+
+     Thus, by default `typed_subpart_iterator()' returns each subpart
+     that has a MIME type of `text/*'.
+
+The following function has been added as a useful debugging tool.  It
+should _not_ be considered part of the supported public interface for
+the package.
+
+`_structure(msg[, fp[, level]])'
+     Prints an indented representation of the content types of the
+     message object structure.  For example:
+
+          >>> msg = email.message_from_file(somefile)
+          >>> _structure(msg)
+          multipart/mixed
+              text/plain
+              text/plain
+              multipart/digest
+                  message/rfc822
+                      text/plain
+                  message/rfc822
+                      text/plain
+                  message/rfc822
+                      text/plain
+                  message/rfc822
+                      text/plain
+                  message/rfc822
+                      text/plain
+              text/plain
+
+     Optional FP is a file-like object to print the output to.  It must
+     be suitable for Python's extended print statement.  LEVEL is used
+     internally.
+
+
+File: python-lib.info,  Node: Differences from email v1 up to Python 221,  Next: Differences from mimelib,  Prev: Iterators,  Up: email
+
+Differences from `email' v1 (up to Python 2.2.1)
+------------------------------------------------
+
+Version 1 of the `email' package was bundled with Python releases up to
+Python 2.2.1.  Version 2 was developed for the Python 2.3 release, and
+backported to Python 2.2.2.  It was also available as a separate
+distutils based package.  `email' version 2 is almost entirely backward
+compatible with version 1, with the following differences:
+
+   * The `email.Header' and `email.Charset' modules have been added.
+
+   * The pickle format for `Message' instances has changed.  Since this
+     was never (and still isn't) formally defined, this isn't
+     considered a backward incompatibility.  However if your
+     application pickles and unpickles `Message' instances, be aware
+     that in `email' version 2, `Message' instances now have private
+     variables _CHARSET and _DEFAULT_TYPE.
+
+   * Several methods in the `Message' class have been deprecated, or
+     their signatures changed.  Also, many new methods have been added.
+     See the documentation for the `Message' class for details.  The
+     changes should be completely backward compatible.
+
+   * The object structure has changed in the face of `message/rfc822'
+     content types.  In `email' version 1, such a type would be
+     represented by a scalar payload, i.e. the container message's
+     `is_multipart()' returned false, `get_payload()' was not a list
+     object, but a single `Message' instance.
+
+     This structure was inconsistent with the rest of the package, so
+     the object representation for `message/rfc822' content types was
+     changed.  In `email' version 2, the container _does_ return `True'
+     from `is_multipart()', and `get_payload()' returns a list
+     containing a single `Message' item.
+
+     Note that this is one place that backward compatibility could not
+     be completely maintained.  However, if you're already testing the
+     return type of `get_payload()', you should be fine.  You just need
+     to make sure your code doesn't do a `set_payload()' with a
+     `Message' instance on a container with a content type of
+     `message/rfc822'.
+
+   * The `Parser' constructor's STRICT argument was added, and its
+     `parse()' and `parsestr()' methods grew a HEADERSONLY argument.
+     The STRICT flag was also added to functions
+     `email.message_from_file()' and `email.message_from_string()'.
+
+   * `Generator.__call__()' is deprecated; use `Generator.flatten()'
+     instead.  The `Generator' class has also grown the `clone()'
+     method.
+
+   * The `DecodedGenerator' class in the `email.Generator' module was
+     added.
+
+   * The intermediate base classes `MIMENonMultipart' and
+     `MIMEMultipart' have been added, and interposed in the class
+     hierarchy for most of the other MIME-related derived classes.
+
+   * The _ENCODER argument to the `MIMEText' constructor has been
+     deprecated.  Encoding  now happens implicitly based on the
+     _CHARSET argument.
+
+   * The following functions in the `email.Utils' module have been
+     deprecated: `dump_address_pairs()', `decode()', and `encode()'.
+     The following functions have been added to the module:
+     `make_msgid()', `decode_rfc2231()', `encode_rfc2231()', and
+     `decode_params()'.
+
+   * The non-public function `email.Iterators._structure()' was added.
+
+
+File: python-lib.info,  Node: Differences from mimelib,  Next: Examples 10,  Prev: Differences from email v1 up to Python 221,  Up: email
+
+Differences from `mimelib'
+--------------------------
+
+The `email' package was originally prototyped as a separate library
+called `mimelib'.  Changes have been made so that method names are more
+consistent, and some methods or modules have either been added or
+removed.  The semantics of some of the methods have also changed.  For
+the most part, any functionality available in `mimelib' is still
+available in the `email' package, albeit often in a different way.
+Backward compatibility between the `mimelib' package and the `email'
+package was not a priority.
+
+Here is a brief description of the differences between the `mimelib'
+and the `email' packages, along with hints on how to port your
+applications.
+
+Of course, the most visible difference between the two packages is that
+the package name has been changed to `email'.  In addition, the
+top-level package has the following differences:
+
+   * `messageFromString()' has been renamed to `message_from_string()'.
+
+   * `messageFromFile()' has been renamed to `message_from_file()'.
+
+
+The `Message' class has the following differences:
+
+   * The method `asString()' was renamed to `as_string()'.
+
+   * The method `ismultipart()' was renamed to `is_multipart()'.
+
+   * The `get_payload()' method has grown a DECODE optional argument.
+
+   * The method `getall()' was renamed to `get_all()'.
+
+   * The method `addheader()' was renamed to `add_header()'.
+
+   * The method `gettype()' was renamed to `get_type()'.
+
+   * The method`getmaintype()' was renamed to `get_main_type()'.
+
+   * The method `getsubtype()' was renamed to `get_subtype()'.
+
+   * The method `getparams()' was renamed to `get_params()'.  Also,
+     whereas `getparams()' returned a list of strings, `get_params()'
+     returns a list of 2-tuples, effectively the key/value pairs of the
+     parameters, split on the `=' sign.
+
+   * The method `getparam()' was renamed to `get_param()'.
+
+   * The method `getcharsets()' was renamed to `get_charsets()'.
+
+   * The method `getfilename()' was renamed to `get_filename()'.
+
+   * The method `getboundary()' was renamed to `get_boundary()'.
+
+   * The method `setboundary()' was renamed to `set_boundary()'.
+
+   * The method `getdecodedpayload()' was removed.  To get similar
+     functionality, pass the value 1 to the DECODE flag of the
+     {get_payload()} method.
+
+   * The method `getpayloadastext()' was removed.  Similar functionality
+     is supported by the `DecodedGenerator' class in the
+     `email.Generator' module.
+
+   * The method `getbodyastext()' was removed.  You can get similar
+     functionality by creating an iterator with
+     `typed_subpart_iterator()' in the `email.Iterators' module.
+
+The `Parser' class has no differences in its public interface.  It does
+have some additional smarts to recognize `message/delivery-status' type
+messages, which it represents as a `Message' instance containing
+separate `Message' subparts for each header block in the delivery status
+notification(1).
+
+The `Generator' class has no differences in its public interface.
+There is a new class in the `email.Generator' module though, called
+`DecodedGenerator' which provides most of the functionality previously
+available in the `Message.getpayloadastext()' method.
+
+The following modules and classes have been changed:
+
+   * The `MIMEBase' class constructor arguments _MAJOR and _MINOR have
+     changed to _MAINTYPE and _SUBTYPE respectively.
+
+   * The `Image' class/module has been renamed to `MIMEImage'.  The
+     _MINOR argument has been renamed to _SUBTYPE.
+
+   * The `Text' class/module has been renamed to `MIMEText'.  The
+     _MINOR argument has been renamed to _SUBTYPE.
+
+   * The `MessageRFC822' class/module has been renamed to
+     `MIMEMessage'.  Note that an earlier version of `mimelib' called
+     this class/module `RFC822', but that clashed with the Python
+     standard library module `rfc822' on some case-insensitive file
+     systems.
+
+     Also, the `MIMEMessage' class now represents any kind of MIME
+     message with main type `message'.  It takes an optional argument
+     _SUBTYPE which is used to set the MIME subtype.  _SUBTYPE defaults
+     to `rfc822'.
+
+`mimelib' provided some utility functions in its `address' and `date'
+modules.  All of these functions have been moved to the `email.Utils'
+module.
+
+The `MsgReader' class/module has been removed.  Its functionality is
+most closely supported in the `body_line_iterator()' function in the
+`email.Iterators' module.
+
+---------- Footnotes ----------
+
+(1) Delivery Status Notifications (DSN) are defined in RFC 1894 .
+
+
+File: python-lib.info,  Node: Examples 10,  Prev: Differences from mimelib,  Up: email
+
+Examples
+--------
+
+Here are a few examples of how to use the `email' package to read,
+write, and send simple email messages, as well as more complex MIME
+messages.
+
+First, let's see how to create and send a simple text message:
+
+`email-simple.py'
+
+Here's an example of how to send a MIME message containing a bunch of
+family pictures that may be residing in a directory:
+
+`email-mime.py'
+
+Here's an example of how to send the entire contents of a directory as
+an email message: (1)
+
+`email-dir.py'
+
+And finally, here's an example of how to unpack a MIME message like the
+one above, into a directory of files:
+
+`email-unpack.py'
+
+---------- Footnotes ----------
+
+(1) Thanks to Matthew Dixon Cowles for the original inspiration and
+examples.
+
+
+File: python-lib.info,  Node: mailcap,  Next: mailbox,  Prev: email,  Up: Internet Data Handling
+
+Mailcap file handling.
+======================
+
+Mailcap file handling.
+
+Mailcap files are used to configure how MIME-aware applications such as
+mail readers and Web browsers react to files with different MIME types.
+(The name "mailcap" is derived from the phrase "mail capability".)  For
+example, a mailcap file might contain a line like `video/mpeg; xmpeg
+%s'.  Then, if the user encounters an email message or Web document
+with the MIME type `video/mpeg', `%s' will be replaced by a filename
+(usually one belonging to a temporary file) and the `xmpeg' program can
+be automatically started to view the file.
+
+The mailcap format is documented in RFC 1524 , "A User Agent
+Configuration Mechanism For Multimedia Mail Format Information," but is
+not an Internet standard.  However, mailcap files are supported on most
+UNIX systems.
+
+`findmatch(caps, MIMEtype                            [, key[, filename[, plist]]])'
+     Return a 2-tuple; the first element is a string containing the
+     command line to be executed (which can be passed to
+     `os.system()'), and the second element is the mailcap entry for a
+     given MIME type.  If no matching MIME type can be found, `(None,
+     None)' is returned.
+
+     KEY is the name of the field desired, which represents the type of
+     activity to be performed; the default value is 'view', since in the
+     most common case you simply want to view the body of the MIME-typed
+     data.  Other possible values might be 'compose' and 'edit', if you
+     wanted to create a new body of the given MIME type or alter the
+     existing body data.  See RFC 1524 for a complete list of these
+     fields.
+
+     FILENAME is the filename to be substituted for `%s' in the command
+     line; the default value is `'/dev/null'' which is almost certainly
+     not what you want, so usually you'll override it by specifying a
+     filename.
+
+     PLIST can be a list containing named parameters; the default value
+     is simply an empty list.  Each entry in the list must be a string
+     containing the parameter name, an equals sign (`='), and the
+     parameter's value.  Mailcap entries can contain named parameters
+     like `%{foo}', which will be replaced by the value of the
+     parameter named 'foo'.  For example, if the command line
+     `showpartial %{id} %{number} %{total}' was in a mailcap file, and
+     PLIST was set to `['id=1', 'number=2', 'total=3']', the resulting
+     command line would be `'showpartial 1 2 3''.
+
+     In a mailcap file, the "test" field can optionally be specified to
+     test some external condition (such as the machine architecture, or
+     the window system in use) to determine whether or not the mailcap
+     line applies.  `findmatch()' will automatically check such
+     conditions and skip the entry if the check fails.
+
+`getcaps()'
+     Returns a dictionary mapping MIME types to a list of mailcap file
+     entries. This dictionary must be passed to the `findmatch()'
+     function.  An entry is stored as a list of dictionaries, but it
+     shouldn't be necessary to know the details of this representation.
+
+     The information is derived from all of the mailcap files found on
+     the system. Settings in the user's mailcap file `$HOME/.mailcap'
+     will override settings in the system mailcap files `/etc/mailcap',
+     `/usr/etc/mailcap', and `/usr/local/etc/mailcap'.
+
+An example usage:
+     >>> import mailcap
+     >>> d=mailcap.getcaps()
+     >>> mailcap.findmatch(d, 'video/mpeg', filename='/tmp/tmp1223')
+     ('xmpeg /tmp/tmp1223', {'view': 'xmpeg %s'})
+
+
+File: python-lib.info,  Node: mailbox,  Next: mhlib,  Prev: mailcap,  Up: Internet Data Handling
+
+Read various mailbox formats
+============================
+
+Read various mailbox formats.
+
+This module defines a number of classes that allow easy and uniform
+access to mail messages in a (UNIX) mailbox.
+
+`UnixMailbox(fp[, factory])'
+     Access to a classic UNIX-style mailbox, where all messages are
+     contained in a single file and separated by `From ' (a.k.a.
+     `From_') lines.  The file object FP points to the mailbox file.
+     The optional FACTORY parameter is a callable that should create
+     new message objects.  FACTORY is called with one argument, FP by
+     the `next()' method of the mailbox object.  The default is the
+     `rfc822.Message' class (see the `rfc822' module - and the note
+     below).
+
+     For maximum portability, messages in a UNIX-style mailbox are
+     separated by any line that begins exactly with the string `'From
+     '' (note the trailing space) if preceded by exactly two newlines.
+     Because of the wide-range of variations in practice, nothing else
+     on the From_ line should be considered.  However, the current
+     implementation doesn't check for the leading two newlines.  This is
+     usually fine for most applications.
+
+     The `UnixMailbox' class implements a more strict version of From_
+     line checking, using a regular expression that usually correctly
+     matched From_ delimiters.  It considers delimiter line to be
+     separated by `From NAME TIME' lines.  For maximum portability, use
+     the `PortableUnixMailbox' class instead.  This class is identical
+     to `UnixMailbox' except that individual messages are separated by
+     only `From ' lines.
+
+     For more information, see .
+
+`PortableUnixMailbox(fp[, factory])'
+     A less-strict version of `UnixMailbox', which considers only the
+     `From ' at the beginning of the line separating messages.  The
+     "NAME TIME" portion of the From line is ignored, to protect
+     against some variations that are observed in practice.  This works
+     since lines in the message which begin with `'From '' are quoted
+     by mail handling software at delivery-time.
+
+`MmdfMailbox(fp[, factory])'
+     Access an MMDF-style mailbox, where all messages are contained in
+     a single file and separated by lines consisting of 4 control-A
+     characters.  The file object FP points to the mailbox file.
+     Optional FACTORY is as with the `UnixMailbox' class.
+
+`MHMailbox(dirname[, factory])'
+     Access an MH mailbox, a directory with each message in a separate
+     file with a numeric name.  The name of the mailbox directory is
+     passed in DIRNAME.  FACTORY is as with the `UnixMailbox' class.
+
+`Maildir(dirname[, factory])'
+     Access a Qmail mail directory.  All new and current mail for the
+     mailbox specified by DIRNAME is made available.  FACTORY is as
+     with the `UnixMailbox' class.
+
+`BabylMailbox(fp[, factory])'
+     Access a Babyl mailbox, which is similar to an MMDF mailbox.  In
+     Babyl format, each message has two sets of headers, the _original_
+     headers and the _visible_ headers.  The original headers appear
+     before a line containing only `'*** EOOH ***''
+     (End-Of-Original-Headers) and the visible headers appear after the
+     `EOOH' line.  Babyl-compliant mail readers will show you only the
+     visible headers, and `BabylMailbox' objects will return messages
+     containing only the visible headers.  You'll have to do your own
+     parsing of the mailbox file to get at the original headers.  Mail
+     messages start with the EOOH line and end with a line containing
+     only `'\037\014''.  FACTORY is as with the `UnixMailbox' class.
+
+Note that because the `rfc822' module is deprecated, it is recommended
+that you use the `email' package to create message objects from a
+mailbox.  (The default can't be changed for backwards compatibility
+reasons.)  The safest way to do this is with bit of code:
+
+     import email
+     import email.Errors
+     import mailbox
+     
+     def msgfactory(fp):
+         try:
+             return email.message_from_file(fp)
+         except email.Errors.MessageParseError:
+             # Don't return None since that will
+     	# stop the mailbox iterator
+     	return ''
+     
+     mbox = mailbox.UnixMailbox(fp, msgfactory)
+
+The above wrapper is defensive against ill-formed MIME messages in the
+mailbox, but you have to be prepared to receive the empty string from
+the mailbox's `next()' method.  On the other hand, if you know your
+mailbox contains only well-formed MIME messages, you can simplify this
+to:
+
+     import email
+     import mailbox
+     
+     mbox = mailbox.UnixMailbox(fp, email.message_from_file)
+
+See also:
+     `mbox - file containing mail messages'{Description of the
+     traditional "mbox" mailbox format.} `maildir - directory for
+     incoming mail messages'{Description of the "maildir" mailbox
+     format.} `Configuring Netscape Mail on UNIX: Why the
+     Content-Length Format is Bad'{A description of problems with
+     relying on the `Content-Length' header for messages stored in
+     mailbox files.}
+
+* Menu:
+
+* Mailbox Objects::
+
+
+File: python-lib.info,  Node: Mailbox Objects,  Prev: mailbox,  Up: mailbox
+
+Mailbox Objects
+---------------
+
+All implementations of mailbox objects are iterable objects, and have
+one externally visible method.  This method is used by iterators
+created from mailbox objects and may also be used directly.
+
+`next()'
+     Return the next message in the mailbox, created with the optional
+     FACTORY argument passed into the mailbox object's constructor.  By
+     default this is an `rfc822.Message' object (see the `rfc822'
+     module).  Depending on the mailbox implementation the FP attribute
+     of this object may be a true file object or a class instance
+     simulating a file object, taking care of things like message
+     boundaries if multiple mail messages are contained in a single
+     file, etc.  If no more messages are available, this method returns
+     `None'.
+
+
+File: python-lib.info,  Node: mhlib,  Next: mimetools,  Prev: mailbox,  Up: Internet Data Handling
+
+Access to MH mailboxes
+======================
+
+Manipulate MH mailboxes from Python.
+
+The `mhlib' module provides a Python interface to MH folders and their
+contents.
+
+The module contains three basic classes, `MH', which represents a
+particular collection of folders, `Folder', which represents a single
+folder, and `Message', which represents a single message.
+
+`MH([path[, profile]])'
+     `MH' represents a collection of MH folders.
+
+`Folder(mh, name)'
+     The `Folder' class represents a single folder and its messages.
+
+`Message(folder, number[, name])'
+     `Message' objects represent individual messages in a folder.  The
+     Message class is derived from `mimetools.Message'.
+
+* Menu:
+
+* MH Objects::
+* Folder Objects::
+* Message Objects::
+
+
+File: python-lib.info,  Node: MH Objects,  Next: Folder Objects,  Prev: mhlib,  Up: mhlib
+
+MH Objects
+----------
+
+`MH' instances have the following methods:
+
+`error(format[, ...])'
+     Print an error message - can be overridden.
+
+`getprofile(key)'
+     Return a profile entry (`None' if not set).
+
+`getpath()'
+     Return the mailbox pathname.
+
+`getcontext()'
+     Return the current folder name.
+
+`setcontext(name)'
+     Set the current folder name.
+
+`listfolders()'
+     Return a list of top-level folders.
+
+`listallfolders()'
+     Return a list of all folders.
+
+`listsubfolders(name)'
+     Return a list of direct subfolders of the given folder.
+
+`listallsubfolders(name)'
+     Return a list of all subfolders of the given folder.
+
+`makefolder(name)'
+     Create a new folder.
+
+`deletefolder(name)'
+     Delete a folder - must have no subfolders.
+
+`openfolder(name)'
+     Return a new open folder object.
+
+
+File: python-lib.info,  Node: Folder Objects,  Next: Message Objects,  Prev: MH Objects,  Up: mhlib
+
+Folder Objects
+--------------
+
+`Folder' instances represent open folders and have the following
+methods:
+
+`error(format[, ...])'
+     Print an error message - can be overridden.
+
+`getfullname()'
+     Return the folder's full pathname.
+
+`getsequencesfilename()'
+     Return the full pathname of the folder's sequences file.
+
+`getmessagefilename(n)'
+     Return the full pathname of message N of the folder.
+
+`listmessages()'
+     Return a list of messages in the folder (as numbers).
+
+`getcurrent()'
+     Return the current message number.
+
+`setcurrent(n)'
+     Set the current message number to N.
+
+`parsesequence(seq)'
+     Parse msgs syntax into list of messages.
+
+`getlast()'
+     Get last message, or `0' if no messages are in the folder.
+
+`setlast(n)'
+     Set last message (internal use only).
+
+`getsequences()'
+     Return dictionary of sequences in folder.  The sequence names are
+     used as keys, and the values are the lists of message numbers in
+     the sequences.
+
+`putsequences(dict)'
+     Return dictionary of sequences in folder {name: list}.
+
+`removemessages(list)'
+     Remove messages in list from folder.
+
+`refilemessages(list, tofolder)'
+     Move messages in list to other folder.
+
+`movemessage(n, tofolder, ton)'
+     Move one message to a given destination in another folder.
+
+`copymessage(n, tofolder, ton)'
+     Copy one message to a given destination in another folder.
+
+
+File: python-lib.info,  Node: Message Objects,  Prev: Folder Objects,  Up: mhlib
+
+Message Objects
+---------------
+
+The `Message' class adds one method to those of `mimetools.Message':
+
+`openmessage(n)'
+     Return a new open message object (costs a file descriptor).
+
+
+File: python-lib.info,  Node: mimetools,  Next: mimetypes,  Prev: mhlib,  Up: Internet Data Handling
+
+Tools for parsing MIME messages
+===============================
+
+Tools for parsing MIME-style message bodies.
+
+_This is deprecated in Python 2.3.  The `email' package should be used
+in preference to the `mimetools' module.  This module is present only
+to maintain backward compatibility._
+
+This module defines a subclass of the `rfc822'  module's `Message'
+class and a number of utility functions that are useful for the
+manipulation for MIME multipart or encoded message.
+
+It defines the following items:
+
+`Message(fp[, seekable])'
+     Return a new instance of the `Message' class.  This is a subclass
+     of the `rfc822.Message' class, with some additional methods (see
+     below).  The SEEKABLE argument has the same meaning as for
+     `rfc822.Message'.
+
+`choose_boundary()'
+     Return a unique string that has a high likelihood of being usable
+     as a part boundary.  The string has the form
+     `'HOSTIPADDR.UID.PID.TIMESTAMP.RANDOM''.
+
+`decode(input, output, encoding)'
+     Read data encoded using the allowed MIME ENCODING from open file
+     object INPUT and write the decoded data to open file object
+     OUTPUT.  Valid values for ENCODING include `'base64'',
+     `'quoted-printable'', `'uuencode'', `'x-uuencode'', `'uue'',
+     `'x-uue'', `'7bit'', and `'8bit''.  Decoding messages encoded in
+     `'7bit'' or `'8bit'' has no effect.  The input is simply copied to
+     the output.
+
+`encode(input, output, encoding)'
+     Read data from open file object INPUT and write it encoded using
+     the allowed MIME ENCODING to open file object OUTPUT.  Valid
+     values for ENCODING are the same as for `decode()'.
+
+`copyliteral(input, output)'
+     Read lines from open file INPUT until `EOF' and write them to open
+     file OUTPUT.
+
+`copybinary(input, output)'
+     Read blocks until `EOF' from open file INPUT and write them to
+     open file OUTPUT.  The block size is currently fixed at 8192.
+
+See also:
+     *Note email:: Comprehensive email handling package; supercedes the
+     `mimetools' module.  *Note rfc822:: Provides the base class for
+     `mimetools.Message'.  *Note multifile:: Support for reading files
+     which contain distinct parts, such as MIME data.
+
+    <http://www.cs.uu.nl/wais/html/na-dir/mail/mime-faq/.html>
+          The MIME Frequently Asked Questions document.  For an
+          overview of MIME, see the answer to question 1.1 in Part 1 of
+          this document.
+
+* Menu:
+
+* Additional Methods of Message Objects::
+
+
+File: python-lib.info,  Node: Additional Methods of Message Objects,  Prev: mimetools,  Up: mimetools
+
+Additional Methods of Message Objects
+-------------------------------------
+
+The `Message' class defines the following methods in addition to the
+`rfc822.Message' methods:
+
+`getplist()'
+     Return the parameter list of the `Content-Type' header.  This is a
+     list of strings.  For parameters of the form `KEY=VALUE', KEY is
+     converted to lower case but VALUE is not.  For example, if the
+     message contains the header `Content-type: text/html; spam=1;
+     Spam=2; Spam' then `getplist()' will return the Python list
+     `['spam=1', 'spam=2', 'Spam']'.
+
+`getparam(name)'
+     Return the VALUE of the first parameter (as returned by
+     `getplist()') of the form `NAME=VALUE' for the given NAME.  If
+     VALUE is surrounded by quotes of the form ``<'...`>'' or
+     ``"'...`"'', these are removed.
+
+`getencoding()'
+     Return the encoding specified in the `Content-Transfer-Encoding'
+     message header.  If no such header exists, return `'7bit''.  The
+     encoding is converted to lower case.
+
+`gettype()'
+     Return the message type (of the form `TYPE/SUBTYPE') as specified
+     in the `Content-Type' header.  If no such header exists, return
+     `'text/plain''.  The type is converted to lower case.
+
+`getmaintype()'
+     Return the main type as specified in the `Content-Type' header.
+     If no such header exists, return `'text''.  The main type is
+     converted to lower case.
+
+`getsubtype()'
+     Return the subtype as specified in the `Content-Type' header.  If
+     no such header exists, return `'plain''.  The subtype is converted
+     to lower case.
+

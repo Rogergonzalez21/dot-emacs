@@ -1,0 +1,214 @@
+;;; -*- coding: emacs-mule -*-
+
+;; ----- ido-last-directory-list -----
+(
+ ("/Users/bongu/" . "Dropbox/")
+ ("c:/idx/data/" . "bugz/")
+ ("c:/idx/bugz/" . "277/")
+ ("c:/home/dev/osx/" . "setgetscreenres/")
+ ("c:/dev/spider/9/" . "testapps/")
+ ("c:/home/documents/extdoc/" . "velo/")
+ ("c:/home/documents/" . "extdoc/")
+ ("c:/ISYS Integration Kit/Demo/Run/" . "CSharp/")
+ ("c:/ISYS Integration Kit/" . "bin32/")
+ ("c:/home/movies/" . "youtube/")
+ ("c:/home/My Dropbox/dev/" . "gps/")
+ ("c:/home/My Dropbox/mydoc/household/" . "Lisas garden pavement/")
+ ("c:/home/My Dropbox/mydoc/" . "household/")
+ ("c:/home/archive/" . "pictures/")
+ ("c:/home/My Dropbox/sites/dev/" . "flickrslides/")
+ ("//linux/v9_5distro/" . "win32-testing/")
+ ("c:/home/pictures/working/print/" . "CTCT Book - core/")
+ ("//linux/v9_5distro/integration kit/" . "windows/")
+ ("//linux/v9_5distro/integration kit/linux/" . "Cpp/")
+ ("//linux/v9_5distro/integration kit/linux/Demo/Run/" . "common/")
+ ("d:/idx/spider/9/" . "brock/")
+ ("d:/idx/spider/" . "9/")
+ ("c:/home/pictures/library/project365/" . "contenders/")
+ ("//linux/v9_5distro/readers/" . "SDK.linux-install/")
+ ("c:/supp/promega/update_issue/" . "ISYSPDRMR_sav/")
+ ("c:/home/My Dropbox/sites/halloleo-com/pictures/" . "css/")
+ ("c:/home/pictures/working/project365/" . "14to15-08/")
+ ("c:/VirtualBox/common/sdk/SDK.linux/Demo/Run/" . "Cpp/")
+ ("c:/VirtualBox/common/sdk/SDK.linux/Demo/" . "Run/")
+ ("c:/VirtualBox/common/sdk/SDK.linux/" . "Demo/")
+ ("c:/VirtualBox/common/sdk/SDK.windows/Demo/" . "Run/")
+ ("c:/VirtualBox/common/sdk/SDK.windows/" . "Demo/")
+ ("c:/VirtualBox/common/sdk/" . "SDK.linux/")
+ ("c:/VirtualBox/" . "common/")
+ ("c:/Documents and Settings/LeoBroska/Desktop/" . "Downloads/")
+ ("c:/home/My Dropbox/sites/" . "halloleo-com/")
+ ("c:/home/My Dropbox/sites/halloleo-com/p365/" . "css/")
+ ("c:/home/My Dropbox/sites/halloleo-com/" . "pics/")
+ ("c:/home/My Dropbox/organise/mail/" . "messages/")
+ ("c:/home/My Dropbox/organise/" . "mail/")
+ ("c:/home/My Dropbox/Sites/halloleo-com/p365/" . "setUp/")
+ ("c:/home/My Dropbox/Sites/halloleo-com/" . "p365/")
+ ("c:/home/My Dropbox/" . "emacs/")
+ ("c:/home/sites/halloleo-com/p365/themes/snow/" . "images/")
+ ("c:/home/sites/halloleo-com/p365/themes/" . "snow/")
+ ("c:/home/sites/halloleo-com/p365alt/" . "setUp/")
+ ("c:/dev/testlink/" . "snippets/")
+ ("c:/etc/" . "anywhere data/")
+ ("c:/idx/testlink/" . "tc1022/")
+ ("c:/home/pictures/library/" . "project365/")
+ ("c:/home/sites/halloleo-com/p365/" . "images/")
+ ("c:/idx/test/9/" . "deletable webindex/")
+ ("c:/home/sites/halloleo-com/project365/satellite/" . "setUp/")
+ ("c:/home/My Dropbox/dev/blogging/tumblr/" . "themes/")
+ ("//2003r2/c$/Documents and Settings/leobroska/Application Data/ISYS Anywhere/" . "Emails/")
+ ("c:/home/dev/" . "osx/")
+ ("c:/WINDOWS/" . "Temp/")
+ ("c:/idx/test/" . "9/")
+ ("c:/dev/spider/9_compare/" . "crawl/")
+ ("c:/home/pictures/working/" . "p365/")
+ ("c:/home/pictures/" . "library/")
+ ("d:/idx/real/9/" . "halloleo/")
+ ("d:/idx/real/" . "9/")
+ ("c:/cyg/usr/" . "bin/")
+ ("c:/cyg/" . "usr/")
+ ("d:/idx/" . "spider/")
+ ("c:/idx/real/" . "9/")
+ ("c:/dev/sdk9/" . "Delphi/")
+ ("c:/Program Files/" . "Mozilla Thunderbird/")
+ ("c:/home/dev/blogging/" . "tumblr/")
+ ("d:/Documents and Settings/LeoBroska/" . "Desktop/")
+ ("d:/Documents and Settings/" . "LeoBroska/")
+ ("d:/home/personal/" . "snippets/")
+ ("d:/home/" . "dev/")
+ ("d:/" . "idx/")
+ ("f:/" . "project365/")
+ ("l:/" . "personal/")
+ ("c:/home/sites/spider/lotsofpdfs/" . "full/")
+ ("c:/Software/ScreenshotCaptor/" . "Screenshots/")
+ ("c:/Software/" . "xampp/")
+ ("c:/home/sites/dev/" . "css-classes-for-HS/")
+ ("c:/home/sites/halloleo-com/etc/lib/" . "highslide/")
+ ("c:/dev/spider/" . "9/")
+ ("c:/dev/" . "bin/")
+ ("c:/home/sites/halloleo-com/etc/" . "lib/")
+ ("c:/home/sites/halloleo-com/" . "p365/")
+ ("c:/home/sites/" . "halloleo-com/")
+ ("c:/idx/" . "data/")
+ ("c:/dev/bin/" . "9/")
+ ("c:/idx/spider/9/" . "isys-homepage/")
+ ("c:/idx/spider/" . "9/")
+ ("c:/home/" . "My Dropbox/")
+ ("c:/" . "dev/")
+ ("c:/home/emacs/" . "site-lisp/")
+)
+
+;; ----- ido-work-directory-list -----
+(
+ "/Users/bongu/"
+ "/Users/bongu/Dropbox/emacs/"
+ "/Users/bongu/Dropbox/"
+ "c:/idx/bugz/4775/"
+ "c:/idx/bugz/4775/Index_HTML/"
+ "f:/project365/"
+ "c:/home/My Dropbox/sites/halloleo-com/pics/"
+ "f:/"
+ "f:/flickr/"
+ "c:/idx/data/bugz/"
+ "//linux/v9_5distro/win32-testing/"
+ "c:/dev/bin/9/"
+ "c:/home/pictures/library/project365/"
+ "c:/home/My Dropbox/emacs/"
+ "c:/home/My Dropbox/emacs/user-lisp/"
+ "c:/home/My Dropbox/dev/"
+ "c:/Program Files/"
+ "c:/home/My Dropbox/sites/halloleo-com/p365/"
+ "c:/home/My Dropbox/sites/halloleo-com/p365/css/"
+ "c:/dev/"
+ "//linux/"
+ "c:/idx/bugz/277/"
+ "//linux/intranet/html/"
+ "c:/home/My Dropbox/sites/dev/spider/case-sensitve/"
+ "c:/idx/spider/9/"
+ "d:/home/sites/"
+ "c:/home/My Dropbox/sites/"
+ "c:/home/movies/"
+ "c:/home/My Dropbox/"
+ "d:/idx/"
+ "c:/idx/"
+ "c:/home/pictures/library/project365/contenders/"
+ "c:/home/My Dropbox/sites/halloleo-com/"
+ "c:/home/My Dropbox/sites/halloleo-com/p365_20090907_last_no_items_scheme/"
+ "f:/_Downloads/"
+ "c:/home/dev/"
+ "c:/home/pictures/working/"
+ "c:/home/archive/pictures/"
+ "c:/dev/spider/9/"
+ "c:/dev/spider/9/testapps/"
+ "c:/home/pictures/"
+ "c:/home/documents/extdoc/velo/"
+ "c:/home/"
+ "c:/home/pictures/library/"
+ "c:/ISYS Integration Kit/bin32/"
+ "c:/ISYS Integration Kit/Demo/Run/CSharp/"
+ "c:/ISYS Integration Kit/Demo/Run/"
+ "c:/ISYS Integration Kit/CSharp/"
+ "c:/Program Files/Microsoft Visual Studio 9.0/VC/"
+ "c:/ISYS Integration Kit/Cpp/"
+)
+
+;; ----- ido-work-file-list -----
+(
+ "."
+ ".emacs"
+ "ISYS.LOG"
+ "leo-frames.el"
+ "inav.php"
+ "localhost.css"
+ "item.php"
+ "header.php"
+ "apage.html"
+)
+
+;; ----- ido-dir-file-cache -----
+(
+ ("/Users/bongu/Dropbox/emacs/" (19179 29743) "user-lisp_sav/" "user-lisp/" "site-lisp/" "site-info/" "list-of-standard-files.txt" "dev/" "data/" "backup/" ".emacs" ".dired" ".custom" "../" "./")
+
+ ("/Users/bongu/" (19179 29662) "tmp/" "Sites/" "Public/" "Pictures/" "Music/" "Movies/" "Library/" "etc/" "emacs_sav/" "Dropbox/" "Downloads/" "Documents/" "dev/" "Desktop/" "bin/" "archive/" "Apps/" ".Xcode/" ".Trash/" ".syncp/" ".ssh/" ".sh_history" ".profile.macports-saved_2009-10-17_at_18:01:26" ".profile" ".macports/" ".MacOSX/" ".lightscribe/" ".lesshst" ".emacs" ".dvdcss/" ".DS_Store" ".dropbox/" ".cups/" ".CFUserTextEncoding" ".bashrc" ".bash_history" ".adobe/" "../" "./")
+
+ ("/Users/bongu/Dropbox/" (19179 28806) "sites/" "Public/" "print/" "Pictures/" "Photos/" "mydoc/" "mail/" "iPhone intro.pdf" "Icon
+" "extdoc/" "emacs/" "diff/" "dev/" "bin/" ".DS_Store" "../" "./")
+
+ ("c:/idx/bugz/4775/" (19177 8219) "ISYSPDR.LOG" "ISYSPDR.IXS" "ISYSPDR.CFG" "ISYS.NET" "ISYS.META" "ISYS.LOG" "ISYS.IXX" "ISYS.IXK" "ISYS.IXG" "ISYS.IXE" "ISYS.IXC" "ISYS.IXB" "ISYS.IXA" "ISYS.CFG" "Index_HTML/" "../" "./")
+
+ ("c:/idx/bugz/4775/Index_HTML/" (19177 7999) "ISYSPDR.LOG" "ISYSPDR.CFG" "ISYS.META" "ISYS.LOG" "ISYS.CFG" "ISYS.CAT" "../" "./")
+
+ ("f:/project365/" (18981 36696) "9-10/" "8-10/" "5-10/" "4-10/" "3-10/" "6-09/" "5-09/" "4-09/" "1-09/" ".dired" "11-10/" "replace_24-01/" "10-10/" "replace_20-09_4010172467/" "replace_27-09_4025393342/" "replace_3-10_4035804053/" "7-10/" "3to5-10_large-med/" "6-10/" "replace_1-10/" "replace_30-09/" "replace_29-09/" "2-10/" "1-10/" "30-09/" "12-09_replace/" "29-09/" "24-09/" "28-09/" "27-09/" "26-09/" "25-09/" "23-09/" "22-09/" "21-09/" "20-09/" "19-09/" "18-09/" "13-09_replace/" "17-09/" "16-09/" "15-09/" "14-09/" "9-09_replace/" "7-09_replace/" "12-05_replace/" "10to11-09/" "12-09/" "9-09/" "8-09/" "7-09/" "3-09/" "11-02_replace/" "31-08_replace/" "1-09_replace/" "2-09/" "../" "./")
+
+ ("c:/home/My Dropbox/sites/halloleo-com/pics/" (19170 40203) "xml/" "validtags.php" "taglist.php" "tagged.php" "tagfuncs.php" "slides.php" "sitedefs.php" "set.php" "preferences.php" "listofsites.php" "js/" "item.php" "images/" "header.php" "css/" "credits.php" "about.php" ".htaccess" "../" "./")
+
+ ("c:/home/My Dropbox/sites/halloleo-com/" (19146 63688) "welcome.html" "webwork/" "webformmailer.php" "pics_20090831/" "pics/" "php.ini" "p365_20090907_last_no_items_scheme/" "p365_20090831/" "p365/" "missing.html" "index.html" "gdform.php" "flickr/" "favicon.ico" "etc/" "dev/" "../" "./")
+
+ ("c:/home/My Dropbox/sites/halloleo-com/p365/" (19173 13607) "xml/" "validtags.php" "taglist.php" "tagged.php" "tagfuncs.php" "slides.php" "sitedefs.php" "set.php" "preferences.php" "js/" "item.php" "index.html" "inav.php" "images/" "header.php" "css/" "credits.php" "about.php" ".htaccess" "../" "./")
+
+ ("c:/dev/bin/9/" (19176 57785) "Wordnet/" "WebUserIndexes/" "WebThemes/" "WebSites/" "WebShared/" "WebIndexes/" "WebFederator/" "WebExtensions/" "WebComponents/" "WebCog/" "Viewer32/" "unrar.dll" "UNICOWS.DLL" "TEMPLATEEDITOR.EXE" "ssleay32.dll" "sqlite3.dll" "SQL/" "spdrules.dll" "SpdCrawl.map" "SpdCrawl.dll" "SharePoint/" "scripttemplates/" "Samples/" "RuleEdit/" "rlist/" "RichPDF/" "Product/" "PageFetch.exe" "NCSO.jar" "msvcr80.dll" "migrate.exe" "Macros/" "LotusDIIOPConnect.jar" "Logs/" "list.txt" "libeay32.dll" "jre/" "Itamo.exe" "ISYSwf.dll" "ISYSwebWorker.exe" "ISYSwebSearch.dll" "ISYSwebIdxr.exe" "ISYSwebExchange.exe" "ISYSwebExchange.cfg" "ISYSwebCore.dll" "ISYSwebBox.dll" "ISYSwebapi.dll" "ISYSweb.exe" "ISYSweb.cfg" "isysu9.dll" "isyssymbols.xml" "ISYSSVR.EXE" "ISYSStat.dll" "ISYSSQL.dll" "ISYSshell.dll" "ISYSSCRIPT.DLL" "ISYSSC.EXE" "ISYSpushLotus.log" "ISYSpushLotus.exe" "ISYSpushLotus.cfg" "ISYSpushLotus-1.dat" "ISYSpdr.map" "ISYSPDR.DLL" "ISYSPDFL.DLL" "ISYSPDFL.DAT" "ISYSPDF6.DLL" "ISYSmeta.dll" "isysmailmon.dll" "isysmail.dll" "isyslts.dll" "ISYSlemp.dll" "isyslds.dll" "ISYSjvm.dll" "isysjournal.dll" "isysjava.dll" "ISYSIndexer.exe" "isysincupdsvc.exe" "isysincupdr.dll" "ISYSHTML.dll" "ISYSforms.xml" "ISYSFed_SP.dll" "ISYSFed_Lotus.dll" "ISYSFed_IMAN.dll" "ISYSFed_Domino.jar" "ISYSFed_Domino.dll" "ISYSfed.dll" "ISYSERROR.LOG" "isysentt.dll" "isysebu.dll" "ISYSdrvmon.dll" "ISYSDominoSec.jar" "ISYSDMS.DLL" "isysdirmon.dll" "ISYSDFCC.exe" "ISYSdc.dll" "ISYSconfig.dll" "isyscom.jar" "ISYSCom.exe" "ISYSCom.dll" "ISYSCat.xml" "ISYSCACHE.DLL" "isysbox.dll" "ISYSband.dll" "ISYSauth.dll" "ISYSACT8.dll" "ISYSACRO.API" "ISYSacad.dll" "ISYS9core.zip" "ISYS9core.dll" "ISYS9.LIC" "ISYS9.KEY" "isys9.dll" "ISYS.NLI" "ISYS.federator.xmlserializers.dll" "ISYS.Federator.dll" "ISYS.ELX" "ISYS.CWD" "ISYS.adm" "ISYS getting started.pdf" "ISYS Desktop 9 Getting Started.pdf" "ISYS Default Site.url" "ISYS Anywhere Site.url" "ISYS Administrator.url" "ISYS Administration Site.url" "ISP2003.dll" "iqw.exe" "installs/" "ILCM.EXE" "iknow9.exe" "iagent9.exe" "Help/" "DMS/" "dict.en" "CRDE2003.dll" "crde2000.dll" "CatIcons/" "AspAuthTest.exe" "7za.dll" "../" "./")
+
+ ("c:/home/pictures/library/floriade09/" (19176 61507) "Swan with kids_IMG_4551.jpg_original" "Swan with kids_IMG_4551.jpg" "Swan with kids_IMG_4543.jpg_original" "Swan with kids_IMG_4543.jpg" "Lisa behind shrub at Floriade 09_IMG_4586.jpg_original" "Lisa behind shrub at Floriade 09_IMG_4586.jpg" "Lisa at Floriade 09_IMG_4570.jpg_original" "Lisa at Floriade 09_IMG_4570.jpg" "Lisa at Floriade 09_IMG_4561.jpg_original" "Lisa at Floriade 09_IMG_4561.jpg" "Latern tree at Floriade 09 pano_smaller.jpg" "Latern tree at Floriade 09 pano.jpg_original" "Latern tree at Floriade 09 pano.jpg" "Flowers at Floriade 09_IMG_4575.jpg_original" "Flowers at Floriade 09_IMG_4575.jpg" "Flowers at Floriade 09_IMG_4532.jpg_original" "Flowers at Floriade 09_IMG_4532.jpg" "Flowers at Floriade 09_IMG_4527.jpg_original" "Flowers at Floriade 09_IMG_4527.jpg" "Flowers at Floriade 09 verto_2.jpg_original" "Flowers at Floriade 09 verto_2.jpg" "../" "./")
+
+ ("c:/home/" (19150 30966) "x.html" "to-protect.txt" "tmp/" "pictures/" "personal/" "My Dropbox/" "music/" "movies/" "ISYSWorkgroup.exe" "documents/" "dev/" "bin/" "archive/" ".VirtualBox/" ".emacs" ".bash_profile" ".bash_history" ".bashrc" "../" "./")
+
+ ("f:/flickr/" (19130 35414) "homeondudley/" "duststorm/" "mymorningview total/" "../" "./")
+
+ ("c:/idx/data/bugz/" (19176 53197) "5438/" "5359/" "../" "./")
+
+ ("c:/idx/data/" (19166 16274) "bugz/" "../" "./")
+
+ ("c:/idx/" (19166 16254) "testlink/" "test/" "spider/" "real/" "ISYSUpdate.LOG" "ISYSReindex.LOG" "data/" "bugz/" "../" "./")
+
+ ("c:/idx/bugz/" (19176 57952) "New Folder/" "5438/" "5359/" "277/" "1782/" "../" "./")
+
+ ("//linux/v9_5distro/builds/weekly/" (19176 57702) "ISYS.cwd" "migrate.exe" "ISYSwf.dll" "iknow9.exe" "WebUserIndexes/" "ISYS Default Site.url" "ISYSforms.xml" "ISYSdms.dll" "ISYSjvm.dll" "ISYSentt.dll" "SharePoint/" "ISYS Administration Site.url" "ISYSpdfl.dll" "iqw.exe" "ISYSjava.dll" "spdrules.dll" "ISYSmail.dll" "ISYSFed_Domino.jar" "isp2003.dll" "ISYSfed.dll" "ISYSwebidxr.exe" "ISYSband.dll" "ISYSdc.dll" "WebExtensions/" "ISYS.nli" "sql/" "isysjournal.dll" "ISYSsc.exe" "ilcm.exe" "ISYSscript.dll" "ISYSshell.dll" "crde2000.dll" "spdcrawl.dll" "WebSites/" "ISYSpdr.dll" "caticons/" "ISYSDFCC.exe" "ruleedit/" "ISYSwebExchange.exe" "ISYSFed_Lotus.dll" "ssleay32.dll" "ISYS Administrator.url" "ISYSwebapi.dll" "ISYS.elx" "ISYS.federator.xmlserializers.dll" "ISYS9.key" "ISYSweb.cfg" "ISYSlts.dll" "ISYSmailmon.dll" "ISYSconfig.dll" "ISYS getting started.pdf" "7za.dll" "ISYShtml.dll" "Product/" "ISYSacro.api" "odyssey_cz.gff" "ISYSwebWorker.exe" "ISYSacad.dll" "NCSO.jar" "odyssey_crt.gff" "ISYSstat.dll" "odyssey_kyz.gff" "sqlite3.dll" "ISYSlemp.dll" "dict.en" "ISYSpdfl.dat" "ISYS9core.dll" "ISYSFed_SP.dll" "iagent9.exe" "dms/" "ISYSsql.dll" "msvcr80.dll" "ISYSCom.exe" "unrar.dll" "crde2003.dll" "ISYS9.dll" "libeay32.dll" "ISYSwebcore.dll" "ISYSsymbols.xml" "rlist/" "ISYSindexer.exe" "ISYS.adm" "viewer32/" "WebCog/" "ISYSwebsearch.dll" "ISYSweb.exe" "LotusDIIOPConnect.jar" "ISYScom.dll" "ISYSwebBox.dll" "ISYSmeta.dll" "WebIndexes/" "ISYSFed_IMAN.dll" "ISYSu9.dll" "64bit/" "WebComponents/" "WebFederator/" "isyslds.dll" "ISYScache.dll" "WebThemes/" "ISYSbox.dll" "wordnet/" "ISYS Anywhere Site.url" "jre/" "ISYS.Federator.dll" "ISYSFed_Domino.dll" "ISYS9.lic" "WebShared/" "isyscom.jar" "ISYS9core.zip" "list.txt" "scripttemplates/" "ISYSdirmon.dll" "ISYSauth.dll" "ISYSpdf6.dll" "ISYSDominoSec.jar" "RichPDF/" "ISYSACT8.dll" "../" "./")
+
+ ("//linux/v9_5distro/win32-testing/" (19140 22297) "ISYSdms.dll" "ISYSpdfl.dll" "ISYSCom.dll" "isysdc.dll" "ISYSacro.map" "ISYSacro.api" "ISYSpdfl.map" ".maps/" "ISYSpdfl.dat" "ISYS9core.dll" "dms/" "ISYSwebcore.dll" "ISYSwebsearch.dll" "ISYSctd.exe" "ISYSCom.map" "ISYSpdf6.map" "Viewer32/" "isyssdk.chm" "ISYSauth.dll" "CodeView9.exe" "ISYSpdf6.dll" "../" "./")
+
+ ("//linux/v9_5distro/builds/" (19083 45816) "9.5.1/" "9.5.2/" "weekly/" "../" "./")
+)
+
+;; ----- ido-unc-hosts-cache -----
+t
+

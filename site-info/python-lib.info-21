@@ -1,0 +1,1318 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: Extending optparse,  Prev: Callback Options,  Up: optparse
+
+Extending `optparse'
+--------------------
+
+Since the two major controlling factors in how `optparse' interprets
+command-line options are the action and type of each option, the most
+likely direction of extension is to add new actions and new types.
+
+Also, the examples section includes several demonstrations of extending
+`optparse' in different ways: e.g. a case-insensitive option parser, or
+two kinds of option parsers that implement "required options".
+
+* Menu:
+
+* Adding new types::
+* Adding new actions::
+* Other reasons to extend optparse::
+* Examples 5::
+
+
+File: python-lib.info,  Node: Adding new types,  Next: Adding new actions,  Prev: Extending optparse,  Up: Extending optparse
+
+Adding new types
+................
+
+To add new types, you need to define your own subclass of `optparse''s
+`Option' class.  This class has a couple of attributes that define
+`optparse''s types: `TYPES' and `TYPE_CHECKER'.
+
+`TYPES' is a tuple of type names; in your subclass, simply define a new
+tuple `TYPES' that builds on the standard one.
+
+`TYPE_CHECKER' is a dictionary mapping type names to type-checking
+functions.  A type-checking function has the following signature:
+
+     def check_foo (option : Option, opt : string, value : string)
+                    -> foo
+
+You can name it whatever you like, and make it return any type you
+like.  The value returned by a type-checking function will wind up in
+the `OptionValues' instance returned by `OptionParser.parse_args()', or
+be passed to callbacks as the VALUE parameter.
+
+Your type-checking function should raise `OptionValueError' if it
+encounters any problems.  `OptionValueError' takes a single string
+argument, which is passed as-is to `OptionParser''s `error()' method,
+which in turn prepends the program name and the string "error:" and
+prints everything to stderr before terminating the process.
+
+Here's a silly example that demonstrates adding a "complex" option type
+to parse Python-style complex numbers on the command line.  (This is
+even sillier than it used to be, because `optparse' 1.3 adds built-in
+support for complex numbers [purely for completeness], but never mind.)
+
+First, the necessary imports:
+
+     from copy import copy
+     from optparse import Option, OptionValueError
+
+You need to define your type-checker first, since it's referred to
+later (in the `TYPE_CHECKER' class attribute of your `Option' subclass):
+
+     def check_complex (option, opt, value):
+         try:
+             return complex(value)
+         except ValueError:
+             raise OptionValueError(
+                 "option %s: invalid complex value: %r" % (opt, value))
+
+Finally, the `Option' subclass:
+
+     class MyOption (Option):
+         TYPES = Option.TYPES + ("complex",)
+         TYPE_CHECKER = copy(Option.TYPE_CHECKER)
+         TYPE_CHECKER["complex"] = check_complex
+
+(If we didn't make a `copy()' of `Option.TYPE_CHECKER', we would end up
+modifying the `TYPE_CHECKER' attribute of `optparse''s Option class.
+This being Python, nothing stops you from doing that except good
+manners and common sense.)
+
+That's it!  Now you can write a script that uses the new option type
+just like any other `optparse'-based script, except you have to
+instruct your `OptionParser' to use `MyOption' instead of `Option':
+
+     parser = OptionParser(option_class=MyOption)
+     parser.add_option("-c", action="store", type="complex", dest="c")
+
+Alternately, you can build your own option list and pass it to
+`OptionParser'; if you don't use `add_option()' in the above way, you
+don't need to tell `OptionParser' which option class to use:
+
+     option_list = [MyOption("-c", action="store", type="complex", dest="c")]
+     parser = OptionParser(option_list=option_list)
+
+
+File: python-lib.info,  Node: Adding new actions,  Next: Other reasons to extend optparse,  Prev: Adding new types,  Up: Extending optparse
+
+Adding new actions
+..................
+
+Adding new actions is a bit trickier, because you have to understand
+that `optparse' has a couple of classifications for actions:
+
+""store" actions"
+     actions that result in `optparse' storing a value to an attribute
+     of the OptionValues instance; these options require a DEST
+     attribute to be supplied to the Option constructor
+
+""typed" actions"
+     actions that take a value from the command line and expect it to be
+     of a certain type; or rather, a string that can be converted to a
+     certain type.  These options require a TYPE attribute to the
+     Option constructor.
+
+Some default "store" actions are STORE, STORE_CONST, APPEND, and COUNT.
+The default "typed" actions are STORE, APPEND, and CALLBACK.
+
+When you add an action, you need to decide if it's a "store" action, a
+"typed", neither, or both.  Three class attributes of `Option' (or your
+`Option' subclass) control this:
+
+`ACTIONS'
+     All actions must be listed as strings in ACTIONS.
+
+`STORE_ACTIONS'
+     "store" actions are additionally listed here.
+
+`TYPED_ACTIONS'
+     "typed" actions are additionally listed here.
+
+In order to actually implement your new action, you must override
+`Option''s `take_action()' method and add a case that recognizes your
+action.
+
+For example, let's add an "extend" action.  This is similar to the
+standard "append" action, but instead of taking a single value from the
+command-line and appending it to an existing list, "extend" will take
+multiple values in a single comma-delimited string, and extend an
+existing list with them.  That is, if `--names' is an "extend" option
+of type string, the command line:
+
+     --names=foo,bar --names blah --names ding,dong
+
+would result in a list:
+
+     ["foo", "bar", "blah", "ding", "dong"]
+
+Again we define a subclass of `Option':
+
+     class MyOption (Option):
+     
+         ACTIONS = Option.ACTIONS + ("extend",)
+         STORE_ACTIONS = Option.STORE_ACTIONS + ("extend",)
+         TYPED_ACTIONS = Option.TYPED_ACTIONS + ("extend",)
+     
+         def take_action (self, action, dest, opt, value, values, parser):
+             if action == "extend":
+                 lvalue = value.split(",")
+                 values.ensure_value(dest, []).extend(lvalue)
+             else:
+                 Option.take_action(
+                     self, action, dest, opt, value, values, parser)
+
+Features of note:
+
+   * "extend" both expects a value on the command-line and stores that
+     value somewhere, so it goes in both `STORE_ACTIONS' and
+     `TYPED_ACTIONS'.
+
+   * `MyOption.take_action()' implements just this one new action, and
+     passes control back to `Option.take_action()' for the standard
+     `optparse' actions.
+
+   * VALUES is an instance of the `Values' class, which provides the
+     very useful `ensure_value()' method. `ensure_value()' is
+     essentially `getattr()' with a safety valve; it is called as:
+
+          values.ensure_value(attr, value)
+
+
+If the `attr' attribute of VALUES doesn't exist or is `None', then
+`ensure_value()' first sets it to VALUE, and then returns VALUE. This
+is very handy for actions like "extend", "append", and "count", all of
+which accumulate data in a variable and expect that variable to be of a
+certain type (a list for the first two, an integer for the latter).
+Using `ensure_value()' means that scripts using your action don't have
+to worry about setting a default value for the option destinations in
+question; they can just leave the default as `None' and
+`ensure_value()' will take care of getting it right when it's needed.
+
+
+File: python-lib.info,  Node: Other reasons to extend optparse,  Next: Examples 5,  Prev: Adding new actions,  Up: Extending optparse
+
+Other reasons to extend `optparse'
+..................................
+
+Adding new types and new actions are the big, obvious reasons why you
+might want to extend `optparse'.  I can think of at least two other
+areas to play with.
+
+First, the simple one: `OptionParser' tries to be helpful by calling
+`sys.exit()' when appropriate, i.e. when there's an error on the
+command-line or when the user requests help.  In the former case, the
+traditional course of letting the script crash with a traceback is
+unacceptable; it will make users think there's a bug in your script
+when they make a command-line error.  In the latter case, there's
+generally not much point in carrying on after printing a help message.
+
+If this behaviour bothers you, it shouldn't be too hard to "fix" it.
+You'll have to
+
+  1. subclass OptionParser and override the error() method
+
+  2. subclass Option and override the take_action() method--you'll need
+     to provide your own handling of the "help" action that doesn't
+     call sys.exit()
+
+The second, much more complex, possibility is to override the
+command-line syntax implemented by `optparse'.  In this case, you'd
+leave the whole machinery of option actions and types alone, but
+rewrite the code that processes `sys.argv'.  You'll need to subclass
+`OptionParser' in any case; depending on how radical a rewrite you
+want, you'll probably need to override one or all of `parse_args()',
+`_process_long_opt()', and `_process_short_opts()'.
+
+Both of these are left as an exercise for the reader.  I have not tried
+to implement either myself, since I'm quite happy with `optparse''s
+default behaviour (naturally).
+
+Happy hacking, and don't forget: Use the Source, Luke.
+
+
+File: python-lib.info,  Node: Examples 5,  Prev: Other reasons to extend optparse,  Up: Extending optparse
+
+Examples
+........
+
+Here are a few examples of extending the `optparse' module.
+
+First, let's change the option-parsing to be case-insensitive:
+
+`caseless.py'
+
+And two ways of implementing "required options" with `optparse'.
+
+Version 1: Add a method to `OptionParser' which applications must call
+after parsing arguments:
+
+`required_1.py'
+
+Version 2: Extend `Option' and add a `required' attribute; extend
+`OptionParser' to ensure that required options are present after
+parsing:
+
+`required_2.py'
+
+
+File: python-lib.info,  Node: tempfile,  Next: errno,  Prev: optparse,  Up: Generic Operating System Services
+
+Generate temporary files and directories
+========================================
+
+Generate temporary files and directories.
+
+This module generates temporary files and directories.  It works on all
+supported platforms.
+
+In version 2.3 of Python, this module was overhauled for enhanced
+security.  It now provides three new functions, `NamedTemporaryFile()',
+`mkstemp()', and `mkdtemp()', which should eliminate all remaining need
+to use the insecure `mktemp()' function.  Temporary file names created
+by this module no longer contain the process ID; instead a string of
+six random characters is used.
+
+Also, all the user-callable functions now take additional arguments
+which allow direct control over the location and name of temporary
+files.  It is no longer necessary to use the global TEMPDIR and
+TEMPLATE variables.  To maintain backward compatibility, the argument
+order is somewhat odd; it is recommended to use keyword arguments for
+clarity.
+
+The module defines the following user-callable functions:
+
+`TemporaryFile([mode='w+b'] [, bufsize=-1] [, suffix] [, prefix] [, dir])'
+     Return a file (or file-like) object that can be used as a temporary
+     storage area.  The file is created using `mkstemp'. It will be
+     destroyed as soon as it is closed (including an implicit close when
+     the object is garbage collected).  Under UNIX, the directory entry
+     for the file is removed immediately after the file is created.
+     Other platforms do not support this; your code should not rely on a
+     temporary file created using this function having or not having a
+     visible name in the file system.
+
+     The MODE parameter defaults to `'w+b'' so that the file created
+     can be read and written without being closed.  Binary mode is used
+     so that it behaves consistently on all platforms without regard
+     for the data that is stored.  BUFSIZE defaults to `-1', meaning
+     that the operating system default is used.
+
+     The DIR, PREFIX and SUFFIX parameters are passed to `mkstemp()'.
+
+`NamedTemporaryFile([mode='w+b'] [, bufsize=-1] [, suffix] [, prefix] [, dir])'
+     This function operates exactly as `TemporaryFile()' does, except
+     that the file is guaranteed to have a visible name in the file
+     system (on UNIX, the directory entry is not unlinked).  That name
+     can be retrieved from the `name' member of the file object.
+     Whether the name can be used to open the file a second time, while
+     the named temporary file is still open, varies across platforms
+     (it can be so used on UNIX; it cannot on Windows NT or later).
+     _Added in Python version 2.3_
+
+`mkstemp([suffix] [, prefix] [, dir] [, text=False])'
+     Creates a temporary file in the most secure manner possible.  There
+     are no race conditions in the file's creation, assuming that the
+     platform properly implements the `O_EXCL' flag for `os.open()'.
+     The file is readable and writable only by the creating user ID.
+     If the platform uses permission bits to indicate whether a file is
+     executable, the file is executable by no one.  The file descriptor
+     is not inherited by child processes.
+
+     Unlike `TemporaryFile()', the user of `mkstemp()' is responsible
+     for deleting the temporary file when done with it.
+
+     If SUFFIX is specified, the file name will end with that suffix,
+     otherwise there will be no suffix.  `mkstemp()' does not put a dot
+     between the file name and the suffix; if you need one, put it at
+     the beginning of SUFFIX.
+
+     If PREFIX is specified, the file name will begin with that prefix;
+     otherwise, a default prefix is used.
+
+     If DIR is specified, the file will be created in that directory;
+     otherwise, a default directory is used.
+
+     If TEXT is specified, it indicates whether to open the file in
+     binary mode (the default) or text mode.  On some platforms, this
+     makes no difference.
+
+     `mkstemp()' returns a tuple containing an OS-level handle to an
+     open file (as would be returned by `os.open()') and the absolute
+     pathname of that file, in that order.  _Added in Python version
+     2.3_
+
+`mkdtemp([suffix] [, prefix] [, dir])'
+     Creates a temporary directory in the most secure manner possible.
+     There are no race conditions in the directory's creation.  The
+     directory is readable, writable, and searchable only by the
+     creating user ID.
+
+     The user of `mkdtemp()' is responsible for deleting the temporary
+     directory and its contents when done with it.
+
+     The PREFIX, SUFFIX, and DIR arguments are the same as for
+     `mkstemp()'.
+
+     `mkdtemp()' returns the absolute pathname of the new directory.
+     _Added in Python version 2.3_
+
+`mktemp([suffix] [, prefix] [, dir])'
+     _This is deprecated in Python 2.3.  Use `mkstemp()' instead._
+     Return an absolute pathname of a file that did not exist at the
+     time the call is made.  The PREFIX, SUFFIX, and DIR arguments are
+     the same as for `mkstemp()'.
+
+     _Use of this function may introduce a security hole in your
+     program.  By the time you get around to doing anything with the
+     file name it returns, someone else may have beaten you to the
+     punch._
+
+The module uses two global variables that tell it how to construct a
+temporary name.  They are initialized at the first call to any of the
+functions above.  The caller may change them, but this is discouraged;
+use the appropriate function arguments, instead.
+
+`tempdir'
+     When set to a value other than `None', this variable defines the
+     default value for the DIR argument to all the functions defined in
+     this module.
+
+     If TEMPDIR is unset or `None' at any call to any of the above
+     functions, Python searches a standard list of directories and sets
+     TEMPDIR to the first one which the calling user can create files
+     in.  The list is:
+
+       1. The directory named by the `TMPDIR' environment variable.
+
+       2. The directory named by the `TEMP' environment variable.
+
+       3. The directory named by the `TMP' environment variable.
+
+       4. A platform-specific location:
+             * On Macintosh, the `Temporary Items' folder.
+
+             * On RiscOS, the directory named by the `Wimp$ScrapDir'
+               environment variable.
+
+             * On Windows, the directories `C:$\backslash$TEMP',
+               `C:$\backslash$TMP', `$\backslash$TEMP', and
+               `$\backslash$TMP', in that order.
+
+             * On all other platforms, the directories `/tmp',
+               `/var/tmp', and `/usr/tmp', in that order.
+
+       5. As a last resort, the current working directory.
+
+`gettempdir()'
+     Return the directory currently selected to create temporary files
+     in.  If TEMPDIR is not None, this simply returns its contents;
+     otherwise, the search described above is performed, and the result
+     returned.
+
+`template'
+     _This is deprecated in Python 2.0.  Use `gettempprefix()' instead._
+     When set to a value other than `None', this variable defines the
+     prefix of the final component of the filenames returned by
+     `mktemp()'.  A string of six random letters and digits is appended
+     to the prefix to make the filename unique.  On Windows, the
+     default prefix is `~T'; on all other systems it is `tmp'.
+
+     Older versions of this module used to require that `template' be
+     set to `None' after a call to `os.fork()'; this has not been
+     necessary since version 1.5.2.
+
+`gettempprefix()'
+     Return the filename prefix used to create temporary files.  This
+     does not contain the directory component.  Using this function is
+     preferred over reading the TEMPLATE variable directly.  _Added in
+     Python version 1.5.2_
+
+
+File: python-lib.info,  Node: errno,  Next: glob,  Prev: tempfile,  Up: Generic Operating System Services
+
+Standard errno system symbols
+=============================
+
+Standard errno system symbols.
+
+This module makes available standard `errno' system symbols.  The value
+of each symbol is the corresponding integer value.  The names and
+descriptions are borrowed from `linux/include/errno.h', which should be
+pretty all-inclusive.
+
+`errorcode'
+     Dictionary providing a mapping from the errno value to the string
+     name in the underlying system.  For instance,
+     `errno.errorcode[errno.EPERM]' maps to `'EPERM''.
+
+To translate a numeric error code to an error message, use
+`os.strerror()'.
+
+Of the following list, symbols that are not used on the current
+platform are not defined by the module.  The specific list of defined
+symbols is available as `errno.errorcode.keys()'.  Symbols available
+can include:
+
+`EPERM'
+     Operation not permitted
+`ENOENT'
+     No such file or directory
+`ESRCH'
+     No such process
+`EINTR'
+     Interrupted system call
+`EIO'
+     I/O error
+`ENXIO'
+     No such device or address
+`E2BIG'
+     Arg list too long
+`ENOEXEC'
+     Exec format error
+`EBADF'
+     Bad file number
+`ECHILD'
+     No child processes
+`EAGAIN'
+     Try again
+`ENOMEM'
+     Out of memory
+`EACCES'
+     Permission denied
+`EFAULT'
+     Bad address
+`ENOTBLK'
+     Block device required
+`EBUSY'
+     Device or resource busy
+`EEXIST'
+     File exists
+`EXDEV'
+     Cross-device link
+`ENODEV'
+     No such device
+`ENOTDIR'
+     Not a directory
+`EISDIR'
+     Is a directory
+`EINVAL'
+     Invalid argument
+`ENFILE'
+     File table overflow
+`EMFILE'
+     Too many open files
+`ENOTTY'
+     Not a typewriter
+`ETXTBSY'
+     Text file busy
+`EFBIG'
+     File too large
+`ENOSPC'
+     No space left on device
+`ESPIPE'
+     Illegal seek
+`EROFS'
+     Read-only file system
+`EMLINK'
+     Too many links
+`EPIPE'
+     Broken pipe
+`EDOM'
+     Math argument out of domain of func
+`ERANGE'
+     Math result not representable
+`EDEADLK'
+     Resource deadlock would occur
+`ENAMETOOLONG'
+     File name too long
+`ENOLCK'
+     No record locks available
+`ENOSYS'
+     Function not implemented
+`ENOTEMPTY'
+     Directory not empty
+`ELOOP'
+     Too many symbolic links encountered
+`EWOULDBLOCK'
+     Operation would block
+`ENOMSG'
+     No message of desired type
+`EIDRM'
+     Identifier removed
+`ECHRNG'
+     Channel number out of range
+`EL2NSYNC'
+     Level 2 not synchronized
+`EL3HLT'
+     Level 3 halted
+`EL3RST'
+     Level 3 reset
+`ELNRNG'
+     Link number out of range
+`EUNATCH'
+     Protocol driver not attached
+`ENOCSI'
+     No CSI structure available
+`EL2HLT'
+     Level 2 halted
+`EBADE'
+     Invalid exchange
+`EBADR'
+     Invalid request descriptor
+`EXFULL'
+     Exchange full
+`ENOANO'
+     No anode
+`EBADRQC'
+     Invalid request code
+`EBADSLT'
+     Invalid slot
+`EDEADLOCK'
+     File locking deadlock error
+`EBFONT'
+     Bad font file format
+`ENOSTR'
+     Device not a stream
+`ENODATA'
+     No data available
+`ETIME'
+     Timer expired
+`ENOSR'
+     Out of streams resources
+`ENONET'
+     Machine is not on the network
+`ENOPKG'
+     Package not installed
+`EREMOTE'
+     Object is remote
+`ENOLINK'
+     Link has been severed
+`EADV'
+     Advertise error
+`ESRMNT'
+     Srmount error
+`ECOMM'
+     Communication error on send
+`EPROTO'
+     Protocol error
+`EMULTIHOP'
+     Multihop attempted
+`EDOTDOT'
+     RFS specific error
+`EBADMSG'
+     Not a data message
+`EOVERFLOW'
+     Value too large for defined data type
+`ENOTUNIQ'
+     Name not unique on network
+`EBADFD'
+     File descriptor in bad state
+`EREMCHG'
+     Remote address changed
+`ELIBACC'
+     Can not access a needed shared library
+`ELIBBAD'
+     Accessing a corrupted shared library
+`ELIBSCN'
+     .lib section in a.out corrupted
+`ELIBMAX'
+     Attempting to link in too many shared libraries
+`ELIBEXEC'
+     Cannot exec a shared library directly
+`EILSEQ'
+     Illegal byte sequence
+`ERESTART'
+     Interrupted system call should be restarted
+`ESTRPIPE'
+     Streams pipe error
+`EUSERS'
+     Too many users
+`ENOTSOCK'
+     Socket operation on non-socket
+`EDESTADDRREQ'
+     Destination address required
+`EMSGSIZE'
+     Message too long
+`EPROTOTYPE'
+     Protocol wrong type for socket
+`ENOPROTOOPT'
+     Protocol not available
+`EPROTONOSUPPORT'
+     Protocol not supported
+`ESOCKTNOSUPPORT'
+     Socket type not supported
+`EOPNOTSUPP'
+     Operation not supported on transport endpoint
+`EPFNOSUPPORT'
+     Protocol family not supported
+`EAFNOSUPPORT'
+     Address family not supported by protocol
+`EADDRINUSE'
+     Address already in use
+`EADDRNOTAVAIL'
+     Cannot assign requested address
+`ENETDOWN'
+     Network is down
+`ENETUNREACH'
+     Network is unreachable
+`ENETRESET'
+     Network dropped connection because of reset
+`ECONNABORTED'
+     Software caused connection abort
+`ECONNRESET'
+     Connection reset by peer
+`ENOBUFS'
+     No buffer space available
+`EISCONN'
+     Transport endpoint is already connected
+`ENOTCONN'
+     Transport endpoint is not connected
+`ESHUTDOWN'
+     Cannot send after transport endpoint shutdown
+`ETOOMANYREFS'
+     Too many references: cannot splice
+`ETIMEDOUT'
+     Connection timed out
+`ECONNREFUSED'
+     Connection refused
+`EHOSTDOWN'
+     Host is down
+`EHOSTUNREACH'
+     No route to host
+`EALREADY'
+     Operation already in progress
+`EINPROGRESS'
+     Operation now in progress
+`ESTALE'
+     Stale NFS file handle
+`EUCLEAN'
+     Structure needs cleaning
+`ENOTNAM'
+     Not a XENIX named type file
+`ENAVAIL'
+     No XENIX semaphores available
+`EISNAM'
+     Is a named type file
+`EREMOTEIO'
+     Remote I/O error
+`EDQUOT'
+     Quota exceeded
+
+
+File: python-lib.info,  Node: glob,  Next: fnmatch,  Prev: errno,  Up: Generic Operating System Services
+
+UNIX style pathname pattern expansion
+=====================================
+
+UNIX shell style pathname pattern expansion.
+
+The `glob' module finds all the pathnames matching a specified pattern
+according to the rules used by the UNIX shell.  No tilde expansion is
+done, but `*', `?', and character ranges expressed with `[]' will be
+correctly matched.  This is done by using the `os.listdir()' and
+`fnmatch.fnmatch()' functions in concert, and not by actually invoking
+a subshell.  (For tilde and shell variable expansion, use
+`os.path.expanduser()' and `os.path.expandvars()'.)
+
+`glob(pathname)'
+     Returns a possibly-empty list of path names that match PATHNAME,
+     which must be a string containing a path specification.  PATHNAME
+     can be either absolute (like `/usr/src/Python-1.5/Makefile') or
+     relative (like `../../Tools/*/*.gif'), and can contain shell-style
+     wildcards.
+
+For example, consider a directory containing only the following files:
+`1.gif', `2.txt', and `card.gif'.  `glob()' will produce the following
+results.  Notice how any leading components of the path are preserved.
+
+     >>> import glob
+     >>> glob.glob('./[0-9].*')
+     ['./1.gif', './2.txt']
+     >>> glob.glob('*.gif')
+     ['1.gif', 'card.gif']
+     >>> glob.glob('?.gif')
+     ['1.gif']
+
+See also:
+     *Note fnmatch:: Shell-style filename (not path) expansion
+
+
+File: python-lib.info,  Node: fnmatch,  Next: shutil,  Prev: glob,  Up: Generic Operating System Services
+
+UNIX filename pattern matching
+==============================
+
+UNIX shell style filename pattern matching.
+
+This module provides support for UNIX shell-style wildcards, which are
+_not_ the same as regular expressions (which are documented in the `re'
+module).  The special characters used in shell-style wildcards are:
+
+Pattern                              Meaning
+------                               -----
+*                                    matches everything
+?                                    matches any single character
+[SEQ]                                matches any character in SEQ
+[!SEQ]                               matches any character not in SEQ
+
+Note that the filename separator (`'/'' on UNIX) is _not_ special to
+this module.  See module `glob'  for pathname expansion (`glob' uses
+`fnmatch()' to match pathname segments).  Similarly, filenames starting
+with a period are not special for this module, and are matched by the
+`*' and `?' patterns.
+
+`fnmatch(filename, pattern)'
+     Test whether the FILENAME string matches the PATTERN string,
+     returning true or false.  If the operating system is
+     case-insensitive, then both parameters will be normalized to all
+     lower- or upper-case before the comparison is performed.  If you
+     require a case-sensitive comparison regardless of whether that's
+     standard for your operating system, use `fnmatchcase()' instead.
+
+`fnmatchcase(filename, pattern)'
+     Test whether FILENAME matches PATTERN, returning true or false;
+     the comparison is case-sensitive.
+
+`filter(names, pattern)'
+     Return the subset of the list of NAMES that match PATTERN.  It is
+     the same as `[n for n in names if fnmatch(n, pattern)]', but
+     implemented more efficiently.  _Added in Python version 2.2_
+
+See also:
+     *Note glob:: UNIX shell-style path expansion.
+
+
+File: python-lib.info,  Node: shutil,  Next: locale,  Prev: fnmatch,  Up: Generic Operating System Services
+
+High-level file operations
+==========================
+
+High-level file operations, including copying.
+
+The `shutil' module offers a number of high-level operations on files
+and collections of files.  In particular, functions are provided which
+support file copying and removal.
+
+*Caveat:*  On MacOS, the resource fork and other metadata are not used.
+For file copies, this means that resources will be lost and file type
+and creator codes will not be correct.
+
+`copyfile(src, dst)'
+     Copy the contents of the file named SRC to a file named DST.  If
+     DST exists, it will be replaced, otherwise it will be created.
+     Special files such as character or block devices and pipes cannot
+     not be copied with this function.  SRC and DST are path names
+     given as strings.
+
+`copyfileobj(fsrc, fdst[, length])'
+     Copy the contents of the file-like object FSRC to the file-like
+     object FDST.  The integer LENGTH, if given, is the buffer size. In
+     particular, a negative LENGTH value means to copy the data without
+     looping over the source data in chunks; by default the data is
+     read in chunks to avoid uncontrolled memory consumption.
+
+`copymode(src, dst)'
+     Copy the permission bits from SRC to DST.  The file contents,
+     owner, and group are unaffected.  SRC and DST are path names given
+     as strings.
+
+`copystat(src, dst)'
+     Copy the permission bits, last access time, and last modification
+     time from SRC to DST.  The file contents, owner, and group are
+     unaffected.  SRC and DST are path names given as strings.
+
+`copy(src, dst)'
+     Copy the file SRC to the file or directory DST.  If DST is a
+     directory, a file with the same basename as SRC is created (or
+     overwritten) in the directory specified.  Permission bits are
+     copied.  SRC and DST are path names given as strings.
+
+`copy2(src, dst)'
+     Similar to `copy()', but last access time and last modification
+     time are copied as well.  This is similar to the UNIX command `cp'
+     `-p'.
+
+`copytree(src, dst[, symlinks])'
+     Recursively copy an entire directory tree rooted at SRC.  The
+     destination directory, named by DST, must not already exist; it
+     will be created.  Individual files are copied using `copy2()'.  If
+     SYMLINKS is true, symbolic links in the source tree are
+     represented as symbolic links in the new tree; if false or
+     omitted, the contents of the linked files are copied to the new
+     tree.  If exception(s) occur, an Error is raised with a list of
+     reasons.
+
+     The source code for this should be considered an example rather
+     than a tool.  _Changed in Python version 2.3_
+
+`rmtree(path[, ignore_errors[, onerror]])'
+     Delete an entire directory tree.  If IGNORE_ERRORS is true, errors
+     resulting from failed removals will be ignored; if false or
+     omitted, such errors are handled by calling a handler specified by
+     ONERROR or, if that is omitted, they raise an exception.
+
+     If ONERROR is provided, it must be a callable that accepts three
+     parameters: FUNCTION, PATH, and EXCINFO.  The first parameter,
+     FUNCTION, is the function which raised the exception; it will be
+     `os.remove()' or `os.rmdir()'.  The second parameter, PATH, will be
+     the path name passed to FUNCTION.  The third parameter, EXCINFO,
+     will be the exception information return by `sys.exc_info()'.
+     Exceptions raised by ONERROR will not be caught.
+
+`move(src, dst)'
+     Recursively move a file or directory to another location.
+
+     If the destination is on our current filesystem, then simply use
+     rename.  Otherwise, copy src to the dst and then remove src.
+
+     _Added in Python version 2.3_
+
+`Error'
+     This exception collects exceptions that raised during a mult-file
+     operation. For `copytree', the exception argument is a list of
+     3-tuples (SRCNAME, DSTNAME, EXCEPTION).
+
+     _Added in Python version 2.3_
+
+* Menu:
+
+* Example 6::
+
+
+File: python-lib.info,  Node: Example 6,  Prev: shutil,  Up: shutil
+
+Example
+-------
+
+This example is the implementation of the `copytree()' function,
+described above, with the docstring omitted.  It demonstrates many of
+the other functions provided by this module.
+
+     def copytree(src, dst, symlinks=0):
+         names = os.listdir(src)
+         os.mkdir(dst)
+         for name in names:
+             srcname = os.path.join(src, name)
+             dstname = os.path.join(dst, name)
+             try:
+                 if symlinks and os.path.islink(srcname):
+                     linkto = os.readlink(srcname)
+                     os.symlink(linkto, dstname)
+                 elif os.path.isdir(srcname):
+                     copytree(srcname, dstname, symlinks)
+                 else:
+                     copy2(srcname, dstname)
+             except (IOError, os.error), why:
+                 print "Can't copy %s to %s: %s" % (`srcname`, `dstname`, str(why))
+
+
+File: python-lib.info,  Node: locale,  Next: gettext,  Prev: shutil,  Up: Generic Operating System Services
+
+Internationalization services
+=============================
+
+Internationalization services.
+
+The `locale' module opens access to the POSIX locale database and
+functionality. The POSIX locale mechanism allows programmers to deal
+with certain cultural issues in an application, without requiring the
+programmer to know all the specifics of each country where the software
+is executed.
+
+The `locale' module is implemented on top of the `_locale'  module,
+which in turn uses an ANSI C locale implementation if available.
+
+The `locale' module defines the following exception and functions:
+
+`Error'
+     Exception raised when `setlocale()' fails.
+
+`setlocale(category[, locale])'
+     If LOCALE is specified, it may be a string, a tuple of the form
+     `(LANGUAGE CODE, ENCODING)', or `None'.  If it is a tuple, it is
+     converted to a string using the locale aliasing engine.  If LOCALE
+     is given and not `None', `setlocale()' modifies the locale setting
+     for the CATEGORY.  The available categories are listed in the data
+     description below.  The value is the name of a locale.  An empty
+     string specifies the user's default settings. If the modification
+     of the locale fails, the exception `Error' is raised.  If
+     successful, the new locale setting is returned.
+
+     If LOCALE is omitted or `None', the current setting for CATEGORY
+     is returned.
+
+     `setlocale()' is not thread safe on most systems.  Applications
+     typically start with a call of
+
+          import locale
+          locale.setlocale(locale.LC_ALL, '')
+
+     This sets the locale for all categories to the user's default
+     setting (typically specified in the `LANG' environment variable).
+     If the locale is not changed thereafter, using multithreading
+     should not cause problems.
+
+     _Changed in Python version 2.0_
+
+`localeconv()'
+     Returns the database of the local conventions as a dictionary.
+     This dictionary has the following strings as keys:
+
+     Key                    Category               Meaning
+     ------                 -----                  -----
+     LC_NUMERIC             `'decimal_point''      Decimal point
+                                                   character.
+                            `'grouping''           Sequence of numbers
+                                                   specifying which
+                                                   relative positions
+                                                   the `'thousands_sep''
+                                                   is expected.  If the
+                                                   sequence is
+                                                   terminated with
+                                                   `CHAR_MAX', no
+                                                   further grouping is
+                                                   performed. If the
+                                                   sequence terminates
+                                                   with a `0',  the last
+                                                   group size is
+                                                   repeatedly used.
+                            `'thousands_sep''      Character used
+                                                   between groups.
+     LC_MONETARY            `'int_curr_symbol''    International
+                                                   currency symbol.
+                            `'currency_symbol''    Local currency symbol.
+                            `'mon_decimal_point''  Decimal point used
+                                                   for monetary values.
+                            `'mon_thousands_sep''  Group separator used
+                                                   for monetary values.
+                            `'mon_grouping''       Equivalent to
+                                                   `'grouping'', used
+                                                   for monetary values.
+                            `'positive_sign''      Symbol used to
+                                                   annotate a positive
+                                                   monetary value.
+                            `'negative_sign''      Symbol used to
+                                                   annotate a nnegative
+                                                   monetary value.
+                            `'frac_digits''        Number of fractional
+                                                   digits used in local
+                                                   formatting of
+                                                   monetary values.
+                            `'int_frac_digits''    Number of fractional
+                                                   digits used in
+                                                   international
+                                                   formatting of
+                                                   monetary values.
+
+     The possible values for `'p_sign_posn'' and `'n_sign_posn'' are
+     given below.
+
+     Value                              Explanation
+     ------                             -----
+     0                                  Currency and value are surrounded
+                                        by parentheses.
+     1                                  The sign should precede the value
+                                        and currency symbol.
+     2                                  The sign should follow the value
+                                        and currency symbol.
+     3                                  The sign should immediately
+                                        precede the value.
+     4                                  The sign should immediately
+                                        follow the value.
+     `LC_MAX'                           Nothing is specified in this
+                                        locale.
+
+`nl_langinfo(option)'
+     Return some locale-specific information as a string. This function
+     is not available on all systems, and the set of possible options
+     might also vary across platforms. The possible argument values are
+     numbers, for which symbolic constants are available in the locale
+     module.
+
+`getdefaultlocale([envvars])'
+     Tries to determine the default locale settings and returns them as
+     a tuple of the form `(LANGUAGE CODE, ENCODING)'.
+
+     According to POSIX, a program which has not called
+     `setlocale(LC_ALL, '')' runs using the portable `'C'' locale.
+     Calling `setlocale(LC_ALL, '')' lets it use the default locale as
+     defined by the `LANG' variable.  Since we do not want to interfere
+     with the current locale setting we thus emulate the behavior in
+     the way described above.
+
+     To maintain compatibility with other platforms, not only the
+     `LANG' variable is tested, but a list of variables given as
+     envvars parameter.  The first found to be defined will be used.
+     ENVVARS defaults to the search path used in GNU gettext; it must
+     always contain the variable name `LANG'.  The GNU gettext search
+     path contains `'LANGUAGE'', `'LC_ALL'', `'LC_CTYPE'', and
+     `'LANG'', in that order.
+
+     Except for the code `'C'', the language code corresponds to RFC
+     1766 .  LANGUAGE CODE and ENCODING may be `None' if their values
+     cannot be determined.  _Added in Python version 2.0_
+
+`getlocale([category])'
+     Returns the current setting for the given locale category as
+     sequence containing LANGUAGE CODE, ENCODING.  CATEGORY may be one
+     of the `LC_*' values except `LC_ALL'.  It defaults to `LC_CTYPE'.
+
+     Except for the code `'C'', the language code corresponds to RFC
+     1766 .  LANGUAGE CODE and ENCODING may be `None' if their values
+     cannot be determined.  _Added in Python version 2.0_
+
+`getpreferredencoding([do_setlocale])'
+     Return the encoding used for text data, according to user
+     preferences.  User preferences are expressed differently on
+     different systems, and might not be available programmatically on
+     some systems, so this function only returns a guess.
+
+     On some systems, it is necessary to invoke `setlocale' to obtain
+     the user preferences, so this function is not thread-safe.  If
+     invoking setlocale is not necessary or desired, DO_SETLOCALE
+     should be set to `False'.
+
+     _Added in Python version 2.3_
+
+`normalize(localename)'
+     Returns a normalized locale code for the given locale name.  The
+     returned locale code is formatted for use with `setlocale()'.  If
+     normalization fails, the original name is returned unchanged.
+
+     If the given encoding is not known, the function defaults to the
+     default encoding for the locale code just like `setlocale()'.
+     _Added in Python version 2.0_
+
+`resetlocale([category])'
+     Sets the locale for CATEGORY to the default setting.
+
+     The default setting is determined by calling `getdefaultlocale()'.
+     CATEGORY defaults to `LC_ALL'.  _Added in Python version 2.0_
+
+`strcoll(string1, string2)'
+     Compares two strings according to the current `LC_COLLATE'
+     setting. As any other compare function, returns a negative, or a
+     positive value, or `0', depending on whether STRING1 collates
+     before or after STRING2 or is equal to it.
+
+`strxfrm(string)'
+     Transforms a string to one that can be used for the built-in
+     function `cmp()' , and still returns locale-aware results.  This
+     function can be used when the same string is compared repeatedly,
+     e.g. when collating a sequence of strings.
+
+`format(format, val[, grouping])'
+     Formats a number VAL according to the current `LC_NUMERIC'
+     setting.  The format follows the conventions of the `%' operator.
+     For floating point values, the decimal point is modified if
+     appropriate.  If GROUPING is true, also takes the grouping into
+     account.
+
+`str(float)'
+     Formats a floating point number using the same format as the
+     built-in function `str(FLOAT)', but takes the decimal point into
+     account.
+
+`atof(string)'
+     Converts a string to a floating point number, following the
+     `LC_NUMERIC' settings.
+
+`atoi(string)'
+     Converts a string to an integer, following the `LC_NUMERIC'
+     conventions.
+
+`LC_CTYPE'
+     Locale category for the character type functions.  Depending on the
+     settings of this category, the functions of module `string'
+     dealing with case change their behaviour.
+
+`LC_COLLATE'
+     Locale category for sorting strings.  The functions `strcoll()'
+     and `strxfrm()' of the `locale' module are affected.
+
+`LC_TIME'
+     Locale category for the formatting of time.  The function
+     `time.strftime()' follows these conventions.
+
+`LC_MONETARY'
+     Locale category for formatting of monetary values.  The available
+     options are available from the `localeconv()' function.
+
+`LC_MESSAGES'
+     Locale category for message display. Python currently does not
+     support application specific locale-aware messages.  Messages
+     displayed by the operating system, like those returned by
+     `os.strerror()' might be affected by this category.
+
+`LC_NUMERIC'
+     Locale category for formatting numbers.  The functions `format()',
+     `atoi()', `atof()' and `str()' of the `locale' module are affected
+     by that category.  All other numeric formatting operations are not
+     affected.
+
+`LC_ALL'
+     Combination of all locale settings.  If this flag is used when the
+     locale is changed, setting the locale for all categories is
+     attempted. If that fails for any category, no category is changed
+     at all.  When the locale is retrieved using this flag, a string
+     indicating the setting for all categories is returned. This string
+     can be later used to restore the settings.
+
+`CHAR_MAX'
+     This is a symbolic constant used for different values returned by
+     `localeconv()'.
+
+The `nl_langinfo' function accepts one of the following keys.  Most
+descriptions are taken from the corresponding description in the GNU C
+library.
+
+`CODESET'
+     Return a string with the name of the character encoding used in the
+     selected locale.
+
+`D_T_FMT'
+     Return a string that can be used as a format string for
+     strftime(3) to represent time and date in a locale-specific way.
+
+`D_FMT'
+     Return a string that can be used as a format string for
+     strftime(3) to represent a date in a locale-specific way.
+
+`T_FMT'
+     Return a string that can be used as a format string for
+     strftime(3) to represent a time in a locale-specific way.
+
+`T_FMT_AMPM'
+     The return value can be used as a format string for `strftime' to
+     represent time in the am/pm format.
+
+`DAY_1 ... DAY_7'
+     Return name of the n-th day of the week. _This follows the US
+     convention of `DAY_1' being Sunday, not the international
+     convention (ISO 8601) that Monday is the first day of the week._
+
+`ABDAY_1 ... ABDAY_7'
+     Return abbreviated name of the n-th day of the week.
+
+`MON_1 ... MON_12'
+     Return name of the n-th month.
+
+`ABMON_1 ... ABMON_12'
+     Return abbreviated name of the n-th month.
+
+`RADIXCHAR'
+     Return radix character (decimal dot, decimal comma, etc.)
+
+`THOUSEP'
+     Return separator character for thousands (groups of three digits).
+
+`YESEXPR'
+     Return a regular expression that can be used with the regex
+     function to recognize a positive response to a yes/no question.
+     _The expression is in the syntax suitable for the `regex()'
+     function from the C library, which might differ from the syntax
+     used in `re'._
+
+`NOEXPR'
+     Return a regular expression that can be used with the regex(3)
+     function to recognize a negative response to a yes/no question.
+
+`CRNCYSTR'
+     Return the currency symbol, preceded by "-" if the symbol should
+     appear before the value, "+" if the symbol should appear after the
+     value, or "." if the symbol should replace the radix character.
+
+`ERA'
+     The return value represents the era used in the current locale.
+
+     Most locales do not define this value.  An example of a locale
+     which does define this value is the Japanese one.  In Japan, the
+     traditional representation of dates includes the name of the era
+     corresponding to the then-emperor's reign.
+
+     Normally it should not be necessary to use this value directly.
+     Specifying the `E' modifier in their format strings causes the
+     `strftime' function to use this information.  The format of the
+     returned string is not specified, and therefore you should not
+     assume knowledge of it on different systems.
+
+`ERA_YEAR'
+     The return value gives the year in the relevant era of the locale.
+
+`ERA_D_T_FMT'
+     This return value can be used as a format string for `strftime' to
+     represent dates and times in a locale-specific era-based way.
+
+`ERA_D_FMT'
+     This return value can be used as a format string for `strftime' to
+     represent time in a locale-specific era-based way.
+
+`ALT_DIGITS'
+     The return value is a representation of up to 100 values used to
+     represent the values 0 to 99.
+
+Example:
+
+     >>> import locale
+     >>> loc = locale.setlocale(locale.LC_ALL) # get current locale
+     >>> locale.setlocale(locale.LC_ALL, 'de_DE') # use German locale; name might vary with platform
+     >>> locale.strcoll('f\xe4n', 'foo') # compare a string containing an umlaut
+     >>> locale.setlocale(locale.LC_ALL, '') # use user's preferred locale
+     >>> locale.setlocale(locale.LC_ALL, 'C') # use default (C) locale
+     >>> locale.setlocale(locale.LC_ALL, loc) # restore saved locale
+
+* Menu:
+
+* Background::
+* For extension writers and programs that embed Python::
+* Access to message catalogs::
+
+
+File: python-lib.info,  Node: Background,  Next: For extension writers and programs that embed Python,  Prev: locale,  Up: locale
+
+Background, details, hints, tips and caveats
+--------------------------------------------
+
+The C standard defines the locale as a program-wide property that may
+be relatively expensive to change.  On top of that, some implementation
+are broken in such a way that frequent locale changes may cause core
+dumps.  This makes the locale somewhat painful to use correctly.
+
+Initially, when a program is started, the locale is the `C' locale, no
+matter what the user's preferred locale is.  The program must
+explicitly say that it wants the user's preferred locale settings by
+calling `setlocale(LC_ALL, '')'.
+
+It is generally a bad idea to call `setlocale()' in some library
+routine, since as a side effect it affects the entire program.  Saving
+and restoring it is almost as bad: it is expensive and affects other
+threads that happen to run before the settings have been restored.
+
+If, when coding a module for general use, you need a locale independent
+version of an operation that is affected by the locale (such as
+`string.lower()', or certain formats used with `time.strftime()'), you
+will have to find a way to do it without using the standard library
+routine.  Even better is convincing yourself that using locale settings
+is okay.  Only as a last resort should you document that your module is
+not compatible with non-`C' locale settings.
+
+The case conversion functions in the `string'  module are affected by
+the locale settings.  When a call to the `setlocale()' function changes
+the `LC_CTYPE' settings, the variables `string.lowercase',
+`string.uppercase' and `string.letters' are recalculated.  Note that
+this code that uses these variable through ``from' ... `import' ...',
+e.g. `from string import letters', is not affected by subsequent
+`setlocale()' calls.
+
+The only way to perform numeric operations according to the locale is
+to use the special functions defined by this module: `atof()',
+`atoi()', `format()', `str()'.
+

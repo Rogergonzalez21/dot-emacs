@@ -1,0 +1,40 @@
+TAB             twittering-goto-next-thing
+RET             twittering-enter
+ESC             Prefix Command
+$               end-of-line
+0               beginning-of-line
+G               end-of-buffer
+H               beginning-of-buffer
+L               twittering-other-user-list-interactive
+V               twittering-other-user-timeline-interactive
+^               beginning-of-line-text
+d               twittering-direct-message
+g               twittering-current-timeline
+h               backward-char
+i               twittering-icon-mode
+j               twittering-goto-next-status
+k               twittering-goto-previous-status
+l               forward-char
+n               twittering-goto-next-status-of-user
+p               twittering-goto-previous-status-of-user
+q               twittering-suspend
+s               twittering-scroll-mode
+t               twittering-toggle-proxy
+v               twittering-other-user-timeline
+<backspace>     backward-char
+<backtab>       twittering-goto-previous-thing
+<mouse-1>       twittering-click
+
+M-TAB           twittering-goto-previous-thing
+
+C-c C-e         twittering-erase-old-statuses
+C-c C-f         twittering-friends-timeline
+C-c C-g         twittering-public-timeline
+C-c C-h         twittering-set-current-hashtag
+C-c C-l         twittering-update-lambda
+C-c RET         twittering-retweet
+C-c C-p         twittering-toggle-proxy
+C-c C-r         twittering-replies-timeline
+C-c C-s         twittering-update-status-interactive
+C-c C-u         twittering-user-timeline
+C-c C-v         twittering-view-user-page

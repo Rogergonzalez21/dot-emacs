@@ -1,0 +1,1168 @@
+This is python-ref.info, produced by makeinfo version 4.3 from
+python-ref.texi.
+
+October 3, 2003
+
+
+File: python-ref.info,  Node: Implementing Descriptors,  Next: Invoking Descriptors,  Prev: More attribute access for new-style classes,  Up: Customizing attribute access
+
+Implementing Descriptors
+........................
+
+The following methods only apply when an instance of the class
+containing the method (a so-called _descriptor_ class) appears in the
+class dictionary of another new-style class, known as the _owner_
+class. In the examples below, "the attribute" refers to the attribute
+whose name is the key of the property in the owner class' `__dict__'.
+
+`__get__(self, instance, owner)'
+     Called to get the attribute of the owner class (class attribute
+     access) or of an instance of that class (instance attribute acces).
+     OWNER is always the owner class, while INSTANCE is the instance
+     that the attribute was accessed through, or `None' when the
+     attribute is accessed through the OWNER.  This method should
+     return the (computed) attribute value or raise an `AttributeError'
+     exception.
+
+`__set__(self, instance, value)'
+     Called to set the attribute on an instance INSTANCE of the owner
+     class to a new value, VALUE.
+
+`__delete__(self, instance)'
+     Called to delete the attribute on an instance INSTANCE of the
+     owner class.
+
+
+File: python-ref.info,  Node: Invoking Descriptors,  Next: __slots__,  Prev: Implementing Descriptors,  Up: Customizing attribute access
+
+Invoking Descriptors
+....................
+
+In general, a descriptor is an object attribute with "binding behavior",
+one whose attribute access has been overridden by methods in the
+descriptor protocol:  `__get__()', `__set__()', and `__delete__()'.  If
+any of those methods are defined for an object, it is said to be a
+descriptor.
+
+The default behavior for attribute access is to get, set, or delete the
+attribute from an object's dictionary. For instance, `a.x' has a lookup
+chain starting with `a.__dict__['x']', then `type(a).__dict__['x']',
+and continuing through the base classes of `type(a)' excluding
+metaclasses.
+
+However, if the looked-up value is an object defining one of the
+descriptor methods, then Python may override the default behavior and
+invoke the descriptor method instead.  Where this occurs in the
+precedence chain depends on which descriptor methods were defined and
+how they were called.  Note that descriptors are only invoked for new
+style objects or classes (ones that subclass `object()' or `type()').
+
+The starting point for descriptor invocation is a binding, `a.x'.  How
+the arguments are assembled depends on `a':
+
+   * Direct Call The simplest and least common call is when user code
+     directly invokes a descriptor method:    `x.__get__(a)'.
+
+   * Instance Binding If binding to a new-style object instance, `a.x'
+     is transformed into the call: `type(a).__dict__['x'].__get__(a,
+     type(a))'.
+
+   * Class Binding If binding to a new-style class, `A.x' is
+     transformed into the call: `A.__dict__['x'].__get__(None, A)'.
+
+   * Super Binding If `a' is an instance of `super', then the binding
+     `super(B, obj).m()' searches `obj.__class__.__mro__' for the base
+     class `A' immediately preceding `B' and then invokes the
+     descriptor with the call: `A.__dict__['m'].__get__(obj, A)'.
+
+
+For instance bindings, the precedence of descriptor invocation depends
+on the which descriptor methods are defined.  Data descriptors define
+both `__get__()' and `__set__()'.  Non-data descriptors have just the
+`__get__()' method.  Data descriptors always override a redefinition in
+an instance dictionary.  In contrast, non-data descriptors can be
+overridden by instances.
+
+Python methods (including `staticmethod()' and `classmethod()') are
+implemented as non-data descriptors.  Accordingly, instances can
+redefine and override methods.  This allows individual instances to
+acquire behaviors that differ from other instances of the same class.
+
+The `property()' function is implemented as a data descriptor.
+Accordingly, instances cannot override the behavior of a property.
+
+
+File: python-ref.info,  Node: __slots__,  Prev: Invoking Descriptors,  Up: Customizing attribute access
+
+__slots__
+.........
+
+By default, instances of both old and new-style classes have a
+dictionary for attribute storage.  This wastes space for objects having
+very few instance variables.  The space consumption can become acute
+when creating large numbers of instances.
+
+The default can be overridden by defining __SLOTS__ in a new-style class
+definition.  The __SLOTS__ declaration takes a sequence of instance
+variables and reserves just enough space in each instance to hold a
+value for each variable.  Space is saved because __DICT__ is not
+created for each instance.
+
+`__slots__'
+     This class variable can be assigned a string, iterable, or
+     sequence of strings with variable names used by instances.  If
+     defined in a new-style class, __SLOTS__ reserves space for the
+     declared variables and prevents the automatic creation of __DICT__
+     and __WEAKREF__ for each instance.  _Added in Python version 2.2_
+
+Notes on using __SLOTS__
+
+   * Without a __DICT__ variable, instances cannot be assigned new
+     variables not listed in the __SLOTS__ definition.  Attempts to
+     assign to an unlisted variable name raises `AttributeError'. If
+     dynamic assignment of new variables is desired, then add
+     `'__dict__'' to the sequence of strings in the __SLOTS__
+     declaration.  _Changed in Python version 2.3_
+
+   * Without a __WEAKREF__ variable for each instance, classes defining
+     __SLOTS__ do not support weak references to its instances.  If
+     weak reference support is needed, then add `'__weakref__'' to the
+     sequence of strings in the __SLOTS__ declaration.  _Changed in
+     Python version 2.3_
+
+   * __SLOTS__ are implemented at the class level by creating
+     descriptors (*Note Implementing Descriptors::) for each variable
+     name.  As a result, class attributes cannot be used to set default
+     values for instance variables defined by __SLOTS__; otherwise, the
+     class attribute would overwrite the descriptor assignment.
+
+   * If a class defines a slot also defined in a base class, the
+     instance variable defined by the base class slot is inaccessible
+     (except by retrieving its descriptor directly from the base
+     class). This renders the meaning of the program undefined.  In the
+     future, a check may be added to prevent this.
+
+   * The action of a __SLOTS__ declaration is limited to the class
+     where it is defined.  As a result, subclasses will have a __DICT__
+     unless they also define  __SLOTS__.
+
+   * __SLOTS__ do not work for classes derived from "variable-length"
+     built-in types such as `long', `str' and `tuple'.
+
+   * Any non-string iterable may be assigned to __SLOTS__.  Mappings
+     may also be used; however, in the future, special meaning may be
+     assigned to the values corresponding to each key.
+
+
+
+File: python-ref.info,  Node: Customizing class creation,  Next: Emulating callable objects,  Prev: Customizing attribute access,  Up: Special method names
+
+Customizing class creation
+--------------------------
+
+By default, new-style classes are constructed using `type()'.  A class
+definition is read into a separate namespace and the value of class
+name is bound to the result of `type(name, bases, dict)'.
+
+When the class definition is read, if __METACLASS__ is defined then the
+callable assigned to it will be called instead of `type()'.  The allows
+classes or functions to be written which monitor or alter the class
+creation process:
+
+   * Modifying the class dictionary prior to the class being created.
+
+   * Returning an instance of another class - essentially performing
+     the role of a factory function.
+
+`__metaclass__'
+     This variable can be any callable accepting arguments for `name',
+     `bases', and `dict'.  Upon class creation, the callable is used
+     instead of the built-in `type()'.  _Added in Python version 2.2_
+
+The appropriate metaclass is determined by the following precedence
+rules:
+
+   * If `dict['__metaclass__']' exists, it is used.
+
+   * Otherwise, if there is at least one base class, its metaclass is
+     used (this looks for a __CLASS__ attribute first and if not found,
+     uses its type).
+
+   * Otherwise, if a global variable named __metaclass__ exists, it is
+     used.
+
+   * Otherwise, the old-style, classic metaclass (types.ClassType) is
+     used.
+
+
+The potential uses for metaclasses are boundless. Some ideas that have
+been explored including logging, interface checking, automatic
+delegation, automatic property creation, proxies, frameworks, and
+automatic resource locking/synchronization.
+
+
+File: python-ref.info,  Node: Emulating callable objects,  Next: Emulating container types,  Prev: Customizing class creation,  Up: Special method names
+
+Emulating callable objects
+--------------------------
+
+`__call__(self[, args...])'
+     Called when the instance is "called" as a function; if this method
+     is defined, `X(arg1, arg2, ...)' is a shorthand for
+     `X.__call__(arg1, arg2, ...)'.
+
+
+File: python-ref.info,  Node: Emulating container types,  Next: Additional methods for emulation of sequence types,  Prev: Emulating callable objects,  Up: Special method names
+
+Emulating container types
+-------------------------
+
+The following methods can be defined to implement container objects.
+Containers usually are sequences (such as lists or tuples) or mappings
+(like dictionaries), but can represent other containers as well.  The
+first set of methods is used either to emulate a sequence or to emulate
+a mapping; the difference is that for a sequence, the allowable keys
+should be the integers K for which `0 <= K < N' where N is the length
+of the sequence, or slice objects, which define a range of items. (For
+backwards compatibility, the method `__getslice__()' (see below) can
+also be defined to handle simple, but not extended slices.) It is also
+recommended that mappings provide the methods `keys()', `values()',
+`items()', `has_key()', `get()', `clear()', `setdefault()',
+`iterkeys()', `itervalues()', `iteritems()', `pop()', `popitem()',
+`copy()', and `update()' behaving similar to those for Python's
+standard dictionary objects.  The `UserDict' module provides a
+`DictMixin' class to help create those methods from a base set of
+`__getitem__()', `__setitem__()', `__delitem__()', and `keys()'.
+Mutable sequences should provide methods `append()', `count()',
+`index()', `extend()', `insert()', `pop()', `remove()', `reverse()' and
+`sort()', like Python standard list objects.  Finally, sequence types
+should implement addition (meaning concatenation) and multiplication
+(meaning repetition) by defining the methods `__add__()', `__radd__()',
+`__iadd__()', `__mul__()', `__rmul__()' and `__imul__()' described
+below; they should not define `__coerce__()' or other numerical
+operators.  It is recommended that both mappings and sequences
+implement the `__contains__()' method to allow efficient use of the
+`in' operator; for mappings, `in' should be equivalent of `has_key()';
+for sequences, it should search through the values.  It is further
+recommended that both mappings and sequences implement the `__iter__()'
+method to allow efficient iteration through the container; for
+mappings, `__iter__()' should be the same as `iterkeys()'; for
+sequences, it should iterate through the values.
+
+`__len__(self)'
+     Called to implement the built-in function `len()' .  Should return
+     the length of the object, an integer `>=' 0.  Also, an object that
+     doesn't define a `__nonzero__()' method and whose `__len__()'
+     method returns zero is considered to be false in a Boolean context.
+
+`__getitem__(self, key)'
+     Called to implement evaluation of `SELF[KEY]'.  For sequence
+     types, the accepted keys should be integers and slice objects.
+     Note that the special interpretation of negative indexes (if the
+     class wishes to emulate a sequence type) is up to the
+     `__getitem__()' method.  If KEY is of an inappropriate type,
+     `TypeError' may be raised; if of a value outside the set of
+     indexes for the sequence (after any special interpretation of
+     negative values), `IndexError' should be raised.  _Note:_ `for'
+     loops expect that an `IndexError' will be raised for illegal
+     indexes to allow proper detection of the end of the sequence.
+
+`__setitem__(self, key, value)'
+     Called to implement assignment to `SELF[KEY]'.  Same note as for
+     `__getitem__()'.  This should only be implemented for mappings if
+     the objects support changes to the values for keys, or if new keys
+     can be added, or for sequences if elements can be replaced.  The
+     same exceptions should be raised for improper KEY values as for
+     the `__getitem__()' method.
+
+`__delitem__(self, key)'
+     Called to implement deletion of `SELF[KEY]'.  Same note as for
+     `__getitem__()'.  This should only be implemented for mappings if
+     the objects support removal of keys, or for sequences if elements
+     can be removed from the sequence.  The same exceptions should be
+     raised for improper KEY values as for the `__getitem__()' method.
+
+`__iter__(self)'
+     This method is called when an iterator is required for a container.
+     This method should return a new iterator object that can iterate
+     over all the objects in the container.  For mappings, it should
+     iterate over the keys of the container, and should also be made
+     available as the method `iterkeys()'.
+
+     Iterator objects also need to implement this method; they are
+     required to return themselves.  For more information on iterator
+     objects, see "Iterator Types" in the .
+
+The membership test operators (`in' and `not in') are normally
+implemented as an iteration through a sequence.  However, container
+objects can supply the following special method with a more efficient
+implementation, which also does not require the object be a sequence.
+
+`__contains__(self, item)'
+     Called to implement membership test operators.  Should return true
+     if ITEM is in SELF, false otherwise.  For mapping objects, this
+     should consider the keys of the mapping rather than the values or
+     the key-item pairs.
+
+
+File: python-ref.info,  Node: Additional methods for emulation of sequence types,  Next: Emulating numeric types,  Prev: Emulating container types,  Up: Special method names
+
+Additional methods for emulation of sequence types
+--------------------------------------------------
+
+The following optional methods can be defined to further emulate
+sequence objects.  Immutable sequences methods should at most only
+define `__getslice__()'; mutable sequences might define all three
+methods.
+
+`__getslice__(self, i, j)'
+     _This is deprecated in Python 2.0.  Support slice objects as
+     parameters to the `__getitem__()' method._ Called to implement
+     evaluation of `SELF[I:J]'.  The returned object should be of the
+     same type as SELF.  Note that missing I or J in the slice
+     expression are replaced by zero or `sys.maxint', respectively.  If
+     negative indexes are used in the slice, the length of the sequence
+     is added to that index.  If the instance does not implement the
+     `__len__()' method, an `AttributeError' is raised.  No guarantee
+     is made that indexes adjusted this way are not still negative.
+     Indexes which are greater than the length of the sequence are not
+     modified.  If no `__getslice__()' is found, a slice object is
+     created instead, and passed to `__getitem__()' instead.
+
+`__setslice__(self, i, j, sequence)'
+     Called to implement assignment to `SELF[I:J]'.  Same notes for I
+     and J as for `__getslice__()'.
+
+     This method is deprecated. If no `__setslice__()' is found, or for
+     extended slicing of the form `SELF[I:J:K]', a slice object is
+     created, and passed to `__setitem__()', instead of
+     `__setslice__()' being called.
+
+`__delslice__(self, i, j)'
+     Called to implement deletion of `SELF[I:J]'.  Same notes for I and
+     J as for `__getslice__()'.  This method is deprecated. If no
+     `__delslice__()' is found, or for extended slicing of the form
+     `SELF[I:J:K]', a slice object is created, and passed to
+     `__delitem__()', instead of `__delslice__()' being called.
+
+Notice that these methods are only invoked when a single slice with a
+single colon is used, and the slice method is available.  For slice
+operations involving extended slice notation, or in absence of the
+slice methods, `__getitem__()', `__setitem__()' or `__delitem__()' is
+called with a slice object as argument.
+
+The following example demonstrate how to make your program or module
+compatible with earlier versions of Python (assuming that methods
+`__getitem__()', `__setitem__()' and `__delitem__()' support slice
+objects as arguments):
+
+     class MyClass:
+         ...
+         def __getitem__(self, index):
+             ...
+         def __setitem__(self, index, value):
+             ...
+         def __delitem__(self, index):
+             ...
+     
+         if sys.version_info < (2, 0):
+             # They won't be defined if version is at least 2.0 final
+     
+             def __getslice__(self, i, j):
+                 return self[max(0, i):max(0, j):]
+             def __setslice__(self, i, j, seq):
+                 self[max(0, i):max(0, j):] = seq
+             def __delslice__(self, i, j):
+                 del self[max(0, i):max(0, j):]
+         ...
+
+Note the calls to `max()'; these are necessary because of the handling
+of negative indices before the `__*slice__()' methods are called.  When
+negative indexes are used, the `__*item__()' methods receive them as
+provided, but the `__*slice__()' methods get a "cooked" form of the
+index values.  For each negative index value, the length of the
+sequence is added to the index before calling the method (which may
+still result in a negative index); this is the customary handling of
+negative indexes by the built-in sequence types, and the `__*item__()'
+methods are expected to do this as well.  However, since they should
+already be doing that, negative indexes cannot be passed in; they must
+be constrained to the bounds of the sequence before being passed to the
+`__*item__()' methods.  Calling `max(0, i)' conveniently returns the
+proper value.
+
+
+File: python-ref.info,  Node: Emulating numeric types,  Next: Coercion rules,  Prev: Additional methods for emulation of sequence types,  Up: Special method names
+
+Emulating numeric types
+-----------------------
+
+The following methods can be defined to emulate numeric objects.
+Methods corresponding to operations that are not supported by the
+particular kind of number implemented (e.g., bitwise operations for
+non-integral numbers) should be left undefined.
+
+`__add__(self, other)'
+
+`__sub__(self, other)'
+
+`__mul__(self, other)'
+
+`__floordiv__(self, other)'
+
+`__mod__(self, other)'
+
+`__divmod__(self, other)'
+
+`__pow__(self, other[, modulo])'
+
+`__lshift__(self, other)'
+
+`__rshift__(self, other)'
+
+`__and__(self, other)'
+
+`__xor__(self, other)'
+
+`__or__(self, other)'
+     These methods are called to implement the binary arithmetic
+     operations (`+', `-', `*', `//', `%', `divmod()' , `pow()' , `**',
+     `<'`<', `>'`>', `&', `^', `|').  For instance, to evaluate the
+     expression X`+'Y, where X is an instance of a class that has an
+     `__add__()' method, `X.__add__(Y)' is called.  The `__divmod__()'
+     method should be the equivalent to using `__floordiv__()' and
+     `__mod__()'; it should not be related to `__truediv__()'
+     (described below).  Note that `__pow__()' should be defined to
+     accept an optional third argument if the ternary version of the
+     built-in `pow()'  function is to be supported.
+
+`__div__(self, other)'
+
+`__truediv__(self, other)'
+     The division operator (`/') is implemented by these methods.  The
+     `__truediv__()' method is used when `__future__.division' is in
+     effect, otherwise `__div__()' is used.  If only one of these two
+     methods is defined, the object will not support division in the
+     alternate context; `TypeError' will be raised instead.
+
+`__radd__(self, other)'
+
+`__rsub__(self, other)'
+
+`__rmul__(self, other)'
+
+`__rdiv__(self, other)'
+
+`__rtruediv__(self, other)'
+
+`__rfloordiv__(self, other)'
+
+`__rmod__(self, other)'
+
+`__rdivmod__(self, other)'
+
+`__rpow__(self, other)'
+
+`__rlshift__(self, other)'
+
+`__rrshift__(self, other)'
+
+`__rand__(self, other)'
+
+`__rxor__(self, other)'
+
+`__ror__(self, other)'
+     These methods are called to implement the binary arithmetic
+     operations (`+', `-', `*', `/', `%', `divmod()' , `pow()' , `**',
+     `<'`<', `>'`>', `&', `^', `|') with reflected (swapped) operands.
+     These functions are only called if the left operand does not
+     support the corresponding operation.  For instance, to evaluate
+     the expression X`-'Y, where Y is an instance of a class that has
+     an `__rsub__()' method, `Y.__rsub__(X)' is called.  Note that
+     ternary `pow()'  will not try calling `__rpow__()' (the coercion
+     rules would become too complicated).
+
+`__iadd__(self, other)'
+
+`__isub__(self, other)'
+
+`__imul__(self, other)'
+
+`__idiv__(self, other)'
+
+`__itruediv__(self, other)'
+
+`__ifloordiv__(self, other)'
+
+`__imod__(self, other)'
+
+`__ipow__(self, other[, modulo])'
+
+`__ilshift__(self, other)'
+
+`__irshift__(self, other)'
+
+`__iand__(self, other)'
+
+`__ixor__(self, other)'
+
+`__ior__(self, other)'
+     These methods are called to implement the augmented arithmetic
+     operations (`+=', `-=', `*=', `/=', `%=', `**=', `<'`<=', `>'`>=',
+     `&=', `^=', `|=').  These methods should attempt to do the
+     operation in-place (modifying SELF) and return the result (which
+     could be, but does not have to be, SELF).  If a specific method is
+     not defined, the augmented operation falls back to the normal
+     methods.  For instance, to evaluate the expression X`+='Y, where X
+     is an instance of a class that has an `__iadd__()' method,
+     `X.__iadd__(Y)' is called.  If X is an instance of a class that
+     does not define a `__iadd()' method, `X.__add__(Y)' and
+     `Y.__radd__(X)' are considered, as with the evaluation of X`+'Y.
+
+`__neg__(self)'
+
+`__pos__(self)'
+
+`__abs__(self)'
+
+`__invert__(self)'
+     Called to implement the unary arithmetic operations (`-', `+',
+     `abs()'  and `~{}').
+
+`__complex__(self)'
+
+`__int__(self)'
+
+`__long__(self)'
+
+`__float__(self)'
+     Called to implement the built-in functions `complex()' , `int()' ,
+     `long()' , and `float()' .  Should return a value of the
+     appropriate type.
+
+`__oct__(self)'
+
+`__hex__(self)'
+     Called to implement the built-in functions `oct()'  and `hex()' .
+     Should return a string value.
+
+`__coerce__(self, other)'
+     Called to implement "mixed-mode" numeric arithmetic.  Should either
+     return a 2-tuple containing SELF and OTHER converted to a common
+     numeric type, or `None' if conversion is impossible.  When the
+     common type would be the type of `other', it is sufficient to
+     return `None', since the interpreter will also ask the other
+     object to attempt a coercion (but sometimes, if the implementation
+     of the other type cannot be changed, it is useful to do the
+     conversion to the other type here).  A return value of
+     `NotImplemented' is equivalent to returning `None'.
+
+
+File: python-ref.info,  Node: Coercion rules,  Prev: Emulating numeric types,  Up: Special method names
+
+Coercion rules
+--------------
+
+This section used to document the rules for coercion.  As the language
+has evolved, the coercion rules have become hard to document precisely;
+documenting what one version of one particular implementation does is
+undesirable.  Instead, here are some informal guidelines regarding
+coercion.  In Python 3.0, coercion will not be supported.
+
+   * If the left operand of a % operator is a string or Unicode object,
+     no coercion takes place and the string formatting operation is
+     invoked instead.
+
+   * It is no longer recommended to define a coercion operation.
+     Mixed-mode operations on types that don't define coercion pass the
+     original arguments to the operation.
+
+   * New-style classes (those derived from `object') never invoke the
+     `__coerce__()' method in response to a binary operator; the only
+     time `__coerce__()' is invoked is when the built-in function
+     `coerce()' is called.
+
+   * For most intents and purposes, an operator that returns
+     `NotImplemented' is treated the same as one that is not
+     implemented at all.
+
+   * Below, `__op__()' and `__rop__()' are used to signify the generic
+     method names corresponding to an operator; `__iop__' is used for
+     the corresponding in-place operator.  For example, for the
+     operator ``+'', `__add__()' and `__radd__()' are used for the left
+     and right variant of the binary operator, and `__iadd__' for the
+     in-place variant.
+
+   * For objects X and Y, first `X.__op__(Y)' is tried.  If this is not
+     implemented or returns `NotImplemented', `Y.__rop__(X)' is tried.
+     If this is also not implemented or returns `NotImplemented', a
+     `TypeError' exception is raised.  But see the following exception:
+
+   * Exception to the previous item: if the left operand is an instance
+     of a built-in type or a new-style class, and the right operand is
+     an instance of a proper subclass of that type or class, the right
+     operand's `__rop__()' method is tried _before_ the left operand's
+     `__op__()' method.  This is done so that a subclass can completely
+     override binary operators.  Otherwise, the left operand's __op__
+     method would always accept the right operand: when an instance of
+     a given class is expected, an instance of a subclass of that class
+     is always acceptable.
+
+   * When either operand type defines a coercion, this coercion is
+     called before that type's `__op__()' or `__rop__()' method is
+     called, but no sooner.  If the coercion returns an object of a
+     different type for the operand whose coercion is invoked, part of
+     the process is redone using the new object.
+
+   * When an in-place operator (like ``+='') is used, if the left
+     operand implements `__iop__()', it is invoked without any
+     coercion.  When the operation falls back to `__op__()' and/or
+     `__rop__()', the normal coercion rules apply.
+
+   * In X`+'Y, if X is a sequence that implements sequence
+     concatenation, sequence concatenation is invoked.
+
+   * In X`*'Y, if one operator is a sequence that implements sequence
+     repetition, and the other is an integer (`int' or `long'),
+     sequence repetition is invoked.
+
+   * Rich comparisons (implemented by methods `__eq__()' and so on)
+     never use coercion.  Three-way comparison (implemented by
+     `__cmp__()') does use coercion under the same conditions as other
+     binary operations use it.
+
+   * In the current implementation, the built-in numeric types `int',
+     `long' and `float' do not use coercion; the type `complex' however
+     does use it.  The difference can become apparent when subclassing
+     these types.  Over time, the type `complex' may be fixed to avoid
+     coercion.  All these types implement a `__coerce__()' method, for
+     use by the built-in `coerce()' function.
+
+
+
+File: python-ref.info,  Node: Execution model,  Next: Expressions,  Prev: Data model,  Up: Top
+
+Execution model
+***************
+
+* Menu:
+
+* Naming and binding::
+* Exceptions::
+
+
+File: python-ref.info,  Node: Naming and binding,  Next: Exceptions,  Prev: Execution model,  Up: Execution model
+
+Naming and binding
+==================
+
+"Names"  refer to objects.  Names are introduced by name binding
+operations.  Each occurrence of a name in the program text refers to
+the "binding"  of that name established in the innermost function block
+containing the use.
+
+A "block"  is a piece of Python program text that is executed as a
+unit.  The following are blocks: a module, a function body, and a class
+definition.  Each command typed interactively is a block.  A script
+file (a file given as standard input to the interpreter or specified on
+the interpreter command line the first argument) is a code block.  A
+script command (a command specified on the interpreter command line
+with the `*-c*' option) is a code block.  The file read by the built-in
+function `execfile()' is a code block.  The string argument passed to
+the built-in function `eval()' and to the `exec' statement is a code
+block.  The expression read and evaluated by the built-in function
+`input()' is a code block.
+
+A code block is executed in an "execution frame" .  A frame contains
+some administrative information (used for debugging) and determines
+where and how execution continues after the code block's execution has
+completed.
+
+A "scope"  defines the visibility of a name within a block.  If a local
+variable is defined in a block, its scope includes that block.  If the
+definition occurs in a function block, the scope extends to any blocks
+contained within the defining one, unless a contained block introduces
+a different binding for the name.  The scope of names defined in a
+class block is limited to the class block; it does not extend to the
+code blocks of methods.
+
+When a name is used in a code block, it is resolved using the nearest
+enclosing scope.  The set of all such scopes visible to a code block is
+called the block's "environment" .
+
+If a name is bound in a block, it is a local variable of that block.
+If a name is bound at the module level, it is a global variable.  (The
+variables of the module code block are local and global.)  If a
+variable is used in a code block but not defined there, it is a "free
+variable" .
+
+When a name is not found at all, a `NameError'  exception is raised.
+If the name refers to a local variable that has not been bound, a
+`UnboundLocalError'  exception is raised.  `UnboundLocalError' is a
+subclass of `NameError'.
+
+The following constructs bind names: formal parameters to functions,
+`import' statements, class and function definitions (these bind the
+class or function name in the defining block), and targets that are
+identifiers if occurring in an assignment, `for' loop header, or in the
+second position of an `except' clause header.  The `import' statement
+of the form "`from ...import *'"  binds all names defined in the
+imported module, except those beginning with an underscore.  This form
+may only be used at the module level.
+
+A target occurring in a `del' statement is also considered bound for
+this purpose (though the actual semantics are to unbind the name).  It
+is illegal to unbind a name that is referenced by an enclosing scope;
+the compiler will report a `SyntaxError'.
+
+Each assignment or import statement occurs within a block defined by a
+class or function definition or at the module level (the top-level code
+block).
+
+If a name binding operation occurs anywhere within a code block, all
+uses of the name within the block are treated as references to the
+current block.  This can lead to errors when a name is used within a
+block before it is bound.
+
+The previous rule is a subtle.  Python lacks declarations and allows
+name binding operations to occur anywhere within a code block.  The
+local variables of a code block can be determined by scanning the
+entire text of the block for name binding operations.
+
+If the global statement occurs within a block, all uses of the name
+specified in the statement refer to the binding of that name in the
+top-level namespace.  Names are resolved in the top-level namespace by
+searching the global namespace, i.e. the namespace of the module
+containing the code block, and the builtin namespace, the namespace of
+the module `__builtin__'.  The global namespace is searched first.  If
+the name is not found there, the builtin namespace is searched.  The
+global statement must precede all uses of the name.
+
+The built-in namespace associated with the execution of a code block is
+actually found by looking up the name `__builtins__' in its global
+namespace; this should be a dictionary or a module (in the latter case
+the module's dictionary is used).  Normally, the `__builtins__'
+namespace is the dictionary of the built-in module `__builtin__' (note:
+no `s').  If it isn't, restricted execution  mode is in effect.
+
+The namespace for a module is automatically created the first time a
+module is imported.  The main module for a script is always called
+`__main__' .
+
+The global statement has the same scope as a name binding operation in
+the same block.  If the nearest enclosing scope for a free variable
+contains a global statement, the free variable is treated as a global.
+
+A class definition is an executable statement that may use and define
+names.  These references follow the normal rules for name resolution.
+The namespace of the class definition becomes the attribute dictionary
+of the class.  Names defined at the class scope are not visible in
+methods.
+
+* Menu:
+
+* Interaction with dynamic features::
+
+
+File: python-ref.info,  Node: Interaction with dynamic features,  Prev: Naming and binding,  Up: Naming and binding
+
+Interaction with dynamic features
+---------------------------------
+
+There are several cases where Python statements are illegal when used
+in conjunction with nested scopes that contain free variables.
+
+If a variable is referenced in an enclosing scope, it is illegal to
+delete the name.  An error will be reported at compile time.
+
+If the wild card form of import -- `import *' -- is used in a function
+and the function contains or is a nested block with free variables, the
+compiler will raise a SyntaxError.
+
+If `exec' is used in a function and the function contains or is a
+nested block with free variables, the compiler will raise a
+`SyntaxError' unless the exec explicitly specifies the local namespace
+for the `exec'.  (In other words, `exec obj' would be illegal, but
+`exec obj in ns' would be legal.)
+
+The `eval()', `execfile()', and `input()' functions and the `exec'
+statement do not have access to the full environment for resolving
+names.  Names may be resolved in the local and global namespaces of the
+caller.  Free variables are not resolved in the nearest enclosing
+namespace, but in the global namespace.(1) The `exec' statement and the
+`eval()' and `execfile()' functions have optional arguments to override
+the global and local namespace.  If only one namespace is specified, it
+is used for both.
+
+---------- Footnotes ----------
+
+(1) This limitation occurs because the code that is executed by these
+operations is not available at the time the module is compiled.
+
+
+File: python-ref.info,  Node: Exceptions,  Prev: Naming and binding,  Up: Execution model
+
+Exceptions
+==========
+
+Exceptions are a means of breaking out of the normal flow of control of
+a code block in order to handle errors or other exceptional conditions.
+An exception is _raised_  at the point where the error is detected; it
+may be _handled_  by the surrounding code block or by any code block
+that directly or indirectly invoked the code block where the error
+occurred.
+
+The Python interpreter raises an exception when it detects a run-time
+error (such as division by zero).  A Python program can also explicitly
+raise an exception with the `raise' statement.  Exception handlers are
+specified with the `try' ... `except' statement.  The `try' ...
+`finally' statement specifies cleanup code which does not handle the
+exception, but is executed whether an exception occurred or not in the
+preceding code.
+
+Python uses the "termination"  model of error handling: an exception
+handler can find out what happened and continue execution at an outer
+level, but it cannot repair the cause of the error and retry the
+failing operation (except by re-entering the offending piece of code
+from the top).
+
+When an exception is not handled at all, the interpreter terminates
+execution of the program, or returns to its interactive main loop.  In
+either case, it prints a stack backtrace, except when the exception is
+`SystemExit' .
+
+Exceptions are identified by class instances.  Selection of a matching
+except clause is based on object identity.  The `except' clause must
+reference the same class or a base class of it.
+
+When an exception is raised, an object (maybe `None') is passed as the
+exception's _value_; this object does not affect the selection of an
+exception handler, but is passed to the selected exception handler as
+additional information.  For class exceptions, this object must be an
+instance of the exception class being raised.
+
+_Notice:_ [warning] Messages to exceptions are not part of the Python
+API.  Their contents may change from one version of Python to the next
+without warning and should not be relied on by code which will run
+under multiple versions of the interpreter.
+
+See also the description of the `try' statement in section~*Note try
+statement:: and `raise' statement in section~*Note raise statement::.
+
+
+File: python-ref.info,  Node: Expressions,  Next: Simple statements,  Prev: Execution model,  Up: Top
+
+Expressions
+***********
+
+This chapter explains the meaning of the elements of expressions in
+Python.
+
+*Syntax Notes:* In this and the following chapters, extended BNF
+notation will be used to describe syntax, not lexical analysis.  When
+(one alternative of) a syntax rule has the form
+
+     [*]
+
+`name `othername''
+and no semantics are given, the semantics of this form of `name' are
+the same as for `othername'.
+
+* Menu:
+
+* Arithmetic conversions::
+* Atoms::
+* Primaries::
+* power operator::
+* Unary arithmetic operations::
+* Binary arithmetic operations::
+* Shifting operations::
+* Binary bit-wise operations::
+* Comparisons::
+* Boolean operations::
+* Lambdas::
+* Expression lists::
+* Evaluation order::
+* Summary::
+
+
+File: python-ref.info,  Node: Arithmetic conversions,  Next: Atoms,  Prev: Expressions,  Up: Expressions
+
+Arithmetic conversions
+======================
+
+When a description of an arithmetic operator below uses the phrase "the
+numeric arguments are converted to a common type," the arguments are
+coerced using the coercion rules listed at the end of chapter *Note
+Data model::.  If both arguments are standard numeric types, the
+following coercions are applied:
+
+   * If either argument is a complex number, the other is converted to
+     complex;
+
+   * otherwise, if either argument is a floating point number, the
+     other is converted to floating point;
+
+   * otherwise, if either argument is a long integer, the other is
+     converted to long integer;
+
+   * otherwise, both must be plain integers and no conversion is
+     necessary.
+
+Some additional rules apply for certain operators (e.g., a string left
+argument to the `%' operator). Extensions can define their own
+coercions.
+
+
+File: python-ref.info,  Node: Atoms,  Next: Primaries,  Prev: Arithmetic conversions,  Up: Expressions
+
+Atoms
+=====
+
+Atoms are the most basic elements of expressions.  The simplest atoms
+are identifiers or literals.  Forms enclosed in reverse quotes or in
+parentheses, brackets or braces are also categorized syntactically as
+atoms.  The syntax for atoms is:
+
+`atom `identifier' | `literal' | `enclosure''
+
+`enclosure `parenth_form' | `list_display''
+
+` | `dict_display' | `string_conversion''
+* Menu:
+
+* Identifiers Names::
+* Literals 2::
+* Parenthesized forms::
+* List displays::
+* Dictionary displays::
+* String conversions::
+
+
+File: python-ref.info,  Node: Identifiers Names,  Next: Literals 2,  Prev: Atoms,  Up: Atoms
+
+Identifiers (Names)
+-------------------
+
+An identifier occurring as an atom is a name.  See Section 4.1 for
+documentation of naming and binding.
+
+When the name is bound to an object, evaluation of the atom yields that
+object.  When a name is not bound, an attempt to evaluate it raises a
+`NameError' exception.
+
+*Private name mangling:* when an identifier that textually occurs in a
+class definition begins with two or more underscore characters and does
+not end in two or more underscores, it is considered a "private name"
+of that class.  Private names are transformed to a longer form before
+code is generated for them.  The transformation inserts the class name
+in front of the name, with leading underscores removed, and a single
+underscore inserted in front of the class name.  For example, the
+identifier `__spam' occurring in a class named `Ham' will be
+transformed to `_Ham__spam'.  This transformation is independent of the
+syntactical context in which the identifier is used.  If the
+transformed name is extremely long (longer than 255 characters),
+implementation defined truncation may happen.  If the class name
+consists only of underscores, no transformation is done.
+
+
+File: python-ref.info,  Node: Literals 2,  Next: Parenthesized forms,  Prev: Identifiers Names,  Up: Atoms
+
+Literals
+--------
+
+Python supports string literals and various numeric literals:
+
+`literal `stringliteral' | `integer' | `longinteger''
+
+` | `floatnumber' | `imagnumber''
+Evaluation of a literal yields an object of the given type (string,
+integer, long integer, floating point number, complex number) with the
+given value.  The value may be approximated in the case of floating
+point and imaginary (complex) literals.  See section *Note Literals::
+for details.
+
+All literals correspond to immutable data types, and hence the object's
+identity is less important than its value.  Multiple evaluations of
+literals with the same value (either the same occurrence in the program
+text or a different occurrence) may obtain the same object or a
+different object with the same value.
+
+
+File: python-ref.info,  Node: Parenthesized forms,  Next: List displays,  Prev: Literals 2,  Up: Atoms
+
+Parenthesized forms
+-------------------
+
+A parenthesized form is an optional expression list enclosed in
+parentheses:
+
+`parenth_form "(" [`expression_list'] ")"'
+A parenthesized expression list yields whatever that expression list
+yields: if the list contains at least one comma, it yields a tuple;
+otherwise, it yields the single expression that makes up the expression
+list.
+
+An empty pair of parentheses yields an empty tuple object.  Since
+tuples are immutable, the rules for literals apply (i.e., two
+occurrences of the empty tuple may or may not yield the same object).
+
+Note that tuples are not formed by the parentheses, but rather by use
+of the comma operator.  The exception is the empty tuple, for which
+parentheses _are_ required -- allowing unparenthesized "nothing" in
+expressions would cause ambiguities and allow common typos to pass
+uncaught.
+
+
+File: python-ref.info,  Node: List displays,  Next: Dictionary displays,  Prev: Parenthesized forms,  Up: Atoms
+
+List displays
+-------------
+
+A list display is a possibly empty series of expressions enclosed in
+square brackets:
+
+`test `and_test' ( "or" `and_test' )* | `lambda_form''
+
+`testlist `test' ( "," `test' )* [ "," ]'
+
+`list_display "[" [`listmaker'] "]"'
+
+`listmaker `expression' ( `list_for' | ( "," `expression' )* [","] )'
+
+`list_iter `list_for' | `list_if''
+
+`list_for "for" `expression_list' "in" `testlist' [`list_iter']'
+
+`list_if "if" `test' [`list_iter']'
+A list display yields a new list object.  Its contents are specified by
+providing either a list of expressions or a list comprehension.  When a
+comma-separated list of expressions is supplied, its elements are
+evaluated from left to right and placed into the list object in that
+order.  When a list comprehension is supplied, it consists of a single
+expression followed by at least one `for' clause and zero or more `for'
+or `if' clauses.  In this case, the elements of the new list are those
+that would be produced by considering each of the `for' or `if' clauses
+a block, nesting from left to right, and evaluating the expression to
+produce a list element each time the innermost block is reached.
+
+
+File: python-ref.info,  Node: Dictionary displays,  Next: String conversions,  Prev: List displays,  Up: Atoms
+
+Dictionary displays
+-------------------
+
+A dictionary display is a possibly empty series of key/datum pairs
+enclosed in curly braces:
+
+`dict_display "{" [`key_datum_list'] "}"'
+
+`key_datum_list `key_datum' ("," `key_datum')* [","]'
+
+`key_datum `expression' ":" `expression''
+A dictionary display yields a new dictionary object.
+
+The key/datum pairs are evaluated from left to right to define the
+entries of the dictionary: each key object is used as a key into the
+dictionary to store the corresponding datum.
+
+Restrictions on the types of the key values are listed earlier in
+section *Note standard type hierarchy::.  (To summarize,the key type
+should be hashable, which excludes all mutable objects.)  Clashes
+between duplicate keys are not detected; the last datum (textually
+rightmost in the display) stored for a given key value prevails.
+
+
+File: python-ref.info,  Node: String conversions,  Prev: Dictionary displays,  Up: Atoms
+
+String conversions
+------------------
+
+A string conversion is an expression list enclosed in reverse (a.k.a.
+backward) quotes:
+
+`string_conversion "`" `expression_list' "`"'
+A string conversion evaluates the contained expression list and
+converts the resulting object into a string according to rules specific
+to its type.
+
+If the object is a string, a number, `None', or a tuple, list or
+dictionary containing only objects whose type is one of these, the
+resulting string is a valid Python expression which can be passed to
+the built-in function `eval()' to yield an expression with the same
+value (or an approximation, if floating point numbers are involved).
+
+(In particular, converting a string adds quotes around it and converts
+"funny" characters to escape sequences that are safe to print.)
+
+Recursive objects (for example, lists or dictionaries that contain a
+reference to themselves, directly or indirectly) use `...' to indicate
+a recursive reference, and the result cannot be passed to `eval()' to
+get an equal value (`SyntaxError' will be raised instead).
+
+The built-in function `repr()' performs exactly the same conversion in
+its argument as enclosing it in parentheses and reverse quotes does.
+The built-in function `str()' performs a similar but more user-friendly
+conversion.
+
+
+File: python-ref.info,  Node: Primaries,  Next: power operator,  Prev: Atoms,  Up: Expressions
+
+Primaries
+=========
+
+Primaries represent the most tightly bound operations of the language.
+Their syntax is:
+
+`primary `atom' | `attributeref' | `subscription' | `slicing' | `call''
+* Menu:
+
+* Attribute references::
+* Subscriptions::
+* Slicings::
+* Calls::
+
+
+File: python-ref.info,  Node: Attribute references,  Next: Subscriptions,  Prev: Primaries,  Up: Primaries
+
+Attribute references
+--------------------
+
+An attribute reference is a primary followed by a period and a name:
+
+`attributeref `primary' "." `identifier''
+The primary must evaluate to an object of a type that supports
+attribute references, e.g., a module, list, or an instance.  This
+object is then asked to produce the attribute whose name is the
+identifier.  If this attribute is not available, the exception
+`AttributeError'  is raised.  Otherwise, the type and value of the
+object produced is determined by the object.  Multiple evaluations of
+the same attribute reference may yield different objects.
+
+
+File: python-ref.info,  Node: Subscriptions,  Next: Slicings,  Prev: Attribute references,  Up: Primaries
+
+Subscriptions
+-------------
+
+A subscription selects an item of a sequence (string, tuple or list) or
+mapping (dictionary) object:
+
+`subscription `primary' "[" `expression_list' "]"'
+The primary must evaluate to an object of a sequence or mapping type.
+
+If the primary is a mapping, the expression list must evaluate to an
+object whose value is one of the keys of the mapping, and the
+subscription selects the value in the mapping that corresponds to that
+key.  (The expression list is a tuple except if it has exactly one
+item.)
+
+If the primary is a sequence, the expression (list) must evaluate to a
+plain integer.  If this value is negative, the length of the sequence
+is added to it (so that, e.g., `x[-1]' selects the last item of `x'.)
+The resulting value must be a nonnegative integer less than the number
+of items in the sequence, and the subscription selects the item whose
+index is that value (counting from zero).
+
+A string's items are characters.  A character is not a separate data
+type but a string of exactly one character.
+

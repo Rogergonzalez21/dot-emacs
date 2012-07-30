@@ -1,0 +1,1199 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: Packer Objects,  Next: Unpacker Objects,  Prev: xdrlib,  Up: xdrlib
+
+Packer Objects
+--------------
+
+`Packer' instances have the following methods:
+
+`get_buffer()'
+     Returns the current pack buffer as a string.
+
+`reset()'
+     Resets the pack buffer to the empty string.
+
+In general, you can pack any of the most common XDR data types by
+calling the appropriate `pack_TYPE()' method.  Each method takes a
+single argument, the value to pack.  The following simple data type
+packing methods are supported: `pack_uint()', `pack_int()',
+`pack_enum()', `pack_bool()', `pack_uhyper()', and `pack_hyper()'.
+
+`pack_float(value)'
+     Packs the single-precision floating point number VALUE.
+
+`pack_double(value)'
+     Packs the double-precision floating point number VALUE.
+
+The following methods support packing strings, bytes, and opaque data:
+
+`pack_fstring(n, s)'
+     Packs a fixed length string, S.  N is the length of the string but
+     it is _not_ packed into the data buffer.  The string is padded
+     with null bytes if necessary to guaranteed 4 byte alignment.
+
+`pack_fopaque(n, data)'
+     Packs a fixed length opaque data stream, similarly to
+     `pack_fstring()'.
+
+`pack_string(s)'
+     Packs a variable length string, S.  The length of the string is
+     first packed as an unsigned integer, then the string data is packed
+     with `pack_fstring()'.
+
+`pack_opaque(data)'
+     Packs a variable length opaque data string, similarly to
+     `pack_string()'.
+
+`pack_bytes(bytes)'
+     Packs a variable length byte stream, similarly to `pack_string()'.
+
+The following methods support packing arrays and lists:
+
+`pack_list(list, pack_item)'
+     Packs a LIST of homogeneous items.  This method is useful for
+     lists with an indeterminate size; i.e. the size is not available
+     until the entire list has been walked.  For each item in the list,
+     an unsigned integer `1' is packed first, followed by the data value
+     from the list.  PACK_ITEM is the function that is called to pack
+     the individual item.  At the end of the list, an unsigned integer
+     `0' is packed.
+
+     For example, to pack a list of integers, the code might appear like
+     this:
+
+          import xdrlib
+          p = xdrlib.Packer()
+          p.pack_list([1, 2, 3], p.pack_int)
+
+`pack_farray(n, array, pack_item)'
+     Packs a fixed length list (ARRAY) of homogeneous items.  N is the
+     length of the list; it is _not_ packed into the buffer, but a
+     `ValueError' exception is raised if `len(ARRAY)' is not equal to
+     N.  As above, PACK_ITEM is the function used to pack each element.
+
+`pack_array(list, pack_item)'
+     Packs a variable length LIST of homogeneous items.  First, the
+     length of the list is packed as an unsigned integer, then each
+     element is packed as in `pack_farray()' above.
+
+
+File: python-lib.info,  Node: Unpacker Objects,  Next: Exceptions,  Prev: Packer Objects,  Up: xdrlib
+
+Unpacker Objects
+----------------
+
+The `Unpacker' class offers the following methods:
+
+`reset(data)'
+     Resets the string buffer with the given DATA.
+
+`get_position()'
+     Returns the current unpack position in the data buffer.
+
+`set_position(position)'
+     Sets the data buffer unpack position to POSITION.  You should be
+     careful about using `get_position()' and `set_position()'.
+
+`get_buffer()'
+     Returns the current unpack data buffer as a string.
+
+`done()'
+     Indicates unpack completion.  Raises an `Error' exception if all
+     of the data has not been unpacked.
+
+In addition, every data type that can be packed with a `Packer', can be
+unpacked with an `Unpacker'.  Unpacking methods are of the form
+`unpack_TYPE()', and take no arguments.  They return the unpacked
+object.
+
+`unpack_float()'
+     Unpacks a single-precision floating point number.
+
+`unpack_double()'
+     Unpacks a double-precision floating point number, similarly to
+     `unpack_float()'.
+
+In addition, the following methods unpack strings, bytes, and opaque
+data:
+
+`unpack_fstring(n)'
+     Unpacks and returns a fixed length string.  N is the number of
+     characters expected.  Padding with null bytes to guaranteed 4 byte
+     alignment is assumed.
+
+`unpack_fopaque(n)'
+     Unpacks and returns a fixed length opaque data stream, similarly to
+     `unpack_fstring()'.
+
+`unpack_string()'
+     Unpacks and returns a variable length string.  The length of the
+     string is first unpacked as an unsigned integer, then the string
+     data is unpacked with `unpack_fstring()'.
+
+`unpack_opaque()'
+     Unpacks and returns a variable length opaque data string,
+     similarly to `unpack_string()'.
+
+`unpack_bytes()'
+     Unpacks and returns a variable length byte stream, similarly to
+     `unpack_string()'.
+
+The following methods support unpacking arrays and lists:
+
+`unpack_list(unpack_item)'
+     Unpacks and returns a list of homogeneous items.  The list is
+     unpacked one element at a time by first unpacking an unsigned
+     integer flag.  If the flag is `1', then the item is unpacked and
+     appended to the list.  A flag of `0' indicates the end of the
+     list.  UNPACK_ITEM is the function that is called to unpack the
+     items.
+
+`unpack_farray(n, unpack_item)'
+     Unpacks and returns (as a list) a fixed length array of homogeneous
+     items.  N is number of list elements to expect in the buffer.  As
+     above, UNPACK_ITEM is the function used to unpack each element.
+
+`unpack_array(unpack_item)'
+     Unpacks and returns a variable length LIST of homogeneous items.
+     First, the length of the list is unpacked as an unsigned integer,
+     then each element is unpacked as in `unpack_farray()' above.
+
+
+File: python-lib.info,  Node: Exceptions,  Prev: Unpacker Objects,  Up: xdrlib
+
+Exceptions
+----------
+
+Exceptions in this module are coded as class instances:
+
+`Error'
+     The base exception class.  `Error' has a single public data member
+     `msg' containing the description of the error.
+
+`ConversionError'
+     Class derived from `Error'.  Contains no additional instance
+     variables.
+
+Here is an example of how you would catch one of these exceptions:
+
+     import xdrlib
+     p = xdrlib.Packer()
+     try:
+         p.pack_double(8.01)
+     except xdrlib.ConversionError, instance:
+         print 'packing the double failed:', instance.msg
+
+
+File: python-lib.info,  Node: netrc,  Next: robotparser,  Prev: xdrlib,  Up: Internet Data Handling
+
+netrc file processing
+=====================
+
+Loading of `.netrc' files.
+
+_Added in Python version 1.5.2_
+
+The `netrc' class parses and encapsulates the netrc file format used by
+the UNIX `ftp' program and other FTP clients.
+
+`netrc([file])'
+     A `netrc' instance or subclass instance encapsulates data from a
+     netrc file.  The initialization argument, if present, specifies the
+     file to parse.  If no argument is given, the file `.netrc' in the
+     user's home directory will be read.  Parse errors will raise
+     `NetrcParseError' with diagnostic information including the file
+     name, line number, and terminating token.
+
+`NetrcParseError'
+     Exception raised by the `netrc' class when syntactical errors are
+     encountered in source text.  Instances of this exception provide
+     three interesting attributes:  `msg' is a textual explanation of
+     the error, `filename' is the name of the source file, and `lineno'
+     gives the line number on which the error was found.
+
+* Menu:
+
+* netrc Objects::
+
+
+File: python-lib.info,  Node: netrc Objects,  Prev: netrc,  Up: netrc
+
+netrc Objects
+-------------
+
+A `netrc' instance has the following methods:
+
+`authenticators(host)'
+     Return a 3-tuple `(LOGIN, ACCOUNT, PASSWORD)' of authenticators
+     for HOST.  If the netrc file did not contain an entry for the
+     given host, return the tuple associated with the `default' entry.
+     If neither matching host nor default entry is available, return
+     `None'.
+
+`__repr__()'
+     Dump the class data as a string in the format of a netrc file.
+     (This discards comments and may reorder the entries.)
+
+Instances of `netrc' have public instance variables:
+
+`hosts'
+     Dictionary mapping host names to `(LOGIN, ACCOUNT, PASSWORD)'
+     tuples.  The `default' entry, if any, is represented as a
+     pseudo-host by that name.
+
+`macros'
+     Dictionary mapping macro names to string lists.
+
+_Note:_ Passwords are limited to a subset of the ASCII character set.
+Versions of this module prior to 2.3 were extremely limited.  Starting
+with 2.3, all ASCII punctuation is allowed in passwords.  However, note
+that whitespace and non-printable characters are not allowed in
+passwords.  This is a limitation of the way the .netrc file is parsed
+and may be removed in the future.
+
+
+File: python-lib.info,  Node: robotparser,  Next: csv,  Prev: netrc,  Up: Internet Data Handling
+
+Parser for robots.txt
+=====================
+
+Loads a `robots.txt' file and answers questions about fetchability of
+other URLs.
+
+This module provides a single class, `RobotFileParser', which answers
+questions about whether or not a particular user agent can fetch a URL
+on the Web site that published the `robots.txt' file.  For more details
+on the structure of `robots.txt' files, see
+<http://www.robotstxt.org/wc/norobots.html>.
+
+`RobotFileParser()'
+     This class provides a set of methods to read, parse and answer
+     questions about a single `robots.txt' file.
+
+    `set_url(url)'
+          Sets the URL referring to a `robots.txt' file.
+
+    `read()'
+          Reads the `robots.txt' URL and feeds it to the parser.
+
+    `parse(lines)'
+          Parses the lines argument.
+
+    `can_fetch(useragent, url)'
+          Returns `True' if the USERAGENT is allowed to fetch the URL
+          according to the rules contained in the parsed `robots.txt'
+          file.
+
+    `mtime()'
+          Returns the time the `robots.txt' file was last fetched.
+          This is useful for long-running web spiders that need to
+          check for new `robots.txt' files periodically.
+
+    `modified()'
+          Sets the time the `robots.txt' file was last fetched to the
+          current time.
+
+The following example demonstrates basic use of the RobotFileParser
+class.
+
+     >>> import robotparser
+     >>> rp = robotparser.RobotFileParser()
+     >>> rp.set_url("http://www.musi-cal.com/robots.txt")
+     >>> rp.read()
+     >>> rp.can_fetch("*", "http://www.musi-cal.com/cgi-bin/search?city=San+Francisco")
+     False
+     >>> rp.can_fetch("*", "http://www.musi-cal.com/")
+     True
+
+
+File: python-lib.info,  Node: csv,  Prev: robotparser,  Up: Internet Data Handling
+
+CSV File Reading and Writing
+============================
+
+Write and read tabular data to and from delimited files.
+
+_Added in Python version 2.3_
+
+The so-called CSV (Comma Separated Values) format is the most common
+import and export format for spreadsheets and databases.  There is no
+"CSV standard", so the format is operationally defined by the many
+applications which read and write it.  The lack of a standard means
+that subtle differences often exist in the data produced and consumed
+by different applications.  These differences can make it annoying to
+process CSV files from multiple sources.  Still, while the delimiters
+and quoting characters vary, the overall format is similar enough that
+it is possible to write a single module which can efficiently
+manipulate such data, hiding the details of reading and writing the
+data from the programmer.
+
+The `csv' module implements classes to read and write tabular data in
+CSV format.  It allows programmers to say, "write this data in the
+format preferred by Excel," or "read data from this file which was
+generated by Excel," without knowing the precise details of the CSV
+format used by Excel.  Programmers can also describe the CSV formats
+understood by other applications or define their own special-purpose
+CSV formats.
+
+The `csv' module's `reader' and `writer' objects read and write
+sequences.  Programmers can also read and write data in dictionary form
+using the `DictReader' and `DictWriter' classes.
+
+_Notice:_ This version of the `csv' module doesn't support Unicode
+input.  Also, there are currently some issues regarding ASCII NUL
+characters.  Accordingly, all input should generally be printable ASCII
+to be safe.  These restrictions will be removed in the future.
+
+See also:
+    *PEP305 CSV File API*
+          The Python Enhancement Proposal which proposed this addition
+          to Python.
+
+* Menu:
+
+* Module Contents 3::
+* Dialects and Formatting Parameters::
+* Reader Objects::
+* Writer Objects::
+* Examples 11::
+
+
+File: python-lib.info,  Node: Module Contents 3,  Next: Dialects and Formatting Parameters,  Prev: csv,  Up: csv
+
+Module Contents
+---------------
+
+The `csv' module defines the following functions:
+
+`reader(csvfile[, dialect=`'excel''[, fmtparam]])'
+     Return a reader object which will iterate over lines in the given
+     {}CSVFILE.  CSVFILE can be any object which supports the iterator
+     protocol and returns a string each time its `next' method is
+     called.  If CSVFILE is a file object, it must be opened with the
+     'b' flag on platforms where that makes a difference.  An optional
+     {}DIALECT parameter can be given which is used to define a set of
+     parameters specific to a particular CSV dialect.  It may be an
+     instance of a subclass of the `Dialect' class or one of the
+     strings returned by the `list_dialects' function.  The other
+     optional {}FMTPARAM keyword arguments can be given to override
+     individual formatting parameters in the current dialect.  For more
+     information about the dialect and formatting parameters, see
+     section~*Note Examples 11::, "Dialects and Formatting Parameters"
+     for details of these parameters.
+
+     All data read are returned as strings.  No automatic data type
+     conversion is performed.
+
+`writer(csvfile[, dialect=`'excel''[, fmtparam]])'
+     Return a writer object responsible for converting the user's data
+     into delimited strings on the given file-like object.  CSVFILE can
+     be any object with a `write' method.  If CSVFILE is a file object,
+     it must be opened with the 'b' flag on platforms where that makes a
+     difference.  An optional {}DIALECT parameter can be given which is
+     used to define a set of parameters specific to a particular CSV
+     dialect.  It may be an instance of a subclass of the `Dialect'
+     class or one of the strings returned by the `list_dialects'
+     function.  The other optional {}FMTPARAM keyword arguments can be
+     given to override individual formatting parameters in the current
+     dialect.  For more information about the dialect and formatting
+     parameters, see section~*Note Examples 11::, "Dialects and
+     Formatting Parameters" for details of these parameters.  To make
+     it as easy as possible to interface with modules which implement
+     the DB API, the value `None' is written as the empty string.
+     While this isn't a reversible transformation, it makes it easier
+     to dump SQL NULL data values to CSV files without preprocessing
+     the data returned from a `cursor.fetch*()' call.  All other
+     non-string data are stringified with `str()' before being written.
+
+`register_dialect(name, dialect)'
+     Associate DIALECT with NAME.  DIALECT must be a subclass of
+     `csv.Dialect'.  NAME must be a string or Unicode object.
+
+`unregister_dialect(name)'
+     Delete the dialect associated with NAME from the dialect registry.
+     An `Error' is raised if NAME is not a registered dialect name.
+
+`get_dialect(name)'
+     Return the dialect associated with NAME.  An `Error' is raised if
+     NAME is not a registered dialect name.
+
+`list_dialects()'
+     Return the names of all registered dialects.
+
+The `csv' module defines the following classes:
+
+`DictReader(csvfile, fieldnames[, restkey=`None'[, restval=`None'[, dialect=`'excel''[, fmtparam]]]])'
+     Create an object which operates like a regular reader but maps the
+     information read into a dict whose keys are given by the FIELDNAMES
+     parameter.  If the row read has fewer fields than the fieldnames
+     sequence, the value of RESTVAL will be used as the default value.
+     If the row read has more fields than the fieldnames sequence, the
+     remaining data is added as a sequence keyed by the value of
+     RESTKEY.  If the row read has fewer fields than the fieldnames
+     sequence, the remaining keys take the value of the optional
+     RESTVAL parameter.  All other parameters are interpreted as for
+     `reader' objects.
+
+`DictWriter(csvfile, fieldnames[, restval=""[, extrasaction=`'raise''[, dialect=`'excel''[, fmtparam]]]])'
+     Create an object which operates like a regular writer but maps
+     dictionaries onto output rows.  The FIELDNAMES parameter
+     identifies the order in which values in the dictionary passed to
+     the `writerow()' method are written to the CSVFILE.  The optional
+     RESTVAL parameter specifies the value to be written if the
+     dictionary is missing a key in FIELDNAMES.  If the dictionary
+     passed to the `writerow()' method contains a key not found in
+     FIELDNAMES, the optional EXTRASACTION parameter indicates what
+     action to take.  If it is set to `'raise'' a `ValueError' is
+     raised.  If it is set to `'ignore'', extra values in the
+     dictionary are ignored.  All other parameters are interpreted as
+     for `writer' objects.
+
+`Dialect'
+     {} The `Dialect' class is a container class relied on primarily
+     for its attributes, which are used to define the parameters for a
+     specific `reader' or `writer' instance.
+
+`Sniffer()'
+     The `Sniffer' class is used to deduce the format of a CSV file.
+
+The `Sniffer' class provides a single method:
+
+`sniff(sample[,delimiters=None])'
+     Analyze the given SAMPLE and return a `Dialect' subclass
+     reflecting the parameters found.  If the optional DELIMITERS
+     parameter is given, it is interpreted as a string containing
+     possible valid delimiter characters.
+
+`has_header(sample)'
+     Analyze the sample text (presumed to be in CSV format) and return
+     `True' if the first row appears to be a series of column headers.
+
+The `csv' module defines the following constants:
+
+`QUOTE_ALL'
+     Instructs `writer' objects to quote all fields.
+
+`QUOTE_MINIMAL'
+     Instructs `writer' objects to only quote those fields which contain
+     the current DELIMITER or begin with the current QUOTECHAR.
+
+`QUOTE_NONNUMERIC'
+     Instructs `writer' objects to quote all non-numeric fields.
+
+`QUOTE_NONE'
+     Instructs `writer' objects to never quote fields.  When the current
+     DELIMITER occurs in output data it is preceded by the current
+     ESCAPECHAR character.  When `QUOTE_NONE' is in effect, it is an
+     error not to have a single-character ESCAPECHAR defined, even if
+     no data to be written contains the DELIMITER character.
+
+The `csv' module defines the following exception:
+
+`Error'
+     Raised by any of the functions when an error is detected.
+
+
+File: python-lib.info,  Node: Dialects and Formatting Parameters,  Next: Reader Objects,  Prev: Module Contents 3,  Up: csv
+
+Dialects and Formatting Parameters
+----------------------------------
+
+To make it easier to specify the format of input and output records,
+specific formatting parameters are grouped together into dialects.  A
+dialect is a subclass of the `Dialect' class having a set of specific
+methods and a single `validate()' method.  When creating `reader' or
+`writer' objects, the programmer can specify a string or a subclass of
+the `Dialect' class as the dialect parameter.  In addition to, or
+instead of, the DIALECT parameter, the programmer can also specify
+individual formatting parameters, which have the same names as the
+attributes defined below for the `Dialect' class.
+
+Dialects support the following attributes:
+
+`delimiter'
+     A one-character string used to separate fields.  It defaults to
+     `',''.
+
+`doublequote'
+     Controls how instances of QUOTECHAR appearing inside a field
+     should be themselves be quoted.  When `True', the character is
+     doubledd.  When `False', the ESCAPECHAR must be a one-character
+     string which is used as a prefix to the QUOTECHAR.  It defaults to
+     `True'.
+
+`escapechar'
+     A one-character string used to escape the DELIMITER if QUOTING is
+     set to `QUOTE_NONE'.  It defaults to `None'.
+
+`lineterminator'
+     The string used to terminate lines in the CSV file.  It defaults to
+     `'\r\n''.
+
+`quotechar'
+     A one-character string used to quote elements containing the
+     DELIMITER or which start with the QUOTECHAR.  It defaults to `'"''.
+
+`quoting'
+     Controls when quotes should be generated by the writer.  It can
+     take on any of the `QUOTE_*' constants (see section~*Note Module
+     Contents 3::) and defaults to `QUOTE_MINIMAL'.
+
+`skipinitialspace'
+     When `True', whitespace immediately following the DELIMITER is
+     ignored.  The default is `False'.
+
+
+File: python-lib.info,  Node: Reader Objects,  Next: Writer Objects,  Prev: Dialects and Formatting Parameters,  Up: csv
+
+Reader Objects
+--------------
+
+Reader objects (`DictReader' instances and objects returned by the
+`reader()' function) have the following public methods:
+
+`next()'
+     Return the next row of the reader's iterable object as a list,
+     parsed according to the current dialect.
+
+
+File: python-lib.info,  Node: Writer Objects,  Next: Examples 11,  Prev: Reader Objects,  Up: csv
+
+Writer Objects
+--------------
+
+Writer objects (`DictWriter' instances and objects returned by the
+`writer()' function) have the following public methods:
+
+`writerow(row)'
+     Write the ROW parameter to the writer's file object, formatted
+     according to the current dialect.
+
+`writerows(rows)'
+     Write all the ROWS parameters to the writer's file object,
+     formatted according to the current dialect.
+
+
+File: python-lib.info,  Node: Examples 11,  Prev: Writer Objects,  Up: csv
+
+Examples
+--------
+
+The "Hello, world" of csv reading is
+
+     import csv
+     reader = csv.reader(file("some.csv"))
+     for row in reader:
+         print row
+
+The corresponding simplest possible writing example is
+
+     import csv
+     writer = csv.writer(file("some.csv", "w"))
+     for row in someiterable:
+         writer.writerow(row)
+
+
+File: python-lib.info,  Node: Structured Markup Processing Tools,  Next: Multimedia Services,  Prev: Internet Data Handling,  Up: Top
+
+Structured Markup Processing Tools
+**********************************
+
+Python supports a variety of modules to work with various forms of
+structured data markup.  This includes modules to work with the
+Standard Generalized Markup Language (SGML) and the Hypertext Markup
+Language (HTML), and several interfaces for working with the Extensible
+Markup Language (XML).
+
+It is important to note that modules in the `xml' package require that
+there be at least one SAX-compliant XML parser available.  Starting
+with Python 2.3, the Expat parser is included with Python, so the
+`xml.parsers.expat' module will always be available.  You may still
+want to be aware of the PyXML add-on package; that package provides an
+extended set of XML libraries for Python.
+
+The documentation for the `xml.dom' and `xml.sax' packages are the
+definition of the Python bindings for the DOM and SAX interfaces.
+
+See also:
+     `Python/XML Libraries' {Home page for the PyXML package,
+     containing an extension of `xml' package bundled with Python.}
+
+* Menu:
+
+* HTMLParser::
+* sgmllib::
+* htmllib::
+* htmlentitydefs::
+* xmlparsersexpat::
+* xmldom::
+* xmldomminidom::
+* xmldompulldom::
+* xmlsax::
+* xmlsaxhandler::
+* xmlsaxsaxutils::
+* xmlsaxxmlreader::
+* xmllib::
+
+
+File: python-lib.info,  Node: HTMLParser,  Next: sgmllib,  Prev: Structured Markup Processing Tools,  Up: Structured Markup Processing Tools
+
+Simple HTML and XHTML parser
+============================
+
+A simple parser that can handle HTML and XHTML.
+
+This module defines a class `HTMLParser' which serves as the basis for
+parsing text files formatted in HTML  (HyperText Mark-up Language) and
+XHTML.    Unlike the parser in `htmllib', this parser is not based on
+the SGML parser in `sgmllib'.
+
+`HTMLParser()'
+     The `HTMLParser' class is instantiated without arguments.
+
+     An HTMLParser instance is fed HTML data and calls handler functions
+     when tags begin and end.  The `HTMLParser' class is meant to be
+     overridden by the user to provide a desired behavior.
+
+     Unlike the parser in `htmllib', this parser does not check that
+     end tags match start tags or call the end-tag handler for elements
+     which are closed implicitly by closing an outer element.
+
+`HTMLParser' instances have the following methods:
+
+`reset()'
+     Reset the instance.  Loses all unprocessed data.  This is called
+     implicitly at instantiation time.
+
+`feed(data)'
+     Feed some text to the parser.  It is processed insofar as it
+     consists of complete elements; incomplete data is buffered until
+     more data is fed or `close()' is called.
+
+`close()'
+     Force processing of all buffered data as if it were followed by an
+     end-of-file mark.  This method may be redefined by a derived class
+     to define additional processing at the end of the input, but the
+     redefined version should always call the `HTMLParser' base class
+     method `close()'.
+
+`getpos()'
+     Return current line number and offset.
+
+`get_starttag_text()'
+     Return the text of the most recently opened start tag.  This should
+     not normally be needed for structured processing, but may be
+     useful in dealing with HTML "as deployed" or for re-generating
+     input with minimal changes (whitespace between attributes can be
+     preserved, etc.).
+
+`handle_starttag(tag, attrs)'
+     This method is called to handle the start of a tag.  It is
+     intended to be overridden by a derived class; the base class
+     implementation does nothing.
+
+     The TAG argument is the name of the tag converted to lower case.
+     The ATTRS argument is a list of `(NAME, VALUE)' pairs containing
+     the attributes found inside the tag's `<>' brackets.  The NAME
+     will be translated to lower case and double quotes and backslashes
+     in the VALUE have been interpreted.  For instance, for the tag `<A
+     HREF="http://www.cwi.nl/">', this method would be called as
+     `handle_starttag('a', [('href', 'http://www.cwi.nl/')])'.
+
+`handle_startendtag(tag, attrs)'
+     Similar to `handle_starttag()', but called when the parser
+     encounters an XHTML-style empty tag (`<a .../>').  This method may
+     be overridden by subclasses which require this particular lexical
+     information; the default implementation simple calls
+     `handle_starttag()' and `handle_endtag()'.
+
+`handle_endtag(tag)'
+     This method is called to handle the end tag of an element.  It is
+     intended to be overridden by a derived class; the base class
+     implementation does nothing.  The TAG argument is the name of the
+     tag converted to lower case.
+
+`handle_data(data)'
+     This method is called to process arbitrary data.  It is intended
+     to be overridden by a derived class; the base class implementation
+     does nothing.
+
+`handle_charref(name)'
+     This method is called to process a character reference of the form
+     `&#REF;'.  It is intended to be overridden by a derived class; the
+     base class implementation does nothing.
+
+`handle_entityref(name)'
+     This method is called to process a general entity reference of the
+     form `&NAME;' where NAME is an general entity reference.  It is
+     intended to be overridden by a derived class; the base class
+     implementation does nothing.
+
+`handle_comment(data)'
+     This method is called when a comment is encountered.  The COMMENT
+     argument is a string containing the text between the `<!--' and
+     `-->' delimiters, but not the delimiters themselves.  For example,
+     the comment `<!--text-->' will cause this method to be called with
+     the argument `'text''.  It is intended to be overridden by a
+     derived class; the base class implementation does nothing.
+
+`handle_decl(decl)'
+     Method called when an SGML declaration is read by the parser.  The
+     DECL parameter will be the entire contents of the declaration
+     inside the `<!'...`>' markup.It is intended to be overridden by a
+     derived class; the base class implementation does nothing.
+
+`handle_pi(data)'
+     Method called when a processing instruction is encountered.  The
+     DATA parameter will contain the entire processing instruction.
+     For example, for the processing instruction `<?proc color='red'>',
+     this method would be called as `handle_pi("proc color='red'")'.  It
+     is intended to be overridden by a derived class; the base class
+     implementation does nothing.
+
+     _Note:_ The `HTMLParser' class uses the SGML syntactic rules for
+     processing instruction.  An XHTML processing instruction using the
+     trailing `?' will cause the `?' to be included in DATA.
+
+* Menu:
+
+* Example HTML Parser Application::
+
+
+File: python-lib.info,  Node: Example HTML Parser Application,  Prev: HTMLParser,  Up: HTMLParser
+
+Example HTML Parser Application
+-------------------------------
+
+As a basic example, below is a very basic HTML parser that uses the
+`HTMLParser' class to print out tags as they are encountered:
+
+     from HTMLParser import HTMLParser
+     
+     class MyHTMLParser(HTMLParser):
+     
+         def handle_starttag(self, tag, attrs):
+             print "Encountered the beginning of a %s tag" % tag
+     
+         def handle_endtag(self, tag):
+             print "Encountered the end of a %s tag" % tag
+
+
+File: python-lib.info,  Node: sgmllib,  Next: htmllib,  Prev: HTMLParser,  Up: Structured Markup Processing Tools
+
+Simple SGML parser
+==================
+
+Only as much of an SGML parser as needed to parse HTML.
+
+This module defines a class `SGMLParser' which serves as the basis for
+parsing text files formatted in SGML (Standard Generalized Mark-up
+Language).  In fact, it does not provide a full SGML parser -- it only
+parses SGML insofar as it is used by HTML, and the module only exists
+as a base for the `htmllib' module.  Another HTML parser which supports
+XHTML and offers a somewhat different interface is available in the
+`HTMLParser' module.
+
+`SGMLParser()'
+     The `SGMLParser' class is instantiated without arguments.  The
+     parser is hardcoded to recognize the following constructs:
+
+        * Opening and closing tags of the form `<TAG ATTR="VALUE" ...>'
+          and `</TAG>', respectively.
+
+        * Numeric character references of the form `&#NAME;'.
+
+        * Entity references of the form `&NAME;'.
+
+        * SGML comments of the form `<!--TEXT-->'.  Note that spaces,
+          tabs, and newlines are allowed between the trailing `>' and
+          the immediately preceding `--'.
+
+
+`SGMLParser' instances have the following interface methods:
+
+`reset()'
+     Reset the instance.  Loses all unprocessed data.  This is called
+     implicitly at instantiation time.
+
+`setnomoretags()'
+     Stop processing tags.  Treat all following input as literal input
+     (CDATA).  (This is only provided so the HTML tag `<PLAINTEXT>' can
+     be implemented.)
+
+`setliteral()'
+     Enter literal mode (CDATA mode).
+
+`feed(data)'
+     Feed some text to the parser.  It is processed insofar as it
+     consists of complete elements; incomplete data is buffered until
+     more data is fed or `close()' is called.
+
+`close()'
+     Force processing of all buffered data as if it were followed by an
+     end-of-file mark.  This method may be redefined by a derived class
+     to define additional processing at the end of the input, but the
+     redefined version should always call `close()'.
+
+`get_starttag_text()'
+     Return the text of the most recently opened start tag.  This should
+     not normally be needed for structured processing, but may be
+     useful in dealing with HTML "as deployed" or for re-generating
+     input with minimal changes (whitespace between attributes can be
+     preserved, etc.).
+
+`handle_starttag(tag, method, attributes)'
+     This method is called to handle start tags for which either a
+     `start_TAG()' or `do_TAG()' method has been defined.  The TAG
+     argument is the name of the tag converted to lower case, and the
+     METHOD argument is the bound method which should be used to
+     support semantic interpretation of the start tag.  The ATTRIBUTES
+     argument is a list of `(NAME, VALUE)' pairs containing the
+     attributes found inside the tag's `<>' brackets.  The NAME has
+     been translated to lower case and double quotes and backslashes in
+     the VALUE have been interpreted.  For instance, for the tag `<A
+     HREF="http://www.cwi.nl/">', this method would be called as
+     `unknown_starttag('a', [('href', 'http://www.cwi.nl/')])'.  The
+     base implementation simply calls METHOD with ATTRIBUTES as the
+     only argument.
+
+`handle_endtag(tag, method)'
+     This method is called to handle endtags for which an `end_TAG()'
+     method has been defined.  The TAG argument is the name of the tag
+     converted to lower case, and the METHOD argument is the bound
+     method which should be used to support semantic interpretation of
+     the end tag.  If no `end_TAG()' method is defined for the closing
+     element, this handler is not called.  The base implementation
+     simply calls METHOD.
+
+`handle_data(data)'
+     This method is called to process arbitrary data.  It is intended
+     to be overridden by a derived class; the base class implementation
+     does nothing.
+
+`handle_charref(ref)'
+     This method is called to process a character reference of the form
+     `&#REF;'.  In the base implementation, REF must be a decimal
+     number in the range 0-255.  It translates the character to ASCII
+     and calls the method `handle_data()' with the character as
+     argument.  If REF is invalid or out of range, the method
+     `unknown_charref(REF)' is called to handle the error.  A subclass
+     must override this method to provide support for named character
+     entities.
+
+`handle_entityref(ref)'
+     This method is called to process a general entity reference of the
+     form `&REF;' where REF is an general entity reference.  It looks
+     for REF in the instance (or class) variable `entitydefs' which
+     should be a mapping from entity names to corresponding
+     translations.  If a translation is found, it calls the method
+     `handle_data()' with the translation; otherwise, it calls the
+     method `unknown_entityref(REF)'.  The default `entitydefs' defines
+     translations for `&amp;', `&apos', `&gt;', `&lt;', and `&quot;'.
+
+`handle_comment(comment)'
+     This method is called when a comment is encountered.  The COMMENT
+     argument is a string containing the text between the `<!--' and
+     `-->' delimiters, but not the delimiters themselves.  For example,
+     the comment `<!--text-->' will cause this method to be called with
+     the argument `'text''.  The default method does nothing.
+
+`handle_decl(data)'
+     Method called when an SGML declaration is read by the parser.  In
+     practice, the `DOCTYPE' declaration is the only thing observed in
+     HTML, but the parser does not discriminate among different (or
+     broken) declarations.  Internal subsets in a `DOCTYPE' declaration
+     are not supported.  The DATA parameter will be the entire contents
+     of the declaration inside the `<!'...`>' markup.  The default
+     implementation does nothing.
+
+`report_unbalanced(tag)'
+     This method is called when an end tag is found which does not
+     correspond to any open element.
+
+`unknown_starttag(tag, attributes)'
+     This method is called to process an unknown start tag.  It is
+     intended to be overridden by a derived class; the base class
+     implementation does nothing.
+
+`unknown_endtag(tag)'
+     This method is called to process an unknown end tag.  It is
+     intended to be overridden by a derived class; the base class
+     implementation does nothing.
+
+`unknown_charref(ref)'
+     This method is called to process unresolvable numeric character
+     references.  Refer to `handle_charref()' to determine what is
+     handled by default.  It is intended to be overridden by a derived
+     class; the base class implementation does nothing.
+
+`unknown_entityref(ref)'
+     This method is called to process an unknown entity reference.  It
+     is intended to be overridden by a derived class; the base class
+     implementation does nothing.
+
+Apart from overriding or extending the methods listed above, derived
+classes may also define methods of the following form to define
+processing of specific tags.  Tag names in the input stream are case
+independent; the TAG occurring in method names must be in lower case:
+
+`start_TAG(attributes)'
+     This method is called to process an opening tag TAG.  It has
+     preference over `do_TAG()'.  The ATTRIBUTES argument has the same
+     meaning as described for `handle_starttag()' above.
+
+`do_TAG(attributes)'
+     This method is called to process an opening tag TAG that does not
+     come with a matching closing tag.  The ATTRIBUTES argument has the
+     same meaning as described for `handle_starttag()' above.
+
+`end_TAG()'
+     This method is called to process a closing tag TAG.
+
+Note that the parser maintains a stack of open elements for which no
+end tag has been found yet.  Only tags processed by `start_TAG()' are
+pushed on this stack.  Definition of an `end_TAG()' method is optional
+for these tags.  For tags processed by `do_TAG()' or by
+`unknown_tag()', no `end_TAG()' method must be defined; if defined, it
+will not be used.  If both `start_TAG()' and `do_TAG()' methods exist
+for a tag, the `start_TAG()' method takes precedence.
+
+
+File: python-lib.info,  Node: htmllib,  Next: htmlentitydefs,  Prev: sgmllib,  Up: Structured Markup Processing Tools
+
+A parser for HTML documents
+===========================
+
+A parser for HTML documents.
+
+This module defines a class which can serve as a base for parsing text
+files formatted in the HyperText Mark-up Language (HTML).  The class is
+not directly concerned with I/O -- it must be provided with input in
+string form via a method, and makes calls to methods of a "formatter"
+object in order to produce output.  The `HTMLParser' class is designed
+to be used as a base class for other classes in order to add
+functionality, and allows most of its methods to be extended or
+overridden.  In turn, this class is derived from and extends the
+`SGMLParser' class defined in module `sgmllib' .  The `HTMLParser'
+implementation supports the HTML 2.0 language as described in RFC 1866
+.  Two implementations of formatter objects are provided in the
+`formatter'  module; refer to the documentation for that module for
+information on the formatter interface.
+
+The following is a summary of the interface defined by
+`sgmllib.SGMLParser':
+
+   * The interface to feed data to an instance is through the `feed()'
+     method, which takes a string argument.  This can be called with as
+     little or as much text at a time as desired; `p.feed(a);
+     p.feed(b)' has the same effect as `p.feed(a+b)'.  When the data
+     contains complete HTML tags, these are processed immediately;
+     incomplete elements are saved in a buffer.  To force processing of
+     all unprocessed data, call the `close()' method.
+
+     For example, to parse the entire contents of a file, use:
+          parser.feed(open('myfile.html').read())
+          parser.close()
+
+   * The interface to define semantics for HTML tags is very simple:
+     derive a class and define methods called `start_TAG()',
+     `end_TAG()', or `do_TAG()'.  The parser will call these at
+     appropriate moments: `start_TAG' or `do_TAG()' is called when an
+     opening tag of the form `<TAG ...>' is encountered; `end_TAG()' is
+     called when a closing tag of the form `<TAG>' is encountered.  If
+     an opening tag requires a corresponding closing tag, like `<H1>'
+     ... `</H1>', the class should define the `start_TAG()' method; if
+     a tag requires no closing tag, like `<P>', the class should define
+     the `do_TAG()' method.
+
+
+The module defines a single class:
+
+`HTMLParser(formatter)'
+     This is the basic HTML parser class.  It supports all entity names
+     required by the HTML 2.0 specification (RFC 1866 ).  It also
+     defines handlers for all HTML 2.0 and many HTML 3.0 and 3.2
+     elements.
+
+See also:
+     *Note formatter:: Interface definition for transforming an
+     abstract flow of formatting events into specific output events on
+     writer objects.  *Note HTMLParser:: Alternate HTML parser that
+     offers a slightly lower-level view of the input, but is designed
+     to work with XHTML, and does not implement some of the SGML syntax
+     not used in "HTML as deployed" and which isn't legal for XHTML.
+     *Note htmlentitydefs:: Definition of replacement text for HTML 2.0
+     entities.  *Note sgmllib:: Base class for `HTMLParser'.
+
+* Menu:
+
+* HTMLParser Objects::
+
+
+File: python-lib.info,  Node: HTMLParser Objects,  Prev: htmllib,  Up: htmllib
+
+HTMLParser Objects
+------------------
+
+In addition to tag methods, the `HTMLParser' class provides some
+additional methods and instance variables for use within tag methods.
+
+`formatter'
+     This is the formatter instance associated with the parser.
+
+`nofill'
+     Boolean flag which should be true when whitespace should not be
+     collapsed, or false when it should be.  In general, this should
+     only be true when character data is to be treated as
+     "preformatted" text, as within a `<PRE>' element.  The default
+     value is false.  This affects the operation of `handle_data()' and
+     `save_end()'.
+
+`anchor_bgn(href, name, type)'
+     This method is called at the start of an anchor region.  The
+     arguments correspond to the attributes of the `<A>' tag with the
+     same names.  The default implementation maintains a list of
+     hyperlinks (defined by the `HREF' attribute for `<A>' tags) within
+     the document.  The list of hyperlinks is available as the data
+     attribute `anchorlist'.
+
+`anchor_end()'
+     This method is called at the end of an anchor region.  The default
+     implementation adds a textual footnote marker using an index into
+     the list of hyperlinks created by `anchor_bgn()'.
+
+`handle_image(source, alt[, ismap[, align[, width[, height]]]])'
+     This method is called to handle images.  The default implementation
+     simply passes the ALT value to the `handle_data()' method.
+
+`save_bgn()'
+     Begins saving character data in a buffer instead of sending it to
+     the formatter object.  Retrieve the stored data via `save_end()'.
+     Use of the `save_bgn()' / `save_end()' pair may not be nested.
+
+`save_end()'
+     Ends buffering character data and returns all data saved since the
+     preceding call to `save_bgn()'.  If the `nofill' flag is false,
+     whitespace is collapsed to single spaces.  A call to this method
+     without a preceding call to `save_bgn()' will raise a `TypeError'
+     exception.
+
+
+File: python-lib.info,  Node: htmlentitydefs,  Next: xmlparsersexpat,  Prev: htmllib,  Up: Structured Markup Processing Tools
+
+Definitions of HTML general entities
+====================================
+
+Definitions of HTML general entities.
+
+This module defines three dictionaries, `name2codepoint',
+`codepoint2name', and `entitydefs'. `entitydefs' is used by the
+`htmllib' module to provide the `entitydefs' member of the `HTMLParser'
+class.  The definition provided here contains all the entities defined
+by XHTML 1.0 that can be handled using simple textual substitution in
+the Latin-1 character set (ISO-8859-1).
+
+`entitydefs'
+     A dictionary mapping XHTML 1.0 entity definitions to their
+     replacement text in ISO Latin-1.
+
+`name2codepoint'
+     A dictionary that maps HTML entity names to the Unicode codepoints.
+     _Added in Python version 2.3_
+
+`codepoint2name'
+     A dictionary that maps Unicode codepoints to HTML entity names.
+     _Added in Python version 2.3_
+
+
+File: python-lib.info,  Node: xmlparsersexpat,  Next: xmldom,  Prev: htmlentitydefs,  Up: Structured Markup Processing Tools
+
+Fast XML parsing using Expat
+============================
+
+An interface to the Expat non-validating XML parser.
+
+_Added in Python version 2.0_
+
+The `xml.parsers.expat' module is a Python interface to the Expat
+non-validating XML parser.  The module provides a single extension
+type, `xmlparser', that represents the current state of an XML parser.
+After an `xmlparser' object has been created, various attributes of the
+object can be set to handler functions.  When an XML document is then
+fed to the parser, the handler functions are called for the character
+data and markup in the XML document.
+
+This module uses the `pyexpat'  module to provide access to the Expat
+parser.  Direct use of the `pyexpat' module is deprecated.
+
+This module provides one exception and one type object:
+
+`ExpatError'
+     The exception raised when Expat reports an error.  See section
+     *Note ExpatError Exceptions::, "ExpatError Exceptions," for more
+     information on interpreting Expat errors.
+
+`error'
+     Alias for `ExpatError'.
+
+`XMLParserType'
+     The type of the return values from the `ParserCreate()' function.
+
+The `xml.parsers.expat' module contains two functions:
+
+`ErrorString(errno)'
+     Returns an explanatory string for a given error number ERRNO.
+
+`ParserCreate([encoding[, namespace_separator]])'
+     Creates and returns a new `xmlparser' object.  ENCODING, if
+     specified, must be a string naming the encoding used by the XML
+     data.  Expat doesn't support as many encodings as Python does, and
+     its repertoire of encodings can't be extended; it supports UTF-8,
+     UTF-16, ISO-8859-1 (Latin1), and ASCII.  If ENCODING is given it
+     will override the implicit or explicit encoding of the document.
+
+     Expat can optionally do XML namespace processing for you, enabled
+     by providing a value for NAMESPACE_SEPARATOR.  The value must be a
+     one-character string; a `ValueError' will be raised if the string
+     has an illegal length (`None' is considered the same as omission).
+     When namespace processing is enabled, element type names and
+     attribute names that belong to a namespace will be expanded.  The
+     element name passed to the element handlers `StartElementHandler'
+     and `EndElementHandler' will be the concatenation of the namespace
+     URI, the namespace separator character, and the local part of the
+     name.  If the namespace separator is a zero byte (`chr(0)') then
+     the namespace URI and the local part will be concatenated without
+     any separator.
+
+     For example, if NAMESPACE_SEPARATOR is set to a space character (`
+     ') and the following document is parsed:
+
+          <?xml version="1.0"?>
+          <root xmlns    = "http://default-namespace.org/"
+                xmlns:py = "http://www.python.org/ns/">
+            <py:elem1 />
+            <elem2 xmlns="" />
+          </root>
+
+     `StartElementHandler' will receive the following strings for each
+     element:
+
+          http://default-namespace.org/ root
+          http://www.python.org/ns/ elem1
+          elem2
+
+See also:
+     `The Expat XML Parser' {Home page of the Expat project.}
+
+* Menu:
+
+* XMLParser Objects::
+* ExpatError Exceptions::
+* Example 10::
+* Content Model Descriptions::
+* Expat error constants::
+

@@ -1,0 +1,1184 @@
+This is python-mac.info, produced by makeinfo version 4.3 from
+python-mac.texi.
+
+October 3, 2003
+
+
+File: python-mac.info,  Node: Top,  Next: Front Matter,  Prev: (dir),  Up: (dir)
+
+Macintosh Library Modules
+*************************
+
+* Menu:
+
+* Front Matter::
+* Using Python on a Mac OS 9 Macintosh::
+* MacPython Modules::
+* MacPython OSA Modules::
+* MacOS Toolbox Modules::
+* Undocumented Modules::
+* History and License::
+* Module Index::
+* Class-Exception-Object Index::
+* Function-Method-Variable Index::
+* Miscellaneous Index::
+
+
+File: python-mac.info,  Node: Front Matter,  Next: Using Python on a Mac OS 9 Macintosh,  Prev: Top,  Up: Top
+
+Front Matter
+************
+
+Copyright (C) 2001, 2002, 2003 Python Software Foundation.  All rights
+reserved.
+
+Copyright (C) 2000 BeOpen.com.  All rights reserved.
+
+Copyright (C) 1995-2000 Corporation for National Research Initiatives.
+All rights reserved.
+
+Copyright (C) 1991-1995 Stichting Mathematisch Centrum.  All rights
+reserved.
+
+See the end of this document for complete license and permissions
+information.
+
+     This library reference manual documents Python's extensions for the
+     Macintosh.  It should be used in conjunction with the , which
+     documents the standard library and built-in types.
+
+     This manual assumes basic knowledge about the Python language.
+     For an informal introduction to Python, see the ; the  remains the
+     highest authority on syntactic and semantic questions.  Finally,
+     the manual entitled  describes how to add new extensions to Python
+     and how to embed it in other applications.
+
+
+
+File: python-mac.info,  Node: Using Python on a Mac OS 9 Macintosh,  Next: MacPython Modules,  Prev: Front Matter,  Up: Top
+
+Using Python on a Mac OS 9 Macintosh
+************************************
+
+Using Python on a Macintosh, especially on Mac OS 9 (MacPython-OSX
+includes a complete UNIX Python) can seem like something completely
+different than using it on a UNIX-like or Windows system. Most of the
+Python documentation, both the "official" documentation and published
+books, describe only how Python is used on these systems, causing
+confusion for the new user of MacPython-OS9. This chapter gives a brief
+introduction to the specifics of using Python on a Macintosh.
+
+The section on the IDE (see Section *Note Using the Python Interactive
+window::) is relevant to MacPython-OSX too.
+
+* Menu:
+
+* Getting and Installing MacPython-OSX::
+* Getting and Installing MacPython-OS9::
+* IDE::
+
+
+File: python-mac.info,  Node: Getting and Installing MacPython-OSX,  Next: Getting and Installing MacPython-OS9,  Prev: Using Python on a Mac OS 9 Macintosh,  Up: Using Python on a Mac OS 9 Macintosh
+
+Getting and Installing MacPython-OSX
+====================================
+
+As of Python 2.3a2 the only sure way of getting MacPython-OSX on your
+machine is getting a source distribution and building what is called a
+"framework Python".  The details are in the file `Mac/OSX/README'.
+
+As binary installers become available the details will be posted to
+<http://www.cwi.nl/~jack/macpython.html>.
+
+What you get after installing is a number of things:
+
+   * A `MacPython-2.3' folder in your `Applications' folder. In here
+     you find the PythonIDE Integrated Development Environment;
+     PythonLauncher, which handles double-clicking Python scripts from
+     the Finder; and the Package Manager.
+
+   * A fairly standard UNIX commandline Python interpreter in
+     `/usr/local/bin/python', but without the usual
+     `/usr/local/lib/python'.
+
+   * A framework `/Library/Frameworks/Python.framework', where all the
+     action really is, but which you usually do not have to be aware of.
+
+To uninstall MacPython you can simply remove these three things.
+
+PythonIDE contains an Apple Help Viewer book called "MacPython Help"
+which you can access through its help menu. If you are completely new to
+Python you should start reading the IDE introduction in that document.
+
+If you are familiar with Python on other UNIX platforms you should read
+the section on running Python scripts from the UNIX shell.
+
+* Menu:
+
+* How to run a Python script::
+* Running scripts with a GUI::
+* configuration::
+
+
+File: python-mac.info,  Node: How to run a Python script,  Next: Running scripts with a GUI,  Prev: Getting and Installing MacPython-OSX,  Up: Getting and Installing MacPython-OSX
+
+How to run a Python script
+--------------------------
+
+Your best way to get started with Python on Mac OS X is through the
+PythonIDE integrated development environment, see section *Note Using
+the Python Interactive window:: and use the Help menu when the IDE is
+running.
+
+If you want to run Python scripts from the Terminal window command line
+or from the Finder you first need an editor to create your script.  Mac
+OS X comes with a number of standard UNIX command line editors, `vi'
+and `emacs' among them. If you want a more Mac-like editor `BBEdit' or
+`TextWrangler' from Bare Bones Software (see
+<http://www.barebones.com/products/bbedit/index.shtml>) are good
+choices.  Their freeware `BBEdit Lite' is officially discontinued but
+still available.  `AppleWorks' or any other word processor that can
+save files in ASCII is also a possibility, but `TextEdit' is not: it
+saves in `.rtf' format only.
+
+To run your script from the Terminal window you must make sure that
+`/usr/local/bin' is in your shell search path before `/usr/bin', where
+the Apple-supplied Python lives (which is version 2.2, as of Mac OS X
+10.2.4).
+
+To run your script from the Finder you have two options:
+   * Drag it to `PythonLauncher'
+
+   * Select `PythonLauncher' as the default application to open your
+     script (or any .py script) through the finder Info window and
+     double-click it.
+
+PythonLauncher has various preferences to control how your script is
+launched.  Option-dragging allows you to change these for one
+invocation, or use its Preferences menu to change things globally.
+
+
+File: python-mac.info,  Node: Running scripts with a GUI,  Next: configuration,  Prev: How to run a Python script,  Up: Getting and Installing MacPython-OSX
+
+Running scripts with a GUI
+--------------------------
+
+There is one Mac OS X quirk that you need to be aware of: programs that
+talk to the Aqua window manager (in other words, anything that has a
+GUI) need to be run in a special way. Use `pythonw' in stead of `python'
+to start such scripts.
+
+
+File: python-mac.info,  Node: configuration,  Prev: Running scripts with a GUI,  Up: Getting and Installing MacPython-OSX
+
+configuration
+-------------
+
+MacPython honours all standard UNIX environment variables such as
+`PYTHONPATH', but setting these variables for programs started from the
+Finder is non-standard as the Finder does not read your `.profile' or
+`.cshrc' at startup.  You need to create a file
+`~/.MacOSX/environment.plist'.  See Apple's Technical Document QA1067
+for details.
+
+Installing additional Python packages is most easily done through the
+Package Manager, see the MacPython Help Book for details.
+
+
+File: python-mac.info,  Node: Getting and Installing MacPython-OS9,  Next: IDE,  Prev: Getting and Installing MacPython-OSX,  Up: Using Python on a Mac OS 9 Macintosh
+
+Getting and Installing MacPython-OS9
+====================================
+
+The most recent release version as well as possible newer experimental
+versions are best found at the MacPython page maintained by Jack
+Jansen: <http://homepages.cwi.nl/~jack/macpython.html>.
+
+Please refer to the `README' included with your distribution for the
+most up-to-date instructions.
+
+Note that MacPython-OS9 runs fine on Mac OS X, and it runs in native
+mode, not in the Classic environment. Unless you have specific
+requirements for a CFM-based Python there is no reason not to use
+MacPython-OSX, though.
+
+* Menu:
+
+* Entering the interactive Interpreter::
+* How to run a Python script 2::
+* Simulating command line arguments::
+* Creating a Python script::
+* Configuration::
+
+
+File: python-mac.info,  Node: Entering the interactive Interpreter,  Next: How to run a Python script 2,  Prev: Getting and Installing MacPython-OS9,  Up: Getting and Installing MacPython-OS9
+
+Entering the interactive Interpreter
+------------------------------------
+
+The interactive interpreter that you will see used in Python
+documentation is started by double-clicking the `PythonInterpreter'
+icon, which looks like a 16-ton weight falling. You should see the
+version information and the `>`>'>~' prompt.  Use it exactly as
+described in the standard documentation.
+
+
+File: python-mac.info,  Node: How to run a Python script 2,  Next: Simulating command line arguments,  Prev: Entering the interactive Interpreter,  Up: Getting and Installing MacPython-OS9
+
+How to run a Python script
+--------------------------
+
+There are several ways to run an existing Python script; two common
+ways to run a Python script are "drag and drop" and "double clicking".
+Other ways include running it from within the IDE (see Section *Note
+Using the Python Interactive window::), or launching via AppleScript.
+
+* Menu:
+
+* Drag and drop::
+* Set Creator and Double Click::
+
+
+File: python-mac.info,  Node: Drag and drop,  Next: Set Creator and Double Click,  Prev: How to run a Python script 2,  Up: How to run a Python script 2
+
+Drag and drop
+.............
+
+One of the easiest ways to launch a Python script is via "Drag and
+Drop". This is just like launching a text file in the Finder by
+"dragging" it over your word processor's icon and "dropping" it there.
+Make sure that you use an icon referring to the `PythonInterpreter',
+not the `IDE' or `Idle' icons which have different behaviour which is
+described below.
+
+Some things that might have gone wrong:
+
+   * A window flashes after dropping the script onto the
+     `PythonInterpreter', but then disappears. Most likely this is a
+     configuration issue; your `PythonInterpreter' is setup to exit
+     immediately upon completion, but your script assumes that if it
+     prints something that text will stick around for a while. To fix
+     this, see section *Note Default startup options::.
+
+   * When you waved the script icon over the `PythonInterpreter', the
+     `PythonInterpreter' icon did not hilight.  Most likely the Creator
+     code and document type is unset (or set incorrectly) - this often
+     happens when a file originates on a non-Mac computer.  See section
+     *Note Set Creator and Double Click:: for more details.
+
+
+File: python-mac.info,  Node: Set Creator and Double Click,  Prev: Drag and drop,  Up: How to run a Python script 2
+
+Set Creator and Double Click
+............................
+
+If the script that you want to launch has the appropriate Creator Code
+and File Type you can simply double-click on the script to launch it.
+To be "double-clickable" a file needs to be of type `TEXT', with a
+creator code of `Pyth'.
+
+Setting the creator code and filetype can be done with the IDE (see
+sections *Note Writing a Python Script:: and *Note Save as versus Save
+as Applet::), with an editor with a Python mode (`BBEdit') - see section
+*Note BBedit::, or with assorted other Mac utilities, but a script
+(`fixfiletypes.py') has been included in the MacPython distribution,
+making it possible to set the proper Type and Creator Codes with Python.
+
+The `fixfiletypes.py' script will change the file type and creator
+codes for the indicated directory.  To use `fixfiletypes.py':
+
+  1. Locate it in the `scripts' folder of the `Mac' folder of the
+     MacPython distribution.
+
+  2. Put all of the scripts that you want to fix in a folder with
+     nothing else in it.
+
+  3. Double-click on the `fixfiletypes.py' icon.
+
+  4. Navigate into the folder of files you want to fix, and press the
+     "Select current folder" button.
+
+
+File: python-mac.info,  Node: Simulating command line arguments,  Next: Creating a Python script,  Prev: How to run a Python script 2,  Up: Getting and Installing MacPython-OS9
+
+Simulating command line arguments
+---------------------------------
+
+There are two ways to simulate command-line arguments with
+MacPython-OS9.
+
+  1. via Interpreter options
+        * Hold the option-key down when launching your script. This will
+          bring up a dialog box of Python Interpreter options.
+
+        * Click "Set UNIX-style command line.." button.
+
+        * Type the arguments into the "Argument" field.
+
+        * Click "OK"
+
+        * Click "Run".
+
+  2. via drag and drop If you save the script as an applet (see Section
+     *Note Save as versus Save as Applet::), you can also simulate some
+     command-line arguments via "Drag-and-Drop". In this case, the
+     names of the files that were dropped onto the applet will be
+     appended to `sys.argv', so that it will appear to the script as
+     though they had been typed on a command line.  As on UNIX systems,
+     the first item in `sys.srgv' is the path to the applet, and the
+     rest are the files dropped on the applet.
+
+
+File: python-mac.info,  Node: Creating a Python script,  Next: Configuration,  Prev: Simulating command line arguments,  Up: Getting and Installing MacPython-OS9
+
+Creating a Python script
+------------------------
+
+Since Python scripts are simply text files, they can be created in any
+way that text files can be created, but some special tools also exist
+with extra features.
+
+* Menu:
+
+* In an editor::
+* Editors with Python modes::
+* BBedit::
+
+
+File: python-mac.info,  Node: In an editor,  Next: Editors with Python modes,  Prev: Creating a Python script,  Up: Creating a Python script
+
+In an editor
+............
+
+You can create a text file with any word processing program such as
+`MSWord' or `AppleWorks' but you need to make sure that the file is
+saved as "ASCII" or "plain text".
+
+
+File: python-mac.info,  Node: Editors with Python modes,  Next: BBedit,  Prev: In an editor,  Up: Creating a Python script
+
+Editors with Python modes
+.........................
+
+Several text editors have additional features that add functionality
+when you are creating a Python script.  These can include coloring
+Python keywords to make your code easier to read, module browsing, or a
+built-in debugger. These include `Alpha', `Pepper', and `BBedit', and
+the MacPython IDE (Section *Note Using the Python Interactive window::).
+
+
+File: python-mac.info,  Node: BBedit,  Prev: Editors with Python modes,  Up: Creating a Python script
+
+BBedit
+......
+
+If you use `BBEdit' to create your scripts you will want to tell it
+about the Python creator code so that you can simply double click on
+the saved file to launch it.
+   * Launch `BBEdit'.
+
+   * Select "Preferences" from the "Edit" menu.
+
+   * Select "File Types" from the scrolling list.
+
+   * click on the "Add..." button and navigate to `PythonInterpreter'
+     in the main directory of the MacPython distribution; click "open".
+
+   * Click on the "Save" button in the Preferences panel.
+
+
+File: python-mac.info,  Node: Configuration,  Prev: Creating a Python script,  Up: Getting and Installing MacPython-OS9
+
+Configuration
+-------------
+
+The MacPython distribution comes with `EditPythonPrefs', an applet
+which will help you to customize the MacPython environment for your
+working habits.
+
+* Menu:
+
+* EditPythonPrefs::
+* Adding modules to the Module Search Path::
+* Default startup options::
+
+
+File: python-mac.info,  Node: EditPythonPrefs,  Next: Adding modules to the Module Search Path,  Prev: Configuration,  Up: Configuration
+
+EditPythonPrefs
+...............
+
+`EditPythonPrefs' gives you the capability to configure Python to
+behave the way you want it to.  There are two ways to use
+`EditPythonPrefs', you can use it to set the preferences in general, or
+you can drop a particular Python engine onto it to customize only that
+version. The latter can be handy if, for example, you want to have a
+second copy of the `PythonInterpreter' that keeps the output window
+open on a normal exit even though you prefer to normally not work that
+way.
+
+To change the default preferences, simply double-click on
+`EditPythonPrefs'. To change the preferences only for one copy of the
+Interpreter, drop the icon for that copy onto `EditPythonPrefs'.  You
+can also use `EditPythonPrefs' in this fashion to set the preferences
+of the `Python IDE' and any applets you create - see section *Note Save
+as versus Save as Applet::.
+
+
+File: python-mac.info,  Node: Adding modules to the Module Search Path,  Next: Default startup options,  Prev: EditPythonPrefs,  Up: Configuration
+
+Adding modules to the Module Search Path
+........................................
+
+When executing an `import' statement, Python looks for modules in
+places defined by the `sys.path' To edit the `sys.path' on a Mac,
+launch `EditPythonPrefs', and enter them into the largish field at the
+top (one per line).
+
+Since MacPython defines a main Python directory, the easiest thing is
+to add folders to search within the main Python directory. To add a
+folder of scripts that you created called "My Folder" located in the
+main Python Folder, enter `$(PYTHON):My Folder' onto a new line.
+
+To add the Desktop under OS 9 or below, add `StartupDriveName:Desktop
+Folder' on a new line.
+
+
+File: python-mac.info,  Node: Default startup options,  Prev: Adding modules to the Module Search Path,  Up: Configuration
+
+Default startup options
+.......................
+
+The "Default startup options..." button in the `EditPythonPrefs' dialog
+box gives you many options including the ability to keep the "Output"
+window open after the script terminates, and the ability to enter
+interactive mode after the termination of the run script. The latter
+can be very helpful if you want to examine the objects that were
+created during your script.
+
+
+File: python-mac.info,  Node: IDE,  Prev: Getting and Installing MacPython-OS9,  Up: Using Python on a Mac OS 9 Macintosh
+
+The IDE
+=======
+
+The `Python IDE' (Integrated Development Environment) is a separate
+application that acts as a text editor for your Python code, a class
+browser, a graphical debugger, and more.
+
+* Menu:
+
+* Using the Python Interactive window::
+* Writing a Python Script::
+* Executing a script from within the IDE::
+* Save as versus Save as Applet::
+
+
+File: python-mac.info,  Node: Using the Python Interactive window,  Next: Writing a Python Script,  Prev: IDE,  Up: IDE
+
+Using the "Python Interactive" window
+-------------------------------------
+
+Use this window like you would the `PythonInterpreter', except that you
+cannot use the "Drag and drop" method above. Instead, dropping a script
+onto the `Python IDE' icon will open the file in a separate script
+window (which you can then execute manually - see section *Note
+Executing a script from within the IDE::).
+
+
+File: python-mac.info,  Node: Writing a Python Script,  Next: Executing a script from within the IDE,  Prev: Using the Python Interactive window,  Up: IDE
+
+Writing a Python Script
+-----------------------
+
+In addition to using the `Python IDE' interactively, you can also type
+out a complete Python program, saving it incrementally, and execute it
+or smaller selections of it.
+
+You can create a new script, open a previously saved script, and save
+your currently open script by selecting the appropriate item in the
+"File" menu. Dropping a Python script onto the `Python IDE' will open
+it for editting.
+
+If you try to open a script with the `Python IDE' but either can't
+locate it from the "Open" dialog box, or you get an error message like
+"Can't open file of type ..." see section *Note Set Creator and Double
+Click::.
+
+When the `Python IDE' saves a script, it uses the creator code settings
+which are available by clicking on the small black triangle on the top
+right of the document window, and selecting "save options". The default
+is to save the file with the `Python IDE' as the creator, this means
+that you can open the file for editing by simply double-clicking on its
+icon. You might want to change this behaviour so that it will be opened
+by the `PythonInterpreter', and run. To do this simply choose "Python
+Interpreter" from the "save options". Note that these options are
+associated with the _file_ not the application.
+
+
+File: python-mac.info,  Node: Executing a script from within the IDE,  Next: Save as versus Save as Applet,  Prev: Writing a Python Script,  Up: IDE
+
+Executing a script from within the IDE
+--------------------------------------
+
+You can run the script in the frontmost window of the `Python IDE' by
+hitting the run all button.  You should be aware, however that if you
+use the Python convention `if __name__ == "__main__":' the script will
+_not_ be "__main__" by default. To get that behaviour you must select
+the "Run as __main__" option from the small black triangle on the top
+right of the document window.  Note that this option is associated with
+the _file_ not the application. It _will_ stay active after a save,
+however; to shut this feature off simply select it again.
+
+
+File: python-mac.info,  Node: Save as versus Save as Applet,  Prev: Executing a script from within the IDE,  Up: IDE
+
+"Save as" versus "Save as Applet"
+---------------------------------
+
+When you are done writing your Python script you have the option of
+saving it as an "applet" (by selecting "Save as applet" from the "File"
+menu). This has a significant advantage in that you can drop files or
+folders onto it, to pass them to the applet the way command-line users
+would type them onto the command-line to pass them as arguments to the
+script. However, you should make sure to save the applet as a separate
+file, do not overwrite the script you are writing, because you will not
+be able to edit it again.
+
+Accessing the items passed to the applet via "drag-and-drop" is done
+using the standard `sys.argv' mechanism. See the general documentation
+for more
+
+Note that saving a script as an applet will not make it runnable on a
+system without a Python installation.
+
+
+File: python-mac.info,  Node: MacPython Modules,  Next: MacPython OSA Modules,  Prev: Using Python on a Mac OS 9 Macintosh,  Up: Top
+
+MacPython Modules
+*****************
+
+The following modules are only available on the Macintosh, and are
+documented here:
+
+* Menu:
+
+* mac::
+* macpath::
+* macfs::
+* ic::
+* MacOS::
+* macostools::
+* findertools::
+* EasyDialogs::
+* FrameWork::
+* autoGIL::
+
+
+File: python-mac.info,  Node: mac,  Next: macpath,  Prev: MacPython Modules,  Up: MacPython Modules
+
+Implementations for the `os' module
+===================================
+
+Implementations for the `os' module.
+
+This module implements the Mac OS 9 operating system dependent
+functionality provided by the standard module `os' .  It is best
+accessed through the `os' module. This module is only available in
+MacPython-OS9, on MacPython-OSX `posix' is used.
+
+The following functions are available in this module: `chdir()',
+`close()', `dup()', `fdopen()', `getcwd()', `lseek()', `listdir()',
+`mkdir()', `open()', `read()', `rename()', `rmdir()', `stat()',
+`sync()', `unlink()', `write()', as well as the exception `error'. Note
+that the times returned by `stat()' are floating-point values, like all
+time values in MacPython-OS9.
+
+
+File: python-mac.info,  Node: macpath,  Next: macfs,  Prev: mac,  Up: MacPython Modules
+
+MacOS path manipulation functions
+=================================
+
+MacOS path manipulation functions.
+
+This module is the Macintosh implementation of the `os.path' module.
+It is most portably accessed as `os.path' .  Refer to the  for
+documentation of `os.path'.
+
+The following functions are available in this module: `normcase()',
+`normpath()', `isabs()', `join()', `split()', `isdir()', `isfile()',
+`walk()', `exists()'.  For other functions available in `os.path' dummy
+counterparts are available.
+
+
+File: python-mac.info,  Node: macfs,  Next: ic,  Prev: macpath,  Up: MacPython Modules
+
+Various file system services
+============================
+
+Support for FSSpec, the Alias Manager, `finder' aliases, and the
+Standard File package.
+
+_This is deprecated in Python 2.3.  The macfs module should be
+considered obsolete. For `FSSpec', `FSRef' and `Alias' handling use the
+Carbon.File or Carbon.Folder module. For file dialogs use the
+`EasyDialogs' module._
+
+This module provides access to Macintosh FSSpec handling, the Alias
+Manager, `finder' aliases and the Standard File package.
+
+Whenever a function or method expects a FILE argument, this argument
+can be one of three things: (1) a full or partial Macintosh pathname,
+(2) an `FSSpec' object or (3) a 3-tuple `(WDREFNUM, PARID, NAME)' as
+described in . An `FSSpec' can point to a non-existing file, as long as
+the folder containing the file exists.  Under MacPython the same is
+true for a pathname, but not under unix-Pyton because of the way
+pathnames and FSRefs works. See Apple's documentation for details.
+
+A description of aliases and the Standard File package can also be
+found there.
+
+`FSSpec(file)'
+     Create an `FSSpec' object for the specified file.
+
+`RawFSSpec(data)'
+     Create an `FSSpec' object given the raw data for the C structure
+     for the `FSSpec' as a string.  This is mainly useful if you have
+     obtained an `FSSpec' structure over a network.
+
+`RawAlias(data)'
+     Create an `Alias' object given the raw data for the C structure
+     for the alias as a string.  This is mainly useful if you have
+     obtained an `FSSpec' structure over a network.
+
+`FInfo()'
+     Create a zero-filled `FInfo' object.
+
+`ResolveAliasFile(file)'
+     Resolve an alias file. Returns a 3-tuple `(FSSPEC, ISFOLDER,
+     ALIASED)' where FSSPEC is the resulting `FSSpec' object, ISFOLDER
+     is true if FSSPEC points to a folder and ALIASED is true if the
+     file was an alias in the first place (otherwise the `FSSpec'
+     object for the file itself is returned).
+
+`StandardGetFile([type, ...])'
+     Present the user with a standard "open input file" dialog.
+     Optionally, you can pass up to four 4-character file types to limit
+     the files the user can choose from. The function returns an
+     `FSSpec' object and a flag indicating that the user completed the
+     dialog without cancelling.
+
+`PromptGetFile(prompt[, type, ...])'
+     Similar to `StandardGetFile()' but allows you to specify a prompt
+     which will be displayed at the top of the dialog.
+
+`StandardPutFile(prompt[, default])'
+     Present the user with a standard "open output file" dialog. PROMPT
+     is the prompt string, and the optional DEFAULT argument
+     initializes the output file name. The function returns an `FSSpec'
+     object and a flag indicating that the user completed the dialog
+     without cancelling.
+
+`GetDirectory([prompt])'
+     Present the user with a non-standard "select a directory" dialog.
+     You have to first open the directory before clicking on the
+     "select current directory" button. PROMPT is the prompt string
+     which will be displayed at the top of the dialog. Return an
+     `FSSpec' object and a success-indicator.
+
+`SetFolder([fsspec])'
+     Set the folder that is initially presented to the user when one of
+     the file selection dialogs is presented. FSSPEC should point to a
+     file in the folder, not the folder itself (the file need not exist,
+     though). If no argument is passed the folder will be set to the
+     current directory, i.e. what `os.getcwd()' returns.
+
+     Note that starting with system 7.5 the user can change Standard
+     File behaviour with the "general controls" control panel, thereby
+     making this call inoperative.
+
+`FindFolder(where, which, create)'
+     Locates one of the "special" folders that MacOS knows about, such
+     as the trash or the Preferences folder. WHERE is the disk to
+     search, WHICH is the 4-character string specifying which folder to
+     locate. Setting CREATE causes the folder to be created if it does
+     not exist. Returns a `(VREFNUM, DIRID)' tuple.
+
+     The constants for WHERE and WHICH can be obtained from the
+     standard module CARBON.FOLDERS.
+
+`NewAliasMinimalFromFullPath(pathname)'
+     Return a minimal `alias' object that points to the given file,
+     which must be specified as a full pathname. This is the only way
+     to create an `Alias' pointing to a non-existing file.
+
+`FindApplication(creator)'
+     Locate the application with 4-character creator code CREATOR. The
+     function returns an `FSSpec' object pointing to the application.
+
+* Menu:
+
+* FSSpec Objects::
+* Alias Objects::
+* FInfo Objects::
+
+
+File: python-mac.info,  Node: FSSpec Objects,  Next: Alias Objects,  Prev: macfs,  Up: macfs
+
+FSSpec Objects
+--------------
+
+`data'
+     The raw data from the FSSpec object, suitable for passing to other
+     applications, for instance.
+
+`as_pathname()'
+     Return the full pathname of the file described by the `FSSpec'
+     object.
+
+`as_tuple()'
+     Return the `(WDREFNUM, PARID, NAME)' tuple of the file described
+     by the `FSSpec' object.
+
+`NewAlias([file])'
+     Create an Alias object pointing to the file described by this
+     FSSpec. If the optional FILE parameter is present the alias will
+     be relative to that file, otherwise it will be absolute.
+
+`NewAliasMinimal()'
+     Create a minimal alias pointing to this file.
+
+`GetCreatorType()'
+     Return the 4-character creator and type of the file.
+
+`SetCreatorType(creator, type)'
+     Set the 4-character creator and type of the file.
+
+`GetFInfo()'
+     Return a `FInfo' object describing the finder info for the file.
+
+`SetFInfo(finfo)'
+     Set the finder info for the file to the values given as FINFO (an
+     `FInfo' object).
+
+`GetDates()'
+     Return a tuple with three floating point values representing the
+     creation date, modification date and backup date of the file.
+
+`SetDates(crdate, moddate, backupdate)'
+     Set the creation, modification and backup date of the file. The
+     values are in the standard floating point format used for times
+     throughout Python.
+
+
+File: python-mac.info,  Node: Alias Objects,  Next: FInfo Objects,  Prev: FSSpec Objects,  Up: macfs
+
+Alias Objects
+-------------
+
+`data'
+     The raw data for the Alias record, suitable for storing in a
+     resource or transmitting to other programs.
+
+`Resolve([file])'
+     Resolve the alias. If the alias was created as a relative alias you
+     should pass the file relative to which it is. Return the FSSpec for
+     the file pointed to and a flag indicating whether the `Alias'
+     object itself was modified during the search process. If the file
+     does not exist but the path leading up to it does exist a valid
+     fsspec is returned.
+
+`GetInfo(num)'
+     An interface to the C routine `GetAliasInfo()'.
+
+`Update(file[, file2])'
+     Update the alias to point to the FILE given. If FILE2 is present a
+     relative alias will be created.
+
+Note that it is currently not possible to directly manipulate a
+resource as an `Alias' object. Hence, after calling `Update()' or after
+`Resolve()' indicates that the alias has changed the Python program is
+responsible for getting the `data' value from the `Alias' object and
+modifying the resource.
+
+
+File: python-mac.info,  Node: FInfo Objects,  Prev: Alias Objects,  Up: macfs
+
+FInfo Objects
+-------------
+
+See  for a complete description of what the various fields mean.
+
+`Creator'
+     The 4-character creator code of the file.
+
+`Type'
+     The 4-character type code of the file.
+
+`Flags'
+     The finder flags for the file as 16-bit integer. The bit values in
+     FLAGS are defined in standard module `MACFS'.
+
+`Location'
+     A Point giving the position of the file's icon in its folder.
+
+`Fldr'
+     The folder the file is in (as an integer).
+
+
+File: python-mac.info,  Node: ic,  Next: MacOS,  Prev: macfs,  Up: MacPython Modules
+
+Access to Internet Config
+=========================
+
+Access to Internet Config.
+
+This module provides access to Macintosh Internet Config  package,
+which stores preferences for Internet programs such as mail address,
+default homepage, etc. Also, Internet Config contains an elaborate set
+of mappings from Macintosh creator/type codes to foreign filename
+extensions plus information on how to transfer files (binary, ascii,
+etc.). Since MacOS 9, this module is a control panel named Internet.
+
+There is a low-level companion module `icglue'  which provides the basic
+Internet Config access functionality.  This low-level module is not
+documented, but the docstrings of the routines document the parameters
+and the routine names are the same as for the Pascal or C API to
+Internet Config, so the standard IC programmers' documentation can be
+used if this module is needed.
+
+The `ic' module defines the `error' exception and symbolic names for
+all error codes Internet Config can produce; see the source for details.
+
+`error'
+     Exception raised on errors in the `ic' module.
+
+The `ic' module defines the following class and function:
+
+`IC([signature[, ic]])'
+     Create an Internet Config object. The signature is a 4-character
+     creator code of the current application (default `'Pyth'') which
+     may influence some of ICs settings. The optional IC argument is a
+     low-level `icglue.icinstance' created beforehand, this may be
+     useful if you want to get preferences from a different config file,
+     etc.
+
+`launchurl(url[, hint])'
+
+`parseurl data[, start[, end[, hint]]]'
+
+`mapfile file'
+
+`maptypecreator type, creator[, filename]'
+
+`settypecreator file'
+     These functions are "shortcuts" to the methods of the same name,
+     described below.
+
+* Menu:
+
+* IC Objects::
+
+
+File: python-mac.info,  Node: IC Objects,  Prev: ic,  Up: ic
+
+IC Objects
+----------
+
+`IC' objects have a mapping interface, hence to obtain the mail address
+you simply get `IC['MailAddress']'. Assignment also works, and changes
+the option in the configuration file.
+
+The module knows about various datatypes, and converts the internal IC
+representation to a "logical" Python data structure. Running the `ic'
+module standalone will run a test program that lists all keys and
+values in your IC database, this will have to serve as documentation.
+
+If the module does not know how to represent the data it returns an
+instance of the `ICOpaqueData' type, with the raw data in its `data'
+attribute. Objects of this type are also acceptable values for
+assignment.
+
+Besides the dictionary interface, `IC' objects have the following
+methods:
+
+`launchurl(url[, hint])'
+     Parse the given URL, lauch the correct application and pass it the
+     URL. The optional HINT can be a scheme name such as `'mailto:'',
+     in which case incomplete URLs are completed with this scheme.  If
+     HINT is not provided, incomplete URLs are invalid.
+
+`parseurl(data[, start[, end[, hint]]])'
+     Find an URL somewhere in DATA and return start position, end
+     position and the URL. The optional START and END can be used to
+     limit the search, so for instance if a user clicks in a long text
+     field you can pass the whole text field and the click-position in
+     START and this routine will return the whole URL in which the user
+     clicked.  As above, HINT is an optional scheme used to complete
+     incomplete URLs.
+
+`mapfile(file)'
+     Return the mapping entry for the given FILE, which can be passed
+     as either a filename or an `macfs.FSSpec()' result, and which need
+     not exist.
+
+     The mapping entry is returned as a tuple `(VERSION, TYPE, CREATOR,
+     POSTCREATOR, FLAGS, EXTENSION, APPNAME, POSTAPPNAME, MIMETYPE,
+     ENTRYNAME)', where VERSION is the entry version number, TYPE is
+     the 4-character filetype, CREATOR is the 4-character creator type,
+     POSTCREATOR is the 4-character creator code of an optional
+     application to post-process the file after downloading, FLAGS are
+     various bits specifying whether to transfer in binary or ascii and
+     such, EXTENSION is the filename extension for this file type,
+     APPNAME is the printable name of the application to which this
+     file belongs, POSTAPPNAME is the name of the postprocessing
+     application, MIMETYPE is the MIME type of this file and ENTRYNAME
+     is the name of this entry.
+
+`maptypecreator(type, creator[, filename])'
+     Return the mapping entry for files with given 4-character TYPE and
+     CREATOR codes. The optional FILENAME may be specified to further
+     help finding the correct entry (if the creator code is `'????'',
+     for instance).
+
+     The mapping entry is returned in the same format as for MAPFILE.
+
+`settypecreator(file)'
+     Given an existing FILE, specified either as a filename or as an
+     `macfs.FSSpec()' result, set its creator and type correctly based
+     on its extension.  The finder is told about the change, so the
+     finder icon will be updated quickly.
+
+
+File: python-mac.info,  Node: MacOS,  Next: macostools,  Prev: ic,  Up: MacPython Modules
+
+Access to Mac OS interpreter features
+=====================================
+
+Access to Mac OS-specific interpreter features.
+
+This module provides access to MacOS specific functionality in the
+Python interpreter, such as how the interpreter eventloop functions and
+the like. Use with care.
+
+Note the capitalization of the module name; this is a historical
+artifact.
+
+`runtimemodel'
+     Either`'carbon'' or `'macho''.  This signifies whether this Python
+     uses the Mac OS X and Mac OS 9 compatible CarbonLib style or the
+     Mac OS X-only Mach-O style. In earlier versions of Python  the
+     value could also be `'ppc'' for the classic Mac OS 8 runtime model.
+
+`linkmodel'
+     The way the interpreter has been linked. As extension modules may
+     be incompatible between linking models, packages could use this
+     information to give more decent error messages. The value is one
+     of `'static'' for a statically linked Python, `'framework'' for
+     Python in a Mac OS X framework, `'shared'' for Python in a
+     standard unix shared library and `'cfm'' for the Mac OS
+     9-compatible Python.
+
+`Error'
+     This exception is raised on MacOS generated errors, either from
+     functions in this module or from other mac-specific modules like
+     the toolbox interfaces. The arguments are the integer error code
+     (the `OSErr' value) and a textual description of the error code.
+     Symbolic names for all known error codes are defined in the
+     standard module `macerrors'.
+
+`SetEventHandler(handler)'
+     In the inner interpreter loop Python will occasionally check for
+     events, unless disabled with `ScheduleParams()'. With this
+     function you can pass a Python event-handler function that will be
+     called if an event is available. The event is passed as parameter
+     and the function should return non-zero if the event has been
+     fully processed, otherwise event processing continues (by passing
+     the event to the console window package, for instance).
+
+     Call `SetEventHandler()' without a parameter to clear the event
+     handler. Setting an event handler while one is already set is an
+     error.
+
+     Availability: MacPython-OS9.
+
+`SchedParams([doint[, evtmask[, besocial[, interval[, bgyield]]]]])'
+     Influence the interpreter inner loop event handling. INTERVAL
+     specifies how often (in seconds, floating point) the interpreter
+     should enter the event processing code. When true, DOINT causes
+     interrupt (command-dot) checking to be done. EVTMASK tells the
+     interpreter to do event processing for events in the mask (redraws,
+     mouseclicks to switch to other applications, etc). The BESOCIAL
+     flag gives other processes a chance to run. They are granted
+     minimal runtime when Python is in the foreground and BGYIELD
+     seconds per INTERVAL when Python runs in the background.
+
+     All parameters are optional, and default to the current value. The
+     return value of this function is a tuple with the old values of
+     these options.  Initial defaults are that all processing is
+     enabled, checking is done every quarter second and the processor
+     is given up for a quarter second when in the background.
+
+     The most common use case is to call `SchedParams(0, 0)' to
+     completely disable event handling in the interpreter mainloop.
+
+     Availability: MacPython-OS9.
+
+`HandleEvent(ev)'
+     Pass the event record EV back to the Python event loop, or
+     possibly to the handler for the `sys.stdout' window (based on the
+     compiler used to build Python). This allows Python programs that do
+     their own event handling to still have some command-period and
+     window-switching capability.
+
+     If you attempt to call this function from an event handler set
+     through `SetEventHandler()' you will get an exception.
+
+     Availability: MacPython-OS9.
+
+`GetErrorString(errno)'
+     Return the textual description of MacOS error code ERRNO.
+
+`splash(resid)'
+     This function will put a splash window on-screen, with the
+     contents of the DLOG resource specified by RESID. Calling with a
+     zero argument will remove the splash screen. This function is
+     useful if you want an applet to post a splash screen early in
+     initialization without first having to load numerous extension
+     modules.
+
+     Availability: MacPython-OS9.
+
+`DebugStr(message [, object])'
+     On Mac OS 9, drop to the low-level debugger with message MESSAGE.
+     The optional OBJECT argument is not used, but can easily be
+     inspected from the debugger. On Mac OS X the string is simply
+     printed to stderr.
+
+     Note that you should use this function with extreme care: if no
+     low-level debugger like MacsBug is installed this call will crash
+     your system. It is intended mainly for developers of Python
+     extension modules.
+
+`SysBeep()'
+     Ring the bell.
+
+`GetTicks()'
+     Get the number of clock ticks (1/60th of a second) since system
+     boot.
+
+`GetCreatorAndType(file)'
+     Return the file creator and file type as two four-character
+     strings.  The FILE parameter can be a pathname or an `FSSpec' or
+     `FSRef' object.
+
+`SetCreatorAndType(file, creator, type)'
+     Set the file creator and file type.  The FILE parameter can be a
+     pathname or an `FSSpec' or `FSRef' object. CREATOR and TYPE must
+     be four character strings.
+
+`openrf(name [, mode])'
+     Open the resource fork of a file. Arguments are the same as for the
+     built-in function `open()'. The object returned has file-like
+     semantics, but it is not a Python file object, so there may be
+     subtle differences.
+
+`WMAvailable()'
+     Checks wether the current process has access to the window manager.
+     The method will return `False' if the window manager is not
+     available, for instance when running on Mac OS X Server or when
+     logged in via ssh, or when the current interpreter is not running
+     from a fullblown application bundle. A script runs from an
+     application bundle either when it has been started with `pythonw'
+     in stead of `python' or when running as an applet.
+
+     On Mac OS 9 the method always returns `True'.
+
+
+File: python-mac.info,  Node: macostools,  Next: findertools,  Prev: MacOS,  Up: MacPython Modules
+
+Convenience routines for file manipulation
+==========================================
+
+Convenience routines for file manipulation.
+
+This module contains some convenience routines for file-manipulation on
+the Macintosh. All file parameters can be specified as pathnames,
+`FSRef' or `FSSpec' objects.
+
+The `macostools' module defines the following functions:
+
+`copy(src, dst[, createpath[, copytimes]])'
+     Copy file SRC to DST.  If CREATEPATH is non-zero the folders
+     leading to DST are created if necessary.  The method copies data
+     and resource fork and some finder information (creator, type,
+     flags) and optionally the creation, modification and backup times
+     (default is to copy them). Custom icons, comments and icon
+     position are not copied.
+
+`copytree(src, dst)'
+     Recursively copy a file tree from SRC to DST, creating folders as
+     needed. SRC and DST should be specified as pathnames.
+
+`mkalias(src, dst)'
+     Create a finder alias DST pointing to SRC.
+
+`touched(dst)'
+     Tell the finder that some bits of finder-information such as
+     creator or type for file DST has changed. The file can be
+     specified by pathname or fsspec. This call should tell the finder
+     to redraw the files icon.
+
+`BUFSIZ'
+     The buffer size for `copy', default 1 megabyte.
+
+Note that the process of creating finder aliases is not specified in
+the Apple documentation. Hence, aliases created with `mkalias()' could
+conceivably have incompatible behaviour in some cases.
+
+
+File: python-mac.info,  Node: findertools,  Next: EasyDialogs,  Prev: macostools,  Up: MacPython Modules
+
+The `finder''s Apple Events interface
+=====================================
+
+Wrappers around the `finder''s Apple Events interface.
+
+This module contains routines that give Python programs access to some
+functionality provided by the finder. They are implemented as wrappers
+around the AppleEvent  interface to the finder.
+
+All file and folder parameters can be specified either as full
+pathnames, or as `FSRef' or `FSSpec' objects.
+
+The `findertools' module defines the following functions:
+
+`launch(file)'
+     Tell the finder to launch FILE. What launching means depends on
+     the file: applications are started, folders are opened and
+     documents are opened in the correct application.
+
+`Print(file)'
+     Tell the finder to print a file. The behaviour is identical to
+     selecting the file and using the print command in the finder's
+     file menu.
+
+`copy(file, destdir)'
+     Tell the finder to copy a file or folder FILE to folder DESTDIR.
+     The function returns an `Alias' object pointing to the new file.
+
+`move(file, destdir)'
+     Tell the finder to move a file or folder FILE to folder DESTDIR.
+     The function returns an `Alias' object pointing to the new file.
+
+`sleep()'
+     Tell the finder to put the Macintosh to sleep, if your machine
+     supports it.
+
+`restart()'
+     Tell the finder to perform an orderly restart of the machine.
+
+`shutdown()'
+     Tell the finder to perform an orderly shutdown of the machine.
+

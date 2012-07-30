@@ -1,0 +1,1202 @@
+This is python-tut.info, produced by makeinfo version 4.3 from
+python-tut.texi.
+
+October 3, 2003
+
+
+File: python-tut.info,  Node: Importing * From a Package,  Next: Intra-package References,  Prev: Packages,  Up: Packages
+
+Importing * From a Package
+--------------------------
+
+Now what happens when the user writes `from Sound.Effects import *'?
+Ideally, one would hope that this somehow goes out to the filesystem,
+finds which submodules are present in the package, and imports them
+all.  Unfortunately, this operation does not work very well on Mac and
+Windows platforms, where the filesystem does not always have accurate
+information about the case of a filename!  On these platforms, there is
+no guaranteed way to know whether a file `ECHO.PY' should be imported
+as a module `echo', `Echo' or `ECHO'.  (For example, Windows 95 has the
+annoying practice of showing all file names with a capitalized first
+letter.)  The DOS 8+3 filename restriction adds another interesting
+problem for long module names.
+
+The only solution is for the package author to provide an explicit
+index of the package.  The import statement uses the following
+convention: if a package's `__init__.py' code defines a list named
+`__all__', it is taken to be the list of module names that should be
+imported when `from PACKAGE import *' is encountered.  It is up to the
+package author to keep this list up-to-date when a new version of the
+package is released.  Package authors may also decide not to support
+it, if they don't see a use for importing * from their package.  For
+example, the file `Sounds/Effects/__init__.py' could contain the
+following code:
+
+     __all__ = ["echo", "surround", "reverse"]
+
+This would mean that `from Sound.Effects import *' would import the
+three named submodules of the `Sound' package.
+
+If `__all__' is not defined, the statement `from Sound.Effects import
+*' does _not_ import all submodules from the package `Sound.Effects'
+into the current namespace; it only ensures that the package
+`Sound.Effects' has been imported (possibly running its initialization
+code, `__init__.py') and then imports whatever names are defined in the
+package.  This includes any names defined (and submodules explicitly
+loaded) by `__init__.py'.  It also includes any submodules of the
+package that were explicitly loaded by previous import statements.
+Consider this code:
+
+     import Sound.Effects.echo
+     import Sound.Effects.surround
+     from Sound.Effects import *
+
+In this example, the echo and surround modules are imported in the
+current namespace because they are defined in the `Sound.Effects'
+package when the `from...import' statement is executed.  (This also
+works when `__all__' is defined.)
+
+Note that in general the practice of importing `*' from a module or
+package is frowned upon, since it often causes poorly readable code.
+However, it is okay to use it to save typing in interactive sessions,
+and certain modules are designed to export only names that follow
+certain patterns.
+
+Remember, there is nothing wrong with using `from Package import
+specific_submodule'!  In fact, this is the recommended notation unless
+the importing module needs to use submodules with the same name from
+different packages.
+
+
+File: python-tut.info,  Node: Intra-package References,  Next: Packages in Multiple Directories,  Prev: Importing * From a Package,  Up: Packages
+
+Intra-package References
+------------------------
+
+The submodules often need to refer to each other.  For example, the
+`surround' module might use the `echo' module.  In fact, such references
+are so common that the `import' statement first looks in the containing
+package before looking in the standard module search path.  Thus, the
+surround module can simply use `import echo' or `from echo import
+echofilter'.  If the imported module is not found in the current
+package (the package of which the current module is a submodule), the
+`import' statement looks for a top-level module with the given name.
+
+When packages are structured into subpackages (as with the `Sound'
+package in the example), there's no shortcut to refer to submodules of
+sibling packages - the full name of the subpackage must be used.  For
+example, if the module `Sound.Filters.vocoder' needs to use the `echo'
+module in the `Sound.Effects' package, it can use `from Sound.Effects
+import echo'.
+
+
+File: python-tut.info,  Node: Packages in Multiple Directories,  Prev: Intra-package References,  Up: Packages
+
+Packages in Multiple Directories
+--------------------------------
+
+Packages support one more special attribute, `__path__'.  This is
+initialized to be a list containing the name of the directory holding
+the package's `__init__.py' before the code in that file is executed.
+This variable can be modified; doing so affects future searches for
+modules and subpackages contained in the package.
+
+While this feature is not often needed, it can be used to extend the
+set of modules found in a package.
+
+
+File: python-tut.info,  Node: Input and Output,  Next: Errors and Exceptions,  Prev: Modules,  Up: Top
+
+Input and Output
+****************
+
+There are several ways to present the output of a program; data can be
+printed in a human-readable form, or written to a file for future use.
+This chapter will discuss some of the possibilities.
+
+* Menu:
+
+* Fancier Output Formatting::
+* Reading and Writing Files::
+
+
+File: python-tut.info,  Node: Fancier Output Formatting,  Next: Reading and Writing Files,  Prev: Input and Output,  Up: Input and Output
+
+Fancier Output Formatting
+=========================
+
+So far we've encountered two ways of writing values: _expression
+statements_ and the `print' statement.  (A third way is using the
+`write()' method of file objects; the standard output file can be
+referenced as `sys.stdout'.  See the Library Reference for more
+information on this.)
+
+Often you'll want more control over the formatting of your output than
+simply printing space-separated values.  There are two ways to format
+your output; the first way is to do all the string handling yourself;
+using string slicing and concatenation operations you can create any
+lay-out you can imagine.  The standard module `string'  contains some
+useful operations for padding strings to a given column width; these
+will be discussed shortly.  The second way is to use the `%' operator
+with a string as the left argument.  The `%' operator interprets the
+left argument much like a `sprintf()'-style format string to be applied
+to the right argument, and returns the string resulting from this
+formatting operation.
+
+One question remains, of course: how do you convert values to strings?
+Luckily, Python has ways to convert any value to a string: pass it to
+the `repr()'  or `str()' functions.  Reverse quotes (```') are
+equivalent to `repr()', but their use is discouraged.
+
+The `str()' function is meant to return representations of values which
+are fairly human-readable, while `repr()' is meant to generate
+representations which can be read by the interpreter (or will force a
+`SyntaxError' if there is not equivalent syntax).  For objects which
+don't have a particular representation for human consumption, `str()'
+will return the same value as `repr()'.  Many values, such as numbers
+or structures like lists and dictionaries, have the same representation
+using either function.  Strings and floating point numbers, in
+particular, have two distinct representations.
+
+Some examples:
+
+     >>> s = 'Hello, world.'
+     >>> str(s)
+     'Hello, world.'
+     >>> repr(s)
+     "'Hello, world.'"
+     >>> str(0.1)
+     '0.1'
+     >>> repr(0.1)
+     '0.10000000000000001'
+     >>> x = 10 * 3.25
+     >>> y = 200 * 200
+     >>> s = 'The value of x is ' + repr(x) + ', and y is ' + repr(y) + '...'
+     >>> print s
+     The value of x is 32.5, and y is 40000...
+     >>> # The repr() of a string adds string quotes and backslashes:
+     ... hello = 'hello, world\n'
+     >>> hellos = repr(hello)
+     >>> print hellos
+     'hello, world\n'
+     >>> # The argument to repr() may be any Python object:
+     ... repr((x, y, ('spam', 'eggs')))
+     "(32.5, 40000, ('spam', 'eggs'))"
+     >>> # reverse quotes are convenient in interactive sessions:
+     ... `x, y, ('spam', 'eggs')`
+     "(32.5, 40000, ('spam', 'eggs'))"
+
+Here are two ways to write a table of squares and cubes:
+
+     >>> import string
+     >>> for x in range(1, 11):
+     ...     print string.rjust(repr(x), 2), string.rjust(repr(x*x), 3),
+     ...     # Note trailing comma on previous line
+     ...     print string.rjust(repr(x*x*x), 4)
+     ...
+      1   1    1
+      2   4    8
+      3   9   27
+      4  16   64
+      5  25  125
+      6  36  216
+      7  49  343
+      8  64  512
+      9  81  729
+     10 100 1000
+     >>> for x in range(1,11):
+     ...     print '%2d %3d %4d' % (x, x*x, x*x*x)
+     ...
+      1   1    1
+      2   4    8
+      3   9   27
+      4  16   64
+      5  25  125
+      6  36  216
+      7  49  343
+      8  64  512
+      9  81  729
+     10 100 1000
+
+(Note that one space between each column was added by the way `print'
+works: it always adds spaces between its arguments.)
+
+This example demonstrates the function `string.rjust()', which
+right-justifies a string in a field of a given width by padding it with
+spaces on the left.  There are similar functions `string.ljust()' and
+`string.center()'.  These functions do not write anything, they just
+return a new string.  If the input string is too long, they don't
+truncate it, but return it unchanged; this will mess up your column
+lay-out but that's usually better than the alternative, which would be
+lying about a value.  (If you really want truncation you can always add
+a slice operation, as in `string.ljust(x,~n)[0:n]'.)
+
+There is another function, `string.zfill()', which pads a numeric
+string on the left with zeros.  It understands about plus and minus
+signs:
+
+     >>> import string
+     >>> string.zfill('12', 5)
+     '00012'
+     >>> string.zfill('-3.14', 7)
+     '-003.14'
+     >>> string.zfill('3.14159265359', 5)
+     '3.14159265359'
+
+Using the `%' operator looks like this:
+
+     >>> import math
+     >>> print 'The value of PI is approximately %5.3f.' % math.pi
+     The value of PI is approximately 3.142.
+
+If there is more than one format in the string, you need to pass a
+tuple as right operand, as in this example:
+
+     >>> table = {'Sjoerd': 4127, 'Jack': 4098, 'Dcab': 7678}
+     >>> for name, phone in table.items():
+     ...     print '%-10s ==> %10d' % (name, phone)
+     ...
+     Jack       ==>       4098
+     Dcab       ==>       7678
+     Sjoerd     ==>       4127
+
+Most formats work exactly as in C and require that you pass the proper
+type; however, if you don't you get an exception, not a core dump.  The
+`%s' format is more relaxed: if the corresponding argument is not a
+string object, it is converted to string using the `str()' built-in
+function.  Using `*' to pass the width or precision in as a separate
+(integer) argument is supported.  The C formats `%n' and `%p' are not
+supported.
+
+If you have a really long format string that you don't want to split
+up, it would be nice if you could reference the variables to be
+formatted by name instead of by position.  This can be done by using
+form `%(name)format', as shown here:
+
+     >>> table = {'Sjoerd': 4127, 'Jack': 4098, 'Dcab': 8637678}
+     >>> print 'Jack: %(Jack)d; Sjoerd: %(Sjoerd)d; Dcab: %(Dcab)d' % table
+     Jack: 4098; Sjoerd: 4127; Dcab: 8637678
+
+This is particularly useful in combination with the new built-in
+`vars()' function, which returns a dictionary containing all local
+variables.
+
+
+File: python-tut.info,  Node: Reading and Writing Files,  Prev: Fancier Output Formatting,  Up: Input and Output
+
+Reading and Writing Files
+=========================
+
+`open()'  returns a file object , and is most commonly used with two
+arguments: `open(FILENAME, MODE)'.
+
+     >>> f=open('/tmp/workfile', 'w')
+     >>> print f
+     <open file '/tmp/workfile', mode 'w' at 80a0960>
+
+The first argument is a string containing the filename.  The second
+argument is another string containing a few characters describing the
+way in which the file will be used.  MODE can be `'r'' when the file
+will only be read, `'w'' for only writing (an existing file with the
+same name will be erased), and `'a'' opens the file for appending; any
+data written to the file is automatically added to the end.  `'r+''
+opens the file for both reading and writing.  The MODE argument is
+optional; `'r'' will be assumed if it's omitted.
+
+On Windows and the Macintosh, `'b'' appended to the mode opens the file
+in binary mode, so there are also modes like `'rb'', `'wb'', and
+`'r+b''.  Windows makes a distinction between text and binary files;
+the end-of-line characters in text files are automatically altered
+slightly when data is read or written.  This behind-the-scenes
+modification to file data is fine for ASCII text files, but it'll
+corrupt binary data like that in JPEGs or `.EXE' files.  Be very
+careful to use binary mode when reading and writing such files.  (Note
+that the precise semantics of text mode on the Macintosh depends on the
+underlying C library being used.)
+
+* Menu:
+
+* Methods of File Objects::
+* pickle Module::
+
+
+File: python-tut.info,  Node: Methods of File Objects,  Next: pickle Module,  Prev: Reading and Writing Files,  Up: Reading and Writing Files
+
+Methods of File Objects
+-----------------------
+
+The rest of the examples in this section will assume that a file object
+called `f' has already been created.
+
+To read a file's contents, call `f.read(SIZE)', which reads some
+quantity of data and returns it as a string.  SIZE is an optional
+numeric argument.  When SIZE is omitted or negative, the entire
+contents of the file will be read and returned; it's your problem if
+the file is twice as large as your machine's memory.  Otherwise, at
+most SIZE bytes are read and returned.  If the end of the file has been
+reached, `f.read()' will return an empty string (`""').
+     >>> f.read()
+     'This is the entire file.\n'
+     >>> f.read()
+     ''
+
+`f.readline()' reads a single line from the file; a newline character
+(`\n') is left at the end of the string, and is only omitted on the
+last line of the file if the file doesn't end in a newline.  This makes
+the return value unambiguous; if `f.readline()' returns an empty
+string, the end of the file has been reached, while a blank line is
+represented by `'\n'', a string containing only a single newline.
+
+     >>> f.readline()
+     'This is the first line of the file.\n'
+     >>> f.readline()
+     'Second line of the file\n'
+     >>> f.readline()
+     ''
+
+`f.readlines()' returns a list containing all the lines of data in the
+file.  If given an optional parameter SIZEHINT, it reads that many
+bytes from the file and enough more to complete a line, and returns the
+lines from that.  This is often used to allow efficient reading of a
+large file by lines, but without having to load the entire file in
+memory.  Only complete lines will be returned.
+
+     >>> f.readlines()
+     ['This is the first line of the file.\n', 'Second line of the file\n']
+
+`f.write(STRING)' writes the contents of STRING to the file, returning
+`None'.
+
+     >>> f.write('This is a test\n')
+
+`f.tell()' returns an integer giving the file object's current position
+in the file, measured in bytes from the beginning of the file.  To
+change the file object's position, use `f.seek(OFFSET, FROM_WHAT)'.
+The position is computed from adding OFFSET to a reference point; the
+reference point is selected by the FROM_WHAT argument.  A FROM_WHAT
+value of 0 measures from the beginning of the file, 1 uses the current
+file position, and 2 uses the end of the file as the reference point.
+FROM_WHAT can be omitted and defaults to 0, using the beginning of the
+file as the reference point.
+
+     >>> f=open('/tmp/workfile', 'r+')
+     >>> f.write('0123456789abcdef')
+     >>> f.seek(5)     # Go to the 6th byte in the file
+     >>> f.read(1)
+     '5'
+     >>> f.seek(-3, 2) # Go to the 3rd byte before the end
+     >>> f.read(1)
+     'd'
+
+When you're done with a file, call `f.close()' to close it and free up
+any system resources taken up by the open file.  After calling
+`f.close()', attempts to use the file object will automatically fail.
+
+     >>> f.close()
+     >>> f.read()
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     ValueError: I/O operation on closed file
+
+File objects have some additional methods, such as `isatty()' and
+`truncate()' which are less frequently used; consult the Library
+Reference for a complete guide to file objects.
+
+
+File: python-tut.info,  Node: pickle Module,  Prev: Methods of File Objects,  Up: Reading and Writing Files
+
+The `pickle' Module
+-------------------
+
+Strings can easily be written to and read from a file. Numbers take a
+bit more effort, since the `read()' method only returns strings, which
+will have to be passed to a function like `string.atoi()', which takes
+a string like `'123'' and returns its numeric value 123.  However, when
+you want to save more complex data types like lists, dictionaries, or
+class instances, things get a lot more complicated.
+
+Rather than have users be constantly writing and debugging code to save
+complicated data types, Python provides a standard module called
+`pickle'.  This is an amazing module that can take almost any Python
+object (even some forms of Python code!), and convert it to a string
+representation; this process is called "pickling".  Reconstructing the
+object from the string representation is called "unpickling".  Between
+pickling and unpickling, the string representing the object may have
+been stored in a file or data, or sent over a network connection to
+some distant machine.
+
+If you have an object `x', and a file object `f' that's been opened for
+writing, the simplest way to pickle the object takes only one line of
+code:
+
+     pickle.dump(x, f)
+
+To unpickle the object again, if `f' is a file object which has been
+opened for reading:
+
+     x = pickle.load(f)
+
+(There are other variants of this, used when pickling many objects or
+when you don't want to write the pickled data to a file; consult the
+complete documentation for `pickle' in the Library Reference.)
+
+`pickle' is the standard way to make Python objects which can be stored
+and reused by other programs or by a future invocation of the same
+program; the technical term for this is a "persistent" object.  Because
+`pickle' is so widely used, many authors who write Python extensions
+take care to ensure that new data types such as matrices can be
+properly pickled and unpickled.
+
+
+File: python-tut.info,  Node: Errors and Exceptions,  Next: Classes,  Prev: Input and Output,  Up: Top
+
+Errors and Exceptions
+*********************
+
+Until now error messages haven't been more than mentioned, but if you
+have tried out the examples you have probably seen some.  There are (at
+least) two distinguishable kinds of errors: _syntax errors_ and
+_exceptions_.
+
+* Menu:
+
+* Syntax Errors::
+* Exceptions::
+* Handling Exceptions::
+* Raising Exceptions::
+* User-defined Exceptions::
+* Defining Clean-up Actions::
+
+
+File: python-tut.info,  Node: Syntax Errors,  Next: Exceptions,  Prev: Errors and Exceptions,  Up: Errors and Exceptions
+
+Syntax Errors
+=============
+
+Syntax errors, also known as parsing errors, are perhaps the most common
+kind of complaint you get while you are still learning Python:
+
+     >>> while True print 'Hello world'
+       File "<stdin>", line 1, in ?
+         while True print 'Hello world'
+                        ^
+     SyntaxError: invalid syntax
+
+The parser repeats the offending line and displays a little `arrow'
+pointing at the earliest point in the line where the error was
+detected.  The error is caused by (or at least detected at) the token
+_preceding_ the arrow: in the example, the error is detected at the
+keyword `print', since a colon (`:') is missing before it.  File name
+and line number are printed so you know where to look in case the input
+came from a script.
+
+
+File: python-tut.info,  Node: Exceptions,  Next: Handling Exceptions,  Prev: Syntax Errors,  Up: Errors and Exceptions
+
+Exceptions
+==========
+
+Even if a statement or expression is syntactically correct, it may
+cause an error when an attempt is made to execute it.  Errors detected
+during execution are called _exceptions_ and are not unconditionally
+fatal: you will soon learn how to handle them in Python programs.  Most
+exceptions are not handled by programs, however, and result in error
+messages as shown here:
+
+     >>> 10 * (1/0)
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     ZeroDivisionError: integer division or modulo by zero
+     >>> 4 + spam*3
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     NameError: name 'spam' is not defined
+     >>> '2' + 2
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     TypeError: cannot concatenate 'str' and 'int' objects
+
+The last line of the error message indicates what happened.  Exceptions
+come in different types, and the type is printed as part of the
+message: the types in the example are `ZeroDivisionError', `NameError'
+and `TypeError'.  The string printed as the exception type is the name
+of the built-in name for the exception that occurred.  This is true for
+all built-in exceptions, but need not be true for user-defined
+exceptions (although it is a useful convention).  Standard exception
+names are built-in identifiers (not reserved keywords).
+
+The rest of the line is a detail whose interpretation depends on the
+exception type; its meaning is dependent on the exception type.
+
+The preceding part of the error message shows the context where the
+exception happened, in the form of a stack backtrace.  In general it
+contains a stack backtrace listing source lines; however, it will not
+display lines read from standard input.
+
+The  lists the built-in exceptions and their meanings.
+
+
+File: python-tut.info,  Node: Handling Exceptions,  Next: Raising Exceptions,  Prev: Exceptions,  Up: Errors and Exceptions
+
+Handling Exceptions
+===================
+
+It is possible to write programs that handle selected exceptions.  Look
+at the following example, which asks the user for input until a valid
+integer has been entered, but allows the user to interrupt the program
+(using <Control-C> or whatever the operating system supports); note
+that a user-generated interruption is signalled by raising the
+`KeyboardInterrupt' exception.
+
+     >>> while True:
+     ...     try:
+     ...         x = int(raw_input("Please enter a number: "))
+     ...         break
+     ...     except ValueError:
+     ...         print "Oops! That was no valid number.  Try again..."
+     ...
+
+The `try' statement works as follows.
+
+   * First, the _try clause_ (the statement(s) between the `try' and
+     `except' keywords) is executed.
+
+   * If no exception occurs, the _except clause_ is skipped and
+     execution of the `try' statement is finished.
+
+   * If an exception occurs during execution of the try clause, the
+     rest of the clause is skipped.  Then if its type matches the
+     exception named after the `except' keyword, the rest of the try
+     clause is skipped, the except clause is executed, and then
+     execution continues after the `try' statement.
+
+   * If an exception occurs which does not match the exception named in
+     the except clause, it is passed on to outer `try' statements; if
+     no handler is found, it is an _unhandled exception_ and execution
+     stops with a message as shown above.
+
+
+A `try' statement may have more than one except clause, to specify
+handlers for different exceptions.  At most one handler will be
+executed.  Handlers only handle exceptions that occur in the
+corresponding try clause, not in other handlers of the same `try'
+statement.  An except clause may name multiple exceptions as a
+parenthesized list, for example:
+
+     ... except (RuntimeError, TypeError, NameError):
+     ...     pass
+
+The last except clause may omit the exception name(s), to serve as a
+wildcard.  Use this with extreme caution, since it is easy to mask a
+real programming error in this way!  It can also be used to print an
+error message and then re-raise the exception (allowing a caller to
+handle the exception as well):
+
+     import string, sys
+     
+     try:
+         f = open('myfile.txt')
+         s = f.readline()
+         i = int(string.strip(s))
+     except IOError, (errno, strerror):
+         print "I/O error(%s): %s" % (errno, strerror)
+     except ValueError:
+         print "Could not convert data to an integer."
+     except:
+         print "Unexpected error:", sys.exc_info()[0]
+         raise
+
+The `try' ... `except' statement has an optional _else clause_, which,
+when present, must follow all except clauses.  It is useful for code
+that must be executed if the try clause does not raise an exception.
+For example:
+
+     for arg in sys.argv[1:]:
+         try:
+             f = open(arg, 'r')
+         except IOError:
+             print 'cannot open', arg
+         else:
+             print arg, 'has', len(f.readlines()), 'lines'
+             f.close()
+
+The use of the `else' clause is better than adding additional code to
+the `try' clause because it avoids accidentally catching an exception
+that wasn't raised by the code being protected by the `try' ...
+`except' statement.
+
+When an exception occurs, it may have an associated value, also known as
+the exception's _argument_.  The presence and type of the argument
+depend on the exception type.
+
+The except clause may specify a variable after the exception name (or
+list).  The variable is bound to an exception instance with the
+arguments stored in `instance.args'.  For convenience, the exception
+instance defines `__getitem__' and `__str__' so the arguments can be
+accessed or printed directly without having to reference `.args'.
+
+     >>> try:
+     ...    raise Exception('spam', 'eggs')
+     ... except Exception, inst:
+     ...    print type(inst)     # the exception instance
+     ...    print inst.args      # arguments stored in .args
+     ...    print inst           # __str__ allows args to printed directly
+     ...    x, y = inst          # __getitem__ allows args to be unpacked directly
+     ...    print 'x =', x
+     ...    print 'y =', y
+     ...
+     <type 'instance'>
+     ('spam', 'eggs')
+     ('spam', 'eggs')
+     x = spam
+     y = eggs
+
+If an exception has an argument, it is printed as the last part
+(`detail') of the message for unhandled exceptions.
+
+Exception handlers don't just handle exceptions if they occur
+immediately in the try clause, but also if they occur inside functions
+that are called (even indirectly) in the try clause.  For example:
+
+     >>> def this_fails():
+     ...     x = 1/0
+     ...
+     >>> try:
+     ...     this_fails()
+     ... except ZeroDivisionError, detail:
+     ...     print 'Handling run-time error:', detail
+     ...
+     Handling run-time error: integer division or modulo
+
+
+File: python-tut.info,  Node: Raising Exceptions,  Next: User-defined Exceptions,  Prev: Handling Exceptions,  Up: Errors and Exceptions
+
+Raising Exceptions
+==================
+
+The `raise' statement allows the programmer to force a specified
+exception to occur.  For example:
+
+     >>> raise NameError, 'HiThere'
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     NameError: HiThere
+
+The first argument to `raise' names the exception to be raised.  The
+optional second argument specifies the exception's argument.
+
+If you need to determine whether an exception was raised but don't
+intend to handle it, a simpler form of the `raise' statement allows you
+to re-raise the exception:
+
+     >>> try:
+     ...     raise NameError, 'HiThere'
+     ... except NameError:
+     ...     print 'An exception flew by!'
+     ...     raise
+     ...
+     An exception flew by!
+     Traceback (most recent call last):
+       File "<stdin>", line 2, in ?
+     NameError: HiThere
+
+
+File: python-tut.info,  Node: User-defined Exceptions,  Next: Defining Clean-up Actions,  Prev: Raising Exceptions,  Up: Errors and Exceptions
+
+User-defined Exceptions
+=======================
+
+Programs may name their own exceptions by creating a new exception
+class.  Exceptions should typically be derived from the `Exception'
+class, either directly or indirectly.  For example:
+
+     >>> class MyError(Exception):
+     ...     def __init__(self, value):
+     ...         self.value = value
+     ...     def __str__(self):
+     ...         return repr(self.value)
+     ...
+     >>> try:
+     ...     raise MyError(2*2)
+     ... except MyError, e:
+     ...     print 'My exception occurred, value:', e.value
+     ...
+     My exception occurred, value: 4
+     >>> raise MyError, 'oops!'
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     __main__.MyError: 'oops!'
+
+Exception classes can be defined which do anything any other class can
+do, but are usually kept simple, often only offering a number of
+attributes that allow information about the error to be extracted by
+handlers for the exception.  When creating a module which can raise
+several distinct errors, a common practice is to create a base class
+for exceptions defined by that module, and subclass that to create
+specific exception classes for different error conditions:
+
+     class Error(Exception):
+         """Base class for exceptions in this module."""
+         pass
+     
+     class InputError(Error):
+         """Exception raised for errors in the input.
+     
+         Attributes:
+             expression -- input expression in which the error occurred
+             message -- explanation of the error
+         """
+     
+         def __init__(self, expression, message):
+             self.expression = expression
+             self.message = message
+     
+     class TransitionError(Error):
+         """Raised when an operation attempts a state transition that's not
+         allowed.
+     
+         Attributes:
+             previous -- state at beginning of transition
+             next -- attempted new state
+             message -- explanation of why the specific transition is not allowed
+         """
+     
+         def __init__(self, previous, next, message):
+             self.previous = previous
+             self.next = next
+             self.message = message
+
+Most exceptions are defined with names that end in "Error," similar to
+the naming of the standard exceptions.
+
+Many standard modules define their own exceptions to report errors that
+may occur in functions they define.  More information on classes is
+presented in chapter *Note Classes::, "Classes."
+
+
+File: python-tut.info,  Node: Defining Clean-up Actions,  Prev: User-defined Exceptions,  Up: Errors and Exceptions
+
+Defining Clean-up Actions
+=========================
+
+The `try' statement has another optional clause which is intended to
+define clean-up actions that must be executed under all circumstances.
+For example:
+
+     >>> try:
+     ...     raise KeyboardInterrupt
+     ... finally:
+     ...     print 'Goodbye, world!'
+     ...
+     Goodbye, world!
+     Traceback (most recent call last):
+       File "<stdin>", line 2, in ?
+     KeyboardInterrupt
+
+A _finally clause_ is executed whether or not an exception has occurred
+in the try clause.  When an exception has occurred, it is re-raised
+after the finally clause is executed.  The finally clause is also
+executed "on the way out" when the `try' statement is left via a
+`break' or `return' statement.
+
+The code in the finally clause is useful for releasing external
+resources (such as files or network connections), regardless of whether
+or not the use of the resource was successful.
+
+A `try' statement must either have one or more except clauses or one
+finally clause, but not both.
+
+
+File: python-tut.info,  Node: Classes,  Next: What Now?,  Prev: Errors and Exceptions,  Up: Top
+
+Classes
+*******
+
+Python's class mechanism adds classes to the language with a minimum of
+new syntax and semantics.  It is a mixture of the class mechanisms
+found in C++ and Modula-3.  As is true for modules, classes in Python
+do not put an absolute barrier between definition and user, but rather
+rely on the politeness of the user not to "break into the definition."
+The most important features of classes are retained with full power,
+however: the class inheritance mechanism allows multiple base classes,
+a derived class can override any methods of its base class or classes,
+a method can call the method of a base class with the same name.
+Objects can contain an arbitrary amount of private data.
+
+In C++ terminology, all class members (including the data members) are
+_public_, and all member functions are _virtual_.  There are no special
+constructors or destructors.  As in Modula-3, there are no shorthands
+for referencing the object's members from its methods: the method
+function is declared with an explicit first argument representing the
+object, which is provided implicitly by the call.  As in Smalltalk,
+classes themselves are objects, albeit in the wider sense of the word:
+in Python, all data types are objects.  This provides semantics for
+importing and renaming.  But, just like in C++ or Modula-3, built-in
+types cannot be used as base classes for extension by the user.  Also,
+like in C++ but unlike in Modula-3, most built-in operators with
+special syntax (arithmetic operators, subscripting etc.) can be
+redefined for class instances.
+
+* Menu:
+
+* A Word About Terminology::
+* Python Scopes and Name Spaces::
+* A First Look at Classes::
+* Random Remarks::
+* Inheritance::
+* Private Variables::
+* Odds and Ends::
+* Exceptions Are Classes Too::
+* Iterators::
+* Generators::
+
+
+File: python-tut.info,  Node: A Word About Terminology,  Next: Python Scopes and Name Spaces,  Prev: Classes,  Up: Classes
+
+A Word About Terminology
+========================
+
+Lacking universally accepted terminology to talk about classes, I will
+make occasional use of Smalltalk and C++ terms.  (I would use Modula-3
+terms, since its object-oriented semantics are closer to those of
+Python than C++, but I expect that few readers have heard of it.)
+
+I also have to warn you that there's a terminological pitfall for
+object-oriented readers: the word "object" in Python does not
+necessarily mean a class instance.  Like C++ and Modula-3, and unlike
+Smalltalk, not all types in Python are classes: the basic built-in
+types like integers and lists are not, and even somewhat more exotic
+types like files aren't.  However, _all_ Python types share a little
+bit of common semantics that is best described by using the word object.
+
+Objects have individuality, and multiple names (in multiple scopes) can
+be bound to the same object.  This is known as aliasing in other
+languages.  This is usually not appreciated on a first glance at
+Python, and can be safely ignored when dealing with immutable basic
+types (numbers, strings, tuples).  However, aliasing has an (intended!)
+effect on the semantics of Python code involving mutable objects such
+as lists, dictionaries, and most types representing entities outside
+the program (files, windows, etc.).  This is usually used to the
+benefit of the program, since aliases behave like pointers in some
+respects.  For example, passing an object is cheap since only a pointer
+is passed by the implementation; and if a function modifies an object
+passed as an argument, the caller will see the change -- this
+eliminates the need for two different argument passing mechanisms as in
+Pascal.
+
+
+File: python-tut.info,  Node: Python Scopes and Name Spaces,  Next: A First Look at Classes,  Prev: A Word About Terminology,  Up: Classes
+
+Python Scopes and Name Spaces
+=============================
+
+Before introducing classes, I first have to tell you something about
+Python's scope rules.  Class definitions play some neat tricks with
+namespaces, and you need to know how scopes and namespaces work to
+fully understand what's going on.  Incidentally, knowledge about this
+subject is useful for any advanced Python programmer.
+
+Let's begin with some definitions.
+
+A _namespace_ is a mapping from names to objects.  Most namespaces are
+currently implemented as Python dictionaries, but that's normally not
+noticeable in any way (except for performance), and it may change in
+the future.  Examples of namespaces are: the set of built-in names
+(functions such as `abs()', and built-in exception names); the global
+names in a module; and the local names in a function invocation.  In a
+sense the set of attributes of an object also form a namespace.  The
+important thing to know about namespaces is that there is absolutely no
+relation between names in different namespaces; for instance, two
+different modules may both define a function "maximize" without
+confusion -- users of the modules must prefix it with the module name.
+
+By the way, I use the word _attribute_ for any name following a dot --
+for example, in the expression `z.real', `real' is an attribute of the
+object `z'.  Strictly speaking, references to names in modules are
+attribute references: in the expression `modname.funcname', `modname'
+is a module object and `funcname' is an attribute of it.  In this case
+there happens to be a straightforward mapping between the module's
+attributes and the global names defined in the module: they share the
+same namespace!  (1)
+
+Attributes may be read-only or writable.  In the latter case,
+assignment to attributes is possible.  Module attributes are writable:
+you can write `modname.the_answer = 42'.  Writable attributes may also
+be deleted with the `del' statement.  For example, `del
+modname.the_answer' will remove the attribute `the_answer' from the
+object named by `modname'.
+
+Name spaces are created at different moments and have different
+lifetimes.  The namespace containing the built-in names is created when
+the Python interpreter starts up, and is never deleted.  The global
+namespace for a module is created when the module definition is read
+in; normally, module namespaces also last until the interpreter quits.
+The statements executed by the top-level invocation of the interpreter,
+either read from a script file or interactively, are considered part of
+a module called `__main__', so they have their own global namespace.
+(The built-in names actually also live in a module; this is called
+`__builtin__'.)
+
+The local namespace for a function is created when the function is
+called, and deleted when the function returns or raises an exception
+that is not handled within the function.  (Actually, forgetting would
+be a better way to describe what actually happens.)  Of course,
+recursive invocations each have their own local namespace.
+
+A _scope_ is a textual region of a Python program where a namespace is
+directly accessible.  "Directly accessible" here means that an
+unqualified reference to a name attempts to find the name in the
+namespace.
+
+Although scopes are determined statically, they are used dynamically.
+At any time during execution, there are at least three nested scopes
+whose namespaces are directly accessible: the innermost scope, which is
+searched first, contains the local names; the namespaces of any
+enclosing functions, which are searched starting with the nearest
+enclosing scope; the middle scope, searched next, contains the current
+module's global names; and the outermost scope (searched last) is the
+namespace containing built-in names.
+
+If a name is declared global, then all references and assignments go
+directly to the middle scope containing the module's global names.
+Otherwise, all variables found outside of the innermost scope are
+read-only.
+
+Usually, the local scope references the local names of the (textually)
+current function.  Outside of functions, the local scope references the
+same namespace as the global scope: the module's namespace.  Class
+definitions place yet another namespace in the local scope.
+
+It is important to realize that scopes are determined textually: the
+global scope of a function defined in a module is that module's
+namespace, no matter from where or by what alias the function is
+called.  On the other hand, the actual search for names is done
+dynamically, at run time -- however, the language definition is
+evolving towards static name resolution, at "compile" time, so don't
+rely on dynamic name resolution!  (In fact, local variables are already
+determined statically.)
+
+A special quirk of Python is that assignments always go into the
+innermost scope.  Assignments do not copy data -- they just bind names
+to objects.  The same is true for deletions: the statement `del x'
+removes the binding of `x' from the namespace referenced by the local
+scope.  In fact, all operations that introduce new names use the local
+scope: in particular, import statements and function definitions bind
+the module or function name in the local scope.  (The `global'
+statement can be used to indicate that particular variables live in the
+global scope.)
+
+---------- Footnotes ----------
+
+(1)  Except for one thing.  Module objects have a secret read-only
+attribute called `__dict__' which returns the dictionary used to
+implement the module's namespace; the name `__dict__' is an attribute
+but not a global name. Obviously, using this violates the abstraction
+of namespace implementation, and should be restricted to things like
+post-mortem debuggers.
+
+
+File: python-tut.info,  Node: A First Look at Classes,  Next: Random Remarks,  Prev: Python Scopes and Name Spaces,  Up: Classes
+
+A First Look at Classes
+=======================
+
+Classes introduce a little bit of new syntax, three new object types,
+and some new semantics.
+
+* Menu:
+
+* Class Definition Syntax::
+* Class Objects::
+* Instance Objects::
+* Method Objects::
+
+
+File: python-tut.info,  Node: Class Definition Syntax,  Next: Class Objects,  Prev: A First Look at Classes,  Up: A First Look at Classes
+
+Class Definition Syntax
+-----------------------
+
+The simplest form of class definition looks like this:
+
+     class ClassName:
+         <statement-1>
+         .
+         .
+         .
+         <statement-N>
+
+Class definitions, like function definitions (`def' statements) must be
+executed before they have any effect.  (You could conceivably place a
+class definition in a branch of an `if' statement, or inside a
+function.)
+
+In practice, the statements inside a class definition will usually be
+function definitions, but other statements are allowed, and sometimes
+useful -- we'll come back to this later.  The function definitions
+inside a class normally have a peculiar form of argument list, dictated
+by the calling conventions for methods -- again, this is explained
+later.
+
+When a class definition is entered, a new namespace is created, and
+used as the local scope -- thus, all assignments to local variables go
+into this new namespace.  In particular, function definitions bind the
+name of the new function here.
+
+When a class definition is left normally (via the end), a _class
+object_ is created.  This is basically a wrapper around the contents of
+the namespace created by the class definition; we'll learn more about
+class objects in the next section.  The original local scope (the one
+in effect just before the class definitions was entered) is reinstated,
+and the class object is bound here to the class name given in the class
+definition header (`ClassName' in the example).
+
+
+File: python-tut.info,  Node: Class Objects,  Next: Instance Objects,  Prev: Class Definition Syntax,  Up: A First Look at Classes
+
+Class Objects
+-------------
+
+Class objects support two kinds of operations: attribute references and
+instantiation.
+
+_Attribute references_ use the standard syntax used for all attribute
+references in Python: `obj.name'.  Valid attribute names are all the
+names that were in the class's namespace when the class object was
+created.  So, if the class definition looked like this:
+
+     class MyClass:
+         "A simple example class"
+         i = 12345
+         def f(self):
+             return 'hello world'
+
+then `MyClass.i' and `MyClass.f' are valid attribute references,
+returning an integer and a method object, respectively.  Class
+attributes can also be assigned to, so you can change the value of
+`MyClass.i' by assignment.  `__doc__' is also a valid attribute,
+returning the docstring belonging to the class: `"A simple example
+class"'.
+
+Class _instantiation_ uses function notation.  Just pretend that the
+class object is a parameterless function that returns a new instance of
+the class.  For example (assuming the above class):
+
+     x = MyClass()
+
+creates a new _instance_ of the class and assigns this object to the
+local variable `x'.
+
+The instantiation operation ("calling" a class object) creates an empty
+object.  Many classes like to create objects in a known initial state.
+Therefore a class may define a special method named `__init__()', like
+this:
+
+         def __init__(self):
+             self.data = []
+
+When a class defines an `__init__()' method, class instantiation
+automatically invokes `__init__()' for the newly-created class
+instance.  So in this example, a new, initialized instance can be
+obtained by:
+
+     x = MyClass()
+
+Of course, the `__init__()' method may have arguments for greater
+flexibility.  In that case, arguments given to the class instantiation
+operator are passed on to `__init__()'.  For example,
+
+     >>> class Complex:
+     ...     def __init__(self, realpart, imagpart):
+     ...         self.r = realpart
+     ...         self.i = imagpart
+     ...
+     >>> x = Complex(3.0, -4.5)
+     >>> x.r, x.i
+     (3.0, -4.5)
+
+
+File: python-tut.info,  Node: Instance Objects,  Next: Method Objects,  Prev: Class Objects,  Up: A First Look at Classes
+
+Instance Objects
+----------------
+
+Now what can we do with instance objects?  The only operations
+understood by instance objects are attribute references.  There are two
+kinds of valid attribute names.
+
+The first I'll call _data attributes_.  These correspond to "instance
+variables" in Smalltalk, and to "data members" in C++.  Data attributes
+need not be declared; like local variables, they spring into existence
+when they are first assigned to.  For example, if `x' is the instance
+of `MyClass' created above, the following piece of code will print the
+value `16', without leaving a trace:
+
+     x.counter = 1
+     while x.counter < 10:
+         x.counter = x.counter * 2
+     print x.counter
+     del x.counter
+
+The second kind of attribute references understood by instance objects
+are _methods_.  A method is a function that "belongs to" an object.
+(In Python, the term method is not unique to class instances: other
+object types can have methods as well.  For example, list objects have
+methods called append, insert, remove, sort, and so on.  However,
+below, we'll use the term method exclusively to mean methods of class
+instance objects, unless explicitly stated otherwise.)
+
+Valid method names of an instance object depend on its class.  By
+definition, all attributes of a class that are (user-defined) function
+objects define corresponding methods of its instances.  So in our
+example, `x.f' is a valid method reference, since `MyClass.f' is a
+function, but `x.i' is not, since `MyClass.i' is not.  But `x.f' is not
+the same thing as `MyClass.f' -- it is a _method object_, not a
+function object.
+
+
+File: python-tut.info,  Node: Method Objects,  Prev: Instance Objects,  Up: A First Look at Classes
+
+Method Objects
+--------------
+
+Usually, a method is called immediately:
+
+     x.f()
+
+In our example, this will return the string `'hello world''.  However,
+it is not necessary to call a method right away: `x.f' is a method
+object, and can be stored away and called at a later time.  For example:
+
+     xf = x.f
+     while True:
+         print xf()
+
+will continue to print `hello world' until the end of time.
+
+What exactly happens when a method is called?  You may have noticed
+that `x.f()' was called without an argument above, even though the
+function definition for `f' specified an argument.  What happened to
+the argument?  Surely Python raises an exception when a function that
+requires an argument is called without any -- even if the argument
+isn't actually used...
+
+Actually, you may have guessed the answer: the special thing about
+methods is that the object is passed as the first argument of the
+function.  In our example, the call `x.f()' is exactly equivalent to
+`MyClass.f(x)'.  In general, calling a method with a list of N
+arguments is equivalent to calling the corresponding function with an
+argument list that is created by inserting the method's object before
+the first argument.
+
+If you still don't understand how methods work, a look at the
+implementation can perhaps clarify matters.  When an instance attribute
+is referenced that isn't a data attribute, its class is searched.  If
+the name denotes a valid class attribute that is a function object, a
+method object is created by packing (pointers to) the instance object
+and the function object just found together in an abstract object: this
+is the method object.  When the method object is called with an
+argument list, it is unpacked again, a new argument list is constructed
+from the instance object and the original argument list, and the
+function object is called with this new argument list.
+

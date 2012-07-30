@@ -1,0 +1,211 @@
+;;; -*- coding: emacs-mule -*-
+
+;; ----- ido-last-directory-list -----
+(
+ ("c:/home/dev/osx/" . "setgetscreenres/")
+ ("c:/dev/spider/9/" . "testapps/")
+ ("c:/home/documents/extdoc/" . "velo/")
+ ("c:/home/documents/" . "extdoc/")
+ ("c:/ISYS Integration Kit/Demo/Run/" . "CSharp/")
+ ("c:/ISYS Integration Kit/" . "bin32/")
+ ("c:/home/movies/" . "youtube/")
+ ("c:/home/My Dropbox/dev/" . "gps/")
+ ("c:/home/My Dropbox/mydoc/household/" . "Lisas garden pavement/")
+ ("c:/home/My Dropbox/mydoc/" . "household/")
+ ("c:/home/archive/" . "pictures/")
+ ("c:/home/My Dropbox/sites/dev/" . "flickrslides/")
+ ("//linux/v9_5distro/" . "linux32-testing/")
+ ("c:/home/pictures/working/print/" . "CTCT Book - core/")
+ ("//linux/v9_5distro/integration kit/" . "windows/")
+ ("//linux/v9_5distro/integration kit/linux/" . "Cpp/")
+ ("//linux/v9_5distro/integration kit/linux/Demo/Run/" . "common/")
+ ("d:/idx/spider/9/" . "brock/")
+ ("d:/idx/spider/" . "9/")
+ ("c:/home/pictures/library/project365/" . "contenders/")
+ ("//linux/v9_5distro/readers/" . "SDK.linux-install/")
+ ("c:/supp/promega/update_issue/" . "ISYSPDRMR_sav/")
+ ("c:/home/My Dropbox/sites/halloleo-com/pictures/" . "css/")
+ ("c:/home/pictures/working/project365/" . "14to15-08/")
+ ("c:/VirtualBox/common/sdk/SDK.linux/Demo/Run/" . "Cpp/")
+ ("c:/VirtualBox/common/sdk/SDK.linux/Demo/" . "Run/")
+ ("c:/VirtualBox/common/sdk/SDK.linux/" . "Demo/")
+ ("c:/VirtualBox/common/sdk/SDK.windows/Demo/" . "Run/")
+ ("c:/VirtualBox/common/sdk/SDK.windows/" . "Demo/")
+ ("c:/VirtualBox/common/sdk/" . "SDK.linux/")
+ ("c:/VirtualBox/" . "common/")
+ ("c:/Documents and Settings/LeoBroska/Desktop/" . "Downloads/")
+ ("c:/home/My Dropbox/sites/" . "halloleo-com/")
+ ("c:/home/My Dropbox/sites/halloleo-com/p365/" . "xml/")
+ ("c:/home/My Dropbox/sites/halloleo-com/" . "p365/")
+ ("c:/home/My Dropbox/organise/mail/" . "messages/")
+ ("c:/home/My Dropbox/organise/" . "mail/")
+ ("c:/home/My Dropbox/Sites/halloleo-com/p365/" . "setUp/")
+ ("c:/home/My Dropbox/Sites/halloleo-com/" . "p365/")
+ ("c:/home/My Dropbox/" . "sites/")
+ ("c:/home/sites/halloleo-com/p365/themes/snow/" . "images/")
+ ("c:/home/sites/halloleo-com/p365/themes/" . "snow/")
+ ("c:/home/sites/halloleo-com/p365alt/" . "setUp/")
+ ("c:/dev/testlink/" . "snippets/")
+ ("c:/etc/" . "anywhere data/")
+ ("c:/idx/testlink/" . "tc1022/")
+ ("c:/home/pictures/library/" . "project365/")
+ ("c:/home/sites/halloleo-com/p365/" . "images/")
+ ("c:/idx/test/9/" . "deletable webindex/")
+ ("c:/home/sites/halloleo-com/project365/satellite/" . "setUp/")
+ ("c:/home/My Dropbox/dev/blogging/tumblr/" . "themes/")
+ ("//2003r2/c$/Documents and Settings/leobroska/Application Data/ISYS Anywhere/" . "Emails/")
+ ("c:/home/dev/" . "osx/")
+ ("c:/WINDOWS/" . "Temp/")
+ ("c:/idx/test/" . "9/")
+ ("c:/dev/spider/9_compare/" . "crawl/")
+ ("c:/home/pictures/working/" . "p365/")
+ ("c:/home/pictures/" . "library/")
+ ("d:/idx/real/9/" . "halloleo/")
+ ("d:/idx/real/" . "9/")
+ ("c:/cyg/usr/" . "bin/")
+ ("c:/cyg/" . "usr/")
+ ("d:/idx/" . "spider/")
+ ("c:/idx/real/" . "9/")
+ ("c:/dev/sdk9/" . "Delphi/")
+ ("c:/Program Files/" . "Mozilla Thunderbird/")
+ ("c:/home/dev/blogging/" . "tumblr/")
+ ("d:/Documents and Settings/LeoBroska/" . "Desktop/")
+ ("d:/Documents and Settings/" . "LeoBroska/")
+ ("d:/home/personal/" . "snippets/")
+ ("d:/home/" . "dev/")
+ ("d:/" . "idx/")
+ ("f:/" . "project365/")
+ ("l:/" . "personal/")
+ ("c:/home/sites/spider/lotsofpdfs/" . "full/")
+ ("c:/Software/ScreenshotCaptor/" . "Screenshots/")
+ ("c:/Software/" . "xampp/")
+ ("c:/home/sites/dev/" . "css-classes-for-HS/")
+ ("c:/home/sites/halloleo-com/etc/lib/" . "highslide/")
+ ("c:/dev/spider/" . "9/")
+ ("c:/dev/" . "spider/")
+ ("c:/home/sites/halloleo-com/etc/" . "lib/")
+ ("c:/home/sites/halloleo-com/" . "p365/")
+ ("c:/home/sites/" . "halloleo-com/")
+ ("c:/idx/" . "test/")
+ ("c:/dev/bin/" . "9/")
+ ("c:/idx/spider/9/" . "isys-homepage/")
+ ("c:/idx/spider/" . "9/")
+ ("c:/home/" . "My Dropbox/")
+ ("c:/" . "WINDOWS/")
+ ("c:/home/emacs/" . "site-lisp/")
+)
+
+;; ----- ido-work-directory-list -----
+(
+ "/Users/bongu/"
+ "d:/home/sites/"
+ "c:/home/My Dropbox/sites/"
+ "c:/home/movies/"
+ "f:/"
+ "c:/home/My Dropbox/"
+ "f:/project365/"
+ "d:/idx/"
+ "c:/idx/"
+ "c:/home/pictures/library/project365/contenders/"
+ "c:/home/My Dropbox/sites/halloleo-com/"
+ "c:/home/My Dropbox/sites/halloleo-com/p365_20090907_last_no_items_scheme/"
+ "f:/_Downloads/"
+ "c:/home/dev/"
+ "c:/home/pictures/library/project365/"
+ "c:/home/pictures/working/"
+ "c:/home/archive/pictures/"
+ "c:/dev/spider/9/"
+ "c:/dev/spider/9/testapps/"
+ "c:/home/pictures/"
+ "c:/home/documents/extdoc/velo/"
+ "c:/home/"
+ "c:/home/pictures/library/"
+ "c:/ISYS Integration Kit/bin32/"
+ "c:/ISYS Integration Kit/Demo/Run/CSharp/"
+ "c:/ISYS Integration Kit/Demo/Run/"
+ "c:/ISYS Integration Kit/CSharp/"
+ "c:/Program Files/Microsoft Visual Studio 9.0/VC/"
+ "c:/ISYS Integration Kit/Cpp/"
+ "c:/ISYS Integration Kit/demo/run/"
+ "c:/dev/"
+ "c:/Documents and Settings/LeoBroska/Application Data/"
+ "c:/Documents and Settings/LeoBroska/Application Data/Thunderbird/Profiles/0h1ut6xc.default/ImapMail/"
+ "c:/home/My Dropbox/mydoc/"
+ "c:/Documents and Settings/LeoBroska/Application Data/Thunderbird/Profiles/0h1ut6xc.default/ImapMail/mail.messagingengine.com/INBOX.sbd/"
+ "//linux/v9_5distro/builds/"
+ "c:/Documents and Settings/LeoBroska/Desktop/"
+ "c:/home/movies/youtube/"
+ "d:/Program Files/"
+ "c:/home/My Dropbox/bin/"
+ "c:/home/My Dropbox/dev/gps/"
+ "c:/home/My Dropbox/dev/"
+ "c:/home/My Dropbox/dev/photos/"
+ "c:/home/My Dropbox/mydoc/household/Lisas garden pavement/"
+ "c:/home/My Dropbox/sites/halloleo-com/p365/"
+ "g:/"
+ "c:/home/archive/mail/"
+ "c:/home/archive/"
+ "c:/home/My Dropbox/emacs/"
+ "~/"
+)
+
+;; ----- ido-work-file-list -----
+(
+ "."
+ "preferences.php"
+ "sites"
+ "CSharpIndex-CREATE.bat"
+ "CSharpIndex.bat"
+ "LARGE"
+ "x.html"
+ "item.php"
+ ".emacs"
+ "tagged.php"
+)
+
+;; ----- ido-dir-file-cache -----
+(
+ ("/Users/bongu/" (19177 19267) "tmp/" "Sites/" "Public/" "Pictures/" "Music/" "Movies/" "Library/" "etc/" "emacs/" "Dropbox/" "Downloads/" "Documents/" "dev/" "Desktop/" "bin/" "archive/" "Apps/" ".Xcode/" ".Trash/" ".syncp/" ".ssh/" ".sh_history" ".profile.macports-saved_2009-10-17_at_18:01:26" ".profile" ".macports/" ".MacOSX/" ".lightscribe/" ".lesshst" ".emacs" ".dvdcss/" ".DS_Store" ".dropbox/" ".cups/" ".CFUserTextEncoding" ".bashrc" ".bash_history" ".adobe/" "../" "./")
+
+ ("d:/home/sites/" (18660 14558) "WS_FTP.LOG" "spider/" "old/" "index.html" "httpwiki/" "halloleo-net/" "halloleo-com/" "dev/" "aspnet_client/" ".~/" ".message" ".htaccess" "../" "./")
+
+ ("d:/home/sites/httpwiki/" (18471 40637) "WS_FTP.LOG" "wikilib.d/" "wiki.d/" "scripts/" "README.txt" "pub/" "pmwiki.php" "local/" "docs/" "cookbook/" "attach/" "../" "./")
+
+ ("d:/home/sites/httpwiki/wikilib.d/" (18471 40636) "WS_FTP.LOG" "Site.UploadQuickReference" "Site.Site" "Site.SideBar" "Site.Search" "Site.Preferences" "Site.PageNotFound" "Site.PageListTemplates" "Site.PageActions" "Site.GroupAttributes" "Site.EditQuickReference" "Site.EditForm" "Site.AuthUser" "Site.AuthForm" "PmWiki.WikiWords" "PmWiki.WikiWord" "PmWiki.WikiWikiWeb" "PmWiki.WikiTrails" "PmWiki.WikiStyles" "PmWiki.WikiStyleExamples" "PmWiki.WikiStructure" "PmWiki.WikiSandbox" "PmWiki.WikiPage" "PmWiki.WikiGroups" "PmWiki.WikiGroup" "PmWiki.WikiFarmTerminology" "PmWiki.WikiFarms" "PmWiki.WikiAdministrator" "PmWiki.WebFeeds" "PmWiki.Variables" "PmWiki.UrlApprovals" "PmWiki.UploadVariables" "PmWiki.UploadsAdmin" "PmWiki.Uploads" "PmWiki.UpgradingFromPmWiki1" "PmWiki.Upgrades" "PmWiki.Troubleshooting" "PmWiki.TextFormattingRules" "PmWiki.Tables" "PmWiki.TableDirectives" "PmWiki.SpecialCharacters" "PmWiki.SkinTemplates" "PmWiki.Skins" "PmWiki.SitePreferences" "PmWiki.SimultaneousEdits" "PmWiki.SecurityVariables" "PmWiki.Security" "PmWiki.Requirements" "PmWiki.ReleaseNotes" "PmWiki.RefCount" "PmWiki.PmWikiPhilosophy" "PmWiki.PmWiki" "PmWiki.PerGroupCustomizations" "PmWiki.PatrickMichaud" "PmWiki.PathVariables" "PmWiki.PasswordsAdmin" "PmWiki.Passwords" "PmWiki.PageVariables" "PmWiki.PagelistVariables" "PmWiki.PageLists" "PmWiki.PageHistory" "PmWiki.PageFileFormat" "PmWiki.PageDirectives" "PmWiki.OtherVariables" "PmWiki.Notify" "PmWiki.MarkupMasterIndex" "PmWiki.MailPosts" "PmWiki.MailingLists" "PmWiki.LocalCustomizations" "PmWiki.LinkVariables" "PmWiki.Links" "PmWiki.LayoutVariables" "PmWiki.Internationalizations" "PmWiki.InterMap" "PmWiki.Installation" "PmWiki.InitialSetupTasks" "PmWiki.IncludeOtherPages" "PmWiki.Images" "PmWiki.I18nVariables" "PmWiki.GroupHeaders" "PmWiki.GroupHeader" "PmWiki.Glossary" "PmWiki.Functions" "PmWiki.FmtPageName" "PmWiki.FilePermissions" "PmWiki.FAQ" "PmWiki.EditVariables" "PmWiki.DocumentationIndex" "PmWiki.DesignNotes" "PmWiki.DeletingPages" "PmWiki.DebugVariables" "PmWiki.CustomWikiStyles" "PmWiki.CustomMarkup" "PmWiki.CustomInterMap" "PmWiki.CreatingNewPages" "PmWiki.Contributors" "PmWiki.ConditionalMarkup" "PmWiki.ChangesFromPmWiki1" "PmWiki.ChangeLog" "PmWiki.Categories" "PmWiki.BasicVariables" "PmWiki.BasicEditing" "PmWiki.BackupAndRestore" "PmWiki.AvailableActions" "PmWiki.AuthUser" "PmWiki.Audiences" "PmWiki.AccessKeys" "Main.WikiSandbox" "Main.HomePage" "../" "./")
+
+ ("c:/home/My Dropbox/sites/" (19154 21240) "sl.html" "saved/" "index.html" "httpwiki/" "halloleo-net/" "halloleo-com/" "dev/" "../" "./")
+
+ ("f:/project365/" (18981 36696) "5-10/" "4-10/" "3-10/" "6-09/" "5-09/" "4-09/" "1-09/" ".dired" "7-10/" "3to5-10_large-med/" "6-10/" "replace_1-10/" "replace_30-09/" "replace_29-09/" "2-10/" "1-10/" "30-09/" "12-09_replace/" "29-09/" "24-09/" "28-09/" "27-09/" "26-09/" "25-09/" "23-09/" "22-09/" "21-09/" "20-09/" "19-09/" "18-09/" "13-09_replace/" "17-09/" "16-09/" "15-09/" "14-09/" "9-09_replace/" "7-09_replace/" "12-05_replace/" "10to11-09/" "12-09/" "9-09/" "8-09/" "7-09/" "3-09/" "11-02_replace/" "31-08_replace/" "1-09_replace/" "2-09/" "../" "./")
+
+ ("c:/home/My Dropbox/" (19165 13465) "Yellow Mount Square Sculpture pano I_2_cropped.jpg" "Yellow Mount Square Sculpture pano I_2.jpg" "Yellow Mount Square Sculpture pano I_2.fgx" "Skyscraper reflection in old window_2_hq_cropped.jpg" "Skyscraper reflection in old window_2_hq.jpg" "sites/" "Public/" "print/" "predictiably irrational.txt" "pictures/" "Photos/" "mydoc/" "mail/" "Garden with Staghorn fern (right side) extended.jpg" "extdoc/" "emacs/" "diff/" "dev/" "desktop.ini" "bin/" "../" "./")
+
+ ("c:/home/movies/" (19167 46767) "youtube/" "The smart wine bottle.mov" "The Rain Rider_HD_old.mov" "The Rain Rider_HD.mov" "The Kookaburra from Bronte_HD.mov" "raw/" "Lugworm castings-Display.m4v" "Lisa blows the candles out_HD.mov" "Lisa and the Butterflies_hd.mov" "Court Drama_HD.mov" "Branded escalators_HD.mov" "2008/" "../" "./")
+
+ ("c:/idx/bugz/1782/slashdot/" (19167 36326) "ISYSPDR.TRN" "ISYSPDR.LOG" "ISYSPDR.IXS" "ISYSPDR.CFG" "ISYS.NET" "ISYS.META" "ISYS.IXK" "ISYS.IXF" "ISYS.IXC" "ISYS.IXB" "ISYS.IXA" "ISYS.CFG" "ISYS.CAT" "../" "./")
+
+ ("c:/home/My Dropbox/mydoc/" (19154 43573) "velo/" "travel/" "snippets/" "project365/" "moviemeta/" "household/" "formal/" "etc/" "biz/" "../" "./")
+
+ ("c:/home/My Dropbox/mydoc/moviemeta/" (19157 2815) "The smart wine bottle_meta.txt" "The Rain Rider_meta.txt" "Lugworm castings-Display_meta.txt" "Lisa blows the birthday cake candles out_P1020063.JPG" "Lisa blows the birthday cake candles out_meta.txt" "Lisa and the Butterflies_meta.txt" "Court Drama_0724.jpg" "Court Drama HD_meta.txt" "Bollinger Birthday Breakfast_P1020058.JPG" "../" "./")
+
+ ("c:/home/" (19150 30966) "x.html" "to-protect.txt" "tmp/" "pictures/" "personal/" "My Dropbox/" "music/" "movies/" "ISYSWorkgroup.exe" "documents/" "dev/" "bin/" "archive/" ".VirtualBox/" ".emacs" ".bash_profile" ".bash_history" ".bashrc" "../" "./")
+
+ ("c:/home/My Dropbox/mail/" (19126 53945) "settings/" "project365-logo-for-mails-blue.png" "project365-logo-for-mails-black.png" "messages/" "detached/" "../" "./")
+
+ ("c:/home/My Dropbox/mail/settings/" (19167 40163) "zeit-spam-recipients.txt" "x.txt" "old/" "known-false-recipients.txt" "hailmail-sieve-rules.txt.~7~" "hailmail-sieve-rules.txt.~6~" "hailmail-sieve-rules.txt.~5~" "hailmail-sieve-rules.txt.~2~" "hailmail-sieve-rules.txt.~1~" "hailmail-sieve-rules.txt.bkp9" "hailmail-sieve-rules.txt.bkp8" "hailmail-sieve-rules.txt.bkp7" "hailmail-sieve-rules.txt.bkp6" "hailmail-sieve-rules.txt.bkp5" "hailmail-sieve-rules.txt.bkp4" "hailmail-sieve-rules.txt.bkp3" "hailmail-sieve-rules.txt.bkp2" "hailmail-sieve-rules.txt.bkp0" "hailmail-sieve-rules.txt" "hailmail-sieve-rules-size-limit-notify-try.txt.~1~" "hailmail-sieve-rules-size-limit-notify-try.txt" "Collected Addresses 20090415.ldif" "../" "./")
+
+ ("c:/idx/bugz/1782/" (19167 34832) "slashdot/" "../" "./")
+
+ ("c:/Documents and Settings/LeoBroska/Application Data/Thunderbird/Profiles/u4au1glf.default/ImapMail/mail.messagingengine.com/" (19166 19532) "msgFilterRules.dat" "INBOX.sbd/" "INBOX.msf" "INBOX" "../" "./")
+
+ ("//linux/v9_5distro/builds/" (19083 45816) "9.5.1/" "9.5.2/" "weekly/" "../" "./")
+
+ ("c:/home/pictures/working/" (19160 126) "tumblr/" "sites/" "print/" "p365/" "misc/" "gps/" "email/" "../" "./")
+
+ ("c:/home/pictures/library/project365/" (19166 34159) "Yellow Mount Square Sculpture pano I_resized.jpg" "Workshop Windows_IMG_2701.jpg_original" "Workshop Windows_IMG_2701.jpg" "With the Car over the Bridge_1002_2.jpg" "Wine Squares at Kemenys_2828.jpg" "Window View at St-Johns_IMG_0864.jpg" "What a neat Noodle box.jpg" "Weird wall weed I.jpg" "Was this an ATM_IMG_3806_old.jpg" "Was this an ATM_IMG_3806.jpg" "Wan  light behind branches_IMG_3709.jpg" "Walsh Bay in early evening light_IMG_4159_2.jpg" "Walk through a Shadow Square_1090.jpg" "View to bridge through Railway station_2728.jpg" "Velo under Canopy.jpg" "Underground garage with bike I.jpg" "Two Birds looking up_2090.jpg" "Trees at Lunch time_IMG_9145.jpg" "Train Platform in North Sydney_1705.jpg" "Traffic_2343.jpg" "Tower Square Tower.jpg" "Toilet Plant at The Magpie Cafe Berrima_brighter.jpg" "The wide lake I - long.jpg" "The tyre in the tree_P1010748.jpg" "The rain rider_Still1.jpg" "The rain rider_Still1.jpeg" "Terraced Outlook_IMG_2021.jpg" "Tauben_IMG_2598.jpg" "TangoFest 09 Thursday Milonga_IMG_1475.jpg" "TangoFest 09 Friday Ochestra_IMG_1539.jpg" "Tango Shoes in Green Bag_IMG_0293.jpg" "Surfers at Bronte through house walls_IMG_4264.jpg" "Sun-bathed tango practica_P1010982.jpg" "Sun on Fletcher _IMG_3914.jpg" "Sun Light on Highrise Wall_IMG_2147.jpg" "Stone Formation_2524ff.jpg" "Snow leopard on bike_P1010939.jpg" "Smart man with his little girl_P1010819_col.jpg" "Sliced peapods_P1010685.jpg" "Shower view to Tamarama_P1010901.jpg" "Shop Shot_1831.jpg" "Shadows on building near Syd Einfeld Dr_IMG_3691.jpg" "Sender in sunset_IMG_2770.jpg" "Seeds on ground_IMG_4012.jpg" "See myself through Lisa_1250.jpg" "Seagulls fight over left-overs_IMG_3904.jpg" "Seagull group between sand and ocean_2956.jpg" "Sea view at Bronte.jpg" "Sculpture on Miller_1859.jpg" "School Boys_0626_cropped.jpg" "Sales at Haigh's_IMG_0828.jpg" "Sailing impressions_IMG_3073.jpg" "Sailing at Elisabeth Plaza_P1010882.jpg" "Rusty machinery at the dry cleaner_P1010674.jpg" "Rushcutters Promenade to the left.jpg" "Roses only_1116.jpg" "Rooftop_2328.jpg" "Rooftop view.jpg" "Roof reflection_IMG_0797.jpg" "Riding on the Bridge_IMG_2165.jpg" "Riding along Bondi Junction_IMG_2071.jpg" "replace/" "Red Banksia_IMG_4294.jpg" "Rainbow from Mona Lane_2354.jpg" "Projections on Opera House_IMG_1546.jpg" "Professional media capture_IMG_0849.jpg" "Procession Sculpture in Parramatta II.jpg" "Possum at the Bogong Theatre_2636.jpg" "Plane and car_IMG_3940.jpg" "Pink sun umbrella _2896.jpg" "Pink shadow_2807.jpg" "Pedestrian area shared with velo_2682.jpg" "On the Skydiving field_IMG_0403.jpg" "Nutella again at Bar Bacino_P1020087.jpg" "Mum feeds pigons_IMG_3958.jpg" "Moving night view of skyscraper_IMG_9990.jpg" "Morning view from Dudley Street_P1010715.jpg" "Morning light at Observatory Hill_1211.jpg" "Morning at Rushcutters Bay_IMG_0323.jpg" "manual_on_white.jpg" "Locked bike frame_P1020102.jpg" "Little lonley leave_IMG_0484.jpg" "Lisas teddy sun-baths_P1010990.jpg" "Lisas new Spinning Top_0732.jpg" "Lisas Birthday Party - Ballon time_IMG_4105.jpg" "Lisa with hat and fan_2630.jpg" "Lights at Bar Williams_IMG_1158.jpg" "Letterbox_2543.jpg" "Leo and his coffee machine_IMG_3730.jpg" "Leaves in Woollahra_IMG_1202.jpg" "Leaves in puddle_P1010837_crop.jpg" "Late clouds squeezed between skyscrapers vertorama_5.jpg" "Late Afternoon at Manly Beach_0647.jpg" "Lamps over Espressso Counter_IMG_0598.jpg" "Lake walk near Cafe HaHa_IMG_0895_cropped.jpg" "Lake walk near Cafe HaHa_IMG_0895.jpg" "Kellet St Riots_1435.jpg" "Jade Buddha_2887.jpg" "Hyde Parl pond by night_2560.jpg" "Happy at Ellis Beach_P1010580.jpg" "Greenwood Wall Art 80 balanced.jpg" "Greenery at Lower North Sydney_2173.jpg" "Glass of water at work_P1010780.jpg" "Girl on fire_IMG_3028.jpg" "Geroge Street crossing at Town Hall _IMG_2979.jpg" "Future City with Biker_P1010072.jpg" "From the train_0160.jpg" "Fractured building view_P1020030.jpg" "FOTW kite in backlight_IMG_3886.jpg" "Football Kid_IMG_2124.jpg" "Flags and waves frpm the Bondi Icebergs_2928.jpg" "Fish in wide waters of the reef_P1010240.jpg" "Fire at Ellis Beach_P1010557_cropped.jpg" "Feeding Magpies_IMG_0116.jpg" "extra/" "Espresso Window_1392.jpg" "Ducatti Tank_0976.jpg" "Door_IMG_2012.jpg" "Dogs at Bronte cafes_2815.jpg" "Dog with leash_IMG_1781.jpg" "Dinner at Bei Amici.jpg" "Deco mirror at Westfield_IMG_4229_cropped.jpg" "Cycas Plant_2301.jpg" "Curious Cafe transparent dish focus iphoto.jpg" "Cubical skyIMG_0453.jpg" "contenders/" "Colorful bikes_IMG_3782.jpg" "Coconut on beach_P1010283.jpg" "Cockle Bay View.jpg" "Cloths in whorkshop_IMG_3837.jpg" "City from Rooftop_IMG_1316.jpg" "Circled stairs_IMG_4168.jpg" "Church view from BeanDrinking_IMG_0050.jpg" "Church on Clarence St_IMG_0783_old.jpg" "Church on Clarence St_IMG_0783.jpg" "Church and Flats_1045.jpg" "Championship 09 Heat in Concord_IMG_1290.jpg" "Cat at Tamarama_IMG_2239.jpg" "Cactus_IMG_1766.jpg" "Butterflies with less wrinkles_IMG_3281_2.jpg" "Bull at Tower Square_P1020080.jpg" "Bridge Pylon by night.jpg" "Bridge Bike Path_1841.jpg" "Bridge at Night_IMG_1166.jpg" "Bread at Paddingtons boulangerie_2864.jpg" "Bookstore_IMG_0747.jpg" "Blues Point tower by night pano.jpg" "Birthday Ballons_6.jpg" "Beautyful outlook_P1010444.jpg" "Balcony nature_IMG_9995.jpg" "Balcony Lorikeet_IMG_2088.jpg" "Autumn stairs_IMG_0464.jpg" "At the Bike depot_IMG_2380.jpg" "At Luna Park_1641.jpg" "Apple Stairs_IMG_1026.jpg" "Anz at Ridgeway Farm trails_P1010306.jpg" "Alex the skateboarder_P1020061.jpg_original" "Alex the skateboarder_P1020061.jpg" "Airy helmet against blue sky_2393.jpg" "80 on Syd Einfeld Drive_P1010002.jpg" ".dired" "../" "./")
+
+ ("c:/home/pictures/library/project365/contenders/" (19166 34049) "9-09/" "9-07/" "9-06/" "8-09/" "8-07/" "8-06/" "7-09/" "7-06/" "6-09/" "6-08/" "6-06/" "5-09/" "5-08/" "5-07/" "5-06/" "4-09/" "4-07/" "4-06/" "31-08/" "31-07/" "31-05/" "30-09/" "30-08/" "30-07/" "30-06/" "30-05/" "3-09/" "3-08/" "3-07/" "3-06/" "29-09/" "29-08/" "29-06/" "29-05/" "28-09/" "28-08/" "28-06/" "28-05/" "27-09/" "27-08/" "27-06/" "27-05/" "26-09/" "26-08/" "26-06/" "26-05/" "25-09/" "25-08/" "25-06/" "24-09/" "24-08/" "24-06/" "24-05/" "23-09/" "23-08/" "23-07/" "23-06/" "23-05/" "22-09/" "22-08/" "22-07/" "22-06/" "22-05/" "21-09/" "21-08/" "21-06/" "21-05/" "20-09/" "20-08/" "20-06/" "2-09/" "2-07/" "2-06/" "19-09/" "19-08/" "19-07/" "19-06/" "18-08/" "18-07/" "18-06/" "17-09/" "17-08/" "17-07/" "17-06/" "16-09/" "16-08/" "15-09/" "15-08/" "15-07/" "15-06/" "14-09/" "14-07/" "13-08/" "13-07/" "13-06/" "12-09/" "12-08/" "12-07/" "12-06/" "11-08/" "11-07/" "11-06/" "11-05/" "10to11-09/" "10-08/" "10-07/" "10-06/" "1-09/" "1-08/" "1-07/" "1-06/" ".dired" "../" "./")
+)
+
+;; ----- ido-unc-hosts-cache -----
+t
+

@@ -1,0 +1,1229 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: Window Objects,  Next: Constants,  Prev: Functions 2,  Up: curses
+
+Window Objects
+--------------
+
+Window objects, as returned by `initscr()' and `newwin()' above, have
+the following methods:
+
+`addch([y, x,] ch[, attr])'
+     _Note:_ A _character_ means a C character (an ASCII code), rather
+     then a Python character (a string of length 1). (This note is true
+     whenever the documentation mentions a character.) The builtin
+     `ord()' is handy for conveying strings to codes.
+
+     Paint character CH at `(Y, X)' with attributes ATTR, overwriting
+     any character previously painter at that location.  By default,
+     the character position and attributes are the current settings for
+     the window object.
+
+`addnstr([y, x,] str, n[, attr])'
+     Paint at most N characters of the string STR at `(Y, X)' with
+     attributes ATTR, overwriting anything previously on the display.
+
+`addstr([y, x,] str[, attr])'
+     Paint the string STR at `(Y, X)' with attributes ATTR, overwriting
+     anything previously on the display.
+
+`attroff(attr)'
+     Remove attribute ATTR from the "background" set applied to all
+     writes to the current window.
+
+`attron(attr)'
+     Add attribute ATTR from the "background" set applied to all writes
+     to the current window.
+
+`attrset(attr)'
+     Set the "background" set of attributes to ATTR.  This set is
+     initially 0 (no attributes).
+
+`bkgd(ch[, attr])'
+     Sets the background property of the window to the character CH,
+     with attributes ATTR.  The change is then applied to every
+     character position in that window:
+        * The attribute of every character in the window  is changed to
+          the new background attribute.
+
+        * Wherever  the  former background character appears, it is
+          changed to the new background character.
+
+`bkgdset(ch[, attr])'
+     Sets the window's background.  A window's background consists of a
+     character and any combination of attributes.  The attribute part of
+     the background is combined (OR'ed) with all non-blank characters
+     that are written into the window.  Both the character and
+     attribute parts of the background are combined with the blank
+     characters.  The background becomes a property of the character
+     and moves with the character through any scrolling and
+     insert/delete line/character operations.
+
+`border([ls[, rs[, ts[, bs[, tl[, tr[, bl[, br]]]]]]]])'
+     Draw a border around the edges of the window. Each parameter
+     specifies the character to use for a specific part of the border;
+     see the table below for more details.  The characters can be
+     specified as integers or as one-character strings.
+
+     _Note:_ A `0' value for any parameter will cause the default
+     character to be used for that parameter.  Keyword parameters can
+     _not_ be used.  The defaults are listed in this table:
+
+     Parameter              Description            Default value
+     ------                 -----                  -----
+     ls                     Left side              `ACS_VLINE'
+     rs                     Right side             `ACS_VLINE'
+     ts                     Top                    `ACS_HLINE'
+     bs                     Bottom                 `ACS_HLINE'
+     tl                     Upper-left corner      `ACS_ULCORNER'
+     tr                     Upper-right corner     `ACS_URCORNER'
+     bl                     Bottom-left corner     `ACS_BLCORNER'
+     br                     Bottom-right corner    `ACS_BRCORNER'
+
+`box([vertch, horch])'
+     Similar to `border()', but both LS and RS are VERTCH and both TS
+     and {bs} are HORCH.  The default corner characters are always used
+     by this function.
+
+`clear()'
+     Like `erase()', but also causes the whole window to be repainted
+     upon next call to `refresh()'.
+
+`clearok(yes)'
+     If YES is 1, the next call to `refresh()' will clear the window
+     completely.
+
+`clrtobot()'
+     Erase from cursor to the end of the window: all lines below the
+     cursor are deleted, and then the equivalent of `clrtoeol()' is
+     performed.
+
+`clrtoeol()'
+     Erase from cursor to the end of the line.
+
+`cursyncup()'
+     Updates the current cursor position of all the ancestors of the
+     window to reflect the current cursor position of the window.
+
+`delch([x, y])'
+     Delete any character at `(Y, X)'.
+
+`deleteln()'
+     Delete the line under the cursor. All following lines are moved up
+     by 1 line.
+
+`derwin([nlines, ncols,] begin_y, begin_x)'
+     An abbreviation for "derive window", `derwin()' is the same as
+     calling `subwin()', except that BEGIN_Y and BEGIN_X are relative
+     to the origin of the window, rather than relative to the entire
+     screen.  Returns a window object for the derived window.
+
+`echochar(ch[, attr])'
+     Add character CH with attribute ATTR, and immediately call
+     `refresh()' on the window.
+
+`enclose(y, x)'
+     Tests whether the given pair of screen-relative character-cell
+     coordinates are enclosed by the given window, returning true or
+     false.  It is useful for determining what subset of the screen
+     windows enclose the location of a mouse event.
+
+`erase()'
+     Clear the window.
+
+`getbegyx()'
+     Return a tuple `(Y, X)' of co-ordinates of upper-left corner.
+
+`getch([x, y])'
+     Get a character. Note that the integer returned does _not_ have to
+     be in ASCII range: function keys, keypad keys and so on return
+     numbers higher than 256. In no-delay mode, -1 is returned if there
+     is no input.
+
+`getkey([x, y])'
+     Get a character, returning a string instead of an integer, as
+     `getch()' does. Function keys, keypad keys and so on return a
+     multibyte string containing the key name.  In no-delay mode, an
+     exception is raised if there is no input.
+
+`getmaxyx()'
+     Return a tuple `(Y, X)' of the height and width of the window.
+
+`getparyx()'
+     Returns the beginning coordinates of this window relative to its
+     parent window into two integer variables y and x.  Returns `-1,-1'
+     if this window has no parent.
+
+`getstr([x, y])'
+     Read a string from the user, with primitive line editing capacity.
+
+`getyx()'
+     Return a tuple `(Y, X)' of current cursor position relative to the
+     window's upper-left corner.
+
+`hline([y, x,] ch, n)'
+     Display a horizontal line starting at `(Y, X)' with length N
+     consisting of the character CH.
+
+`idcok(flag)'
+     If FLAG is false, curses no longer considers using the hardware
+     insert/delete character feature of the terminal; if FLAG is true,
+     use of character insertion and deletion is enabled.  When curses
+     is first initialized, use of character insert/delete is enabled by
+     default.
+
+`idlok(yes)'
+     If called with YES equal to 1, `curses' will try and use hardware
+     line editing facilities. Otherwise, line insertion/deletion are
+     disabled.
+
+`immedok(flag)'
+     If FLAG is true, any change in the window image automatically
+     causes the window to be refreshed; you no longer have to call
+     `refresh()' yourself.  However, it may degrade performance
+     considerably, due to repeated calls to wrefresh.  This option is
+     disabled by default.
+
+`inch([x, y])'
+     Return the character at the given position in the window. The
+     bottom 8 bits are the character proper, and upper bits are the
+     attributes.
+
+`insch([y, x,] ch[, attr])'
+     Paint character CH at `(Y, X)' with attributes ATTR, moving the
+     line from position X right by one character.
+
+`insdelln(nlines)'
+     Inserts NLINES lines into the specified window above the current
+     line.  The NLINES bottom lines are lost.  For negative NLINES,
+     delete NLINES lines starting with the one under the cursor, and
+     move the remaining lines up.  The bottom NLINES lines are cleared.
+     The current cursor position remains the same.
+
+`insertln()'
+     Insert a blank line under the cursor. All following lines are moved
+     down by 1 line.
+
+`insnstr([y, x,] str, n [, attr])'
+     Insert a character string (as many characters as will fit on the
+     line) before the character under the cursor, up to N characters.
+     If N is zero or negative, the entire string is inserted.  All
+     characters to the right of the cursor are shifted right, with the
+     rightmost characters on the line being lost.  The cursor position
+     does not change (after moving to Y, X, if specified).
+
+`insstr([y, x, ] str [, attr])'
+     Insert a character string (as many characters as will fit on the
+     line) before the character under the cursor.  All characters to
+     the right of the cursor are shifted right, with the rightmost
+     characters on the line being lost.  The cursor position does not
+     change (after moving to Y, X, if specified).
+
+`instr([y, x] [, n])'
+     Returns a string of characters, extracted from the window starting
+     at the current cursor position, or at Y, X if specified.
+     Attributes are stripped from the characters.  If N is specified,
+     `instr()' returns return a string at most N characters long
+     (exclusive of the trailing NUL).
+
+`is_linetouched(LINE)'
+     Returns true if the specified line was modified since the last
+     call to `refresh()'; otherwise returns false.  Raises a
+     `curses.error' exception if LINE is not valid for the given window.
+
+`is_wintouched()'
+     Returns true if the specified window was modified since the last
+     call to `refresh()'; otherwise returns false.
+
+`keypad(yes)'
+     If YES is 1, escape sequences generated by some keys (keypad,
+     function keys) will be interpreted by `curses'.  If YES is 0,
+     escape sequences will be left as is in the input stream.
+
+`leaveok(yes)'
+     If YES is 1, cursor is left where it is on update, instead of
+     being at "cursor position."  This reduces cursor movement where
+     possible. If possible the cursor will be made invisible.
+
+     If YES is 0, cursor will always be at "cursor position" after an
+     update.
+
+`move(new_y, new_x)'
+     Move cursor to `(NEW_Y, NEW_X)'.
+
+`mvderwin(y, x)'
+     Moves the window inside its parent window.  The screen-relative
+     parameters of the window are not changed.  This routine is used to
+     display different parts of the parent window at the same physical
+     position on the screen.
+
+`mvwin(new_y, new_x)'
+     Move the window so its upper-left corner is at `(NEW_Y, NEW_X)'.
+
+`nodelay(yes)'
+     If YES is `1', `getch()' will be non-blocking.
+
+`notimeout(yes)'
+     If YES is `1', escape sequences will not be timed out.
+
+     If YES is `0', after a few milliseconds, an escape sequence will
+     not be interpreted, and will be left in the input stream as is.
+
+`noutrefresh()'
+     Mark for refresh but wait.  This function updates the data
+     structure representing the desired state of the window, but does
+     not force an update of the physical screen.  To accomplish that,
+     call `doupdate()'.
+
+`overlay(destwin[, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol])'
+     Overlay the window on top of DESTWIN. The windows need not be the
+     same size, only the overlapping region is copied. This copy is
+     non-destructive, which means that the current background character
+     does not overwrite the old contents of DESTWIN.
+
+     To get fine-grained control over the copied region, the second form
+     of `overlay()' can be used. SMINROW and SMINCOL are the upper-left
+     coordinates of the source window, and the other variables mark a
+     rectangle in the destination window.
+
+`overwrite(destwin[, sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol])'
+     Overwrite the window on top of DESTWIN. The windows need not be
+     the same size, in which case only the overlapping region is
+     copied. This copy is destructive, which means that the current
+     background character overwrites the old contents of DESTWIN.
+
+     To get fine-grained control over the copied region, the second form
+     of `overwrite()' can be used. SMINROW and SMINCOL are the
+     upper-left coordinates of the source window, the other variables
+     mark a rectangle in the destination window.
+
+`putwin(file)'
+     Writes all data associated with the window into the provided file
+     object.  This information can be later retrieved using the
+     `getwin()' function.
+
+`redrawln(beg, num)'
+     Indicates that the NUM screen lines, starting at line BEG, are
+     corrupted and should be completely redrawn on the next `refresh()'
+     call.
+
+`redrawwin()'
+     Touches the entire window, causing it to be completely redrawn on
+     the next `refresh()' call.
+
+`refresh([pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol])'
+     Update the display immediately (sync actual screen with previous
+     drawing/deleting methods).
+
+     The 6 optional arguments can only be specified when the window is a
+     pad created with `newpad()'.  The additional parameters are needed
+     to indicate what part of the pad and screen are involved.  PMINROW
+     and PMINCOL specify the upper left-hand corner of the rectangle to
+     be displayed in the pad.  SMINROW, SMINCOL, SMAXROW, and SMAXCOL
+     specify the edges of the rectangle to be displayed on the screen.
+     The lower right-hand corner of the rectangle to be displayed in
+     the pad is calculated from the screen coordinates, since the
+     rectangles must be the same size.  Both rectangles must be
+     entirely contained within their respective structures.  Negative
+     values of PMINROW, PMINCOL, SMINROW, or SMINCOL are treated as if
+     they were zero.
+
+`scroll([lines` = 1'])'
+     Scroll the screen or scrolling region upward by LINES lines.
+
+`scrollok(flag)'
+     Controls what happens when the cursor of a window is moved off the
+     edge of the window or scrolling region, either as a result of a
+     newline action on the bottom line, or typing the last character of
+     the last line.  If FLAG is false, the cursor is left on the bottom
+     line.  If FLAG is true, the window is scrolled up one line.  Note
+     that in order to get the physical scrolling effect on the
+     terminal, it is also necessary to call `idlok()'.
+
+`setscrreg(top, bottom)'
+     Set the scrolling region from line TOP to line BOTTOM. All
+     scrolling actions will take place in this region.
+
+`standend()'
+     Turn off the standout attribute.  On some terminals this has the
+     side effect of turning off all attributes.
+
+`standout()'
+     Turn on attribute A_STANDOUT.
+
+`subpad([nlines, ncols,] begin_y, begin_x)'
+     Return a sub-window, whose upper-left corner is at `(BEGIN_Y,
+     BEGIN_X)', and whose width/height is NCOLS/NLINES.
+
+`subwin([nlines, ncols,] begin_y, begin_x)'
+     Return a sub-window, whose upper-left corner is at `(BEGIN_Y,
+     BEGIN_X)', and whose width/height is NCOLS/NLINES.
+
+     By default, the sub-window will extend from the specified position
+     to the lower right corner of the window.
+
+`syncdown()'
+     Touches each location in the window that has been touched in any of
+     its ancestor windows.  This routine is called by `refresh()', so
+     it should almost never be necessary to call it manually.
+
+`syncok(flag)'
+     If called with FLAG set to true, then `syncup()' is called
+     automatically whenever there is a change in the window.
+
+`syncup()'
+     Touches all locations in ancestors of the window that have been
+     changed in the window.
+
+`timeout(delay)'
+     Sets blocking or non-blocking read behavior for the window.  If
+     DELAY is negative, blocking read is used (which will wait
+     indefinitely for input).  If DELAY is zero, then non-blocking read
+     is used, and -1 will be returned by `getch()' if no input is
+     waiting.  If DELAY is positive, then `getch()' will block for
+     DELAY milliseconds, and return -1 if there is still no input at
+     the end of that time.
+
+`touchline(start, count)'
+     Pretend COUNT lines have been changed, starting with line START.
+
+`touchwin()'
+     Pretend the whole window has been changed, for purposes of drawing
+     optimizations.
+
+`untouchwin()'
+     Marks all lines in  the  window  as unchanged since the last call
+     to `refresh()'.
+
+`vline([y, x,] ch, n)'
+     Display a vertical line starting at `(Y, X)' with length N
+     consisting of the character CH.
+
+
+File: python-lib.info,  Node: Constants,  Prev: Window Objects,  Up: curses
+
+Constants
+---------
+
+The `curses' module defines the following data members:
+
+`ERR'
+     Some curses routines  that  return  an integer, such as `getch()',
+     return `ERR' upon failure.
+
+`OK'
+     Some curses routines  that  return  an integer, such as `napms()',
+     return `OK' upon success.
+
+`version'
+     A string representing the current version of the module.  Also
+     available as `__version__'.
+
+Several constants are available to specify character cell attributes:
+
+Attribute                            Meaning
+------                               -----
+A_ALTCHARSET                         Alternate character set mode.
+A_BLINK                              Blink mode.
+A_BOLD                               Bold mode.
+A_DIM                                Dim mode.
+A_NORMAL                             Normal attribute.
+A_STANDOUT                           Standout mode.
+A_UNDERLINE                          Underline mode.
+
+Keys are referred to by integer constants with names starting with
+`KEY_'.   The exact keycaps available are system dependent.
+
+Key constant                         Key
+------                               -----
+KEY_MIN                              Minimum key value
+KEY_BREAK                            Break key (unreliable)
+KEY_DOWN                             Down-arrow
+KEY_UP                               Up-arrow
+KEY_LEFT                             Left-arrow
+KEY_RIGHT                            Right-arrow
+KEY_HOME                             Home key (upward+left arrow)
+KEY_BACKSPACE                        Backspace (unreliable)
+KEY_F0                               Function keys.  Up to 64 function
+                                     keys are supported.
+KEY_FN                               Value of function key N
+KEY_DL                               Delete line
+KEY_IL                               Insert line
+KEY_DC                               Delete character
+KEY_IC                               Insert char or enter insert mode
+KEY_EIC                              Exit insert char mode
+KEY_CLEAR                            Clear screen
+KEY_EOS                              Clear to end of screen
+KEY_EOL                              Clear to end of line
+KEY_SF                               Scroll 1 line forward
+KEY_SR                               Scroll 1 line backward (reverse)
+KEY_NPAGE                            Next page
+KEY_PPAGE                            Previous page
+KEY_STAB                             Set tab
+KEY_CTAB                             Clear tab
+KEY_CATAB                            Clear all tabs
+KEY_ENTER                            Enter or send (unreliable)
+KEY_SRESET                           Soft (partial) reset (unreliable)
+KEY_RESET                            Reset or hard reset (unreliable)
+KEY_PRINT                            Print
+KEY_LL                               Home down or bottom (lower left)
+KEY_A1                               Upper left of keypad
+KEY_A3                               Upper right of keypad
+KEY_B2                               Center of keypad
+KEY_C1                               Lower left of keypad
+KEY_C3                               Lower right of keypad
+KEY_BTAB                             Back tab
+KEY_BEG                              Beg (beginning)
+KEY_CANCEL                           Cancel
+KEY_CLOSE                            Close
+KEY_COMMAND                          Cmd (command)
+KEY_COPY                             Copy
+KEY_CREATE                           Create
+KEY_END                              End
+KEY_EXIT                             Exit
+KEY_FIND                             Find
+KEY_HELP                             Help
+KEY_MARK                             Mark
+KEY_MESSAGE                          Message
+KEY_MOVE                             Move
+KEY_NEXT                             Next
+KEY_OPEN                             Open
+KEY_OPTIONS                          Options
+KEY_PREVIOUS                         Prev (previous)
+KEY_REDO                             Redo
+KEY_REFERENCE                        Ref (reference)
+KEY_REFRESH                          Refresh
+KEY_REPLACE                          Replace
+KEY_RESTART                          Restart
+KEY_RESUME                           Resume
+KEY_SAVE                             Save
+KEY_SBEG                             Shifted Beg (beginning)
+KEY_SCANCEL                          Shifted Cancel
+KEY_SCOMMAND                         Shifted Command
+KEY_SCOPY                            Shifted Copy
+KEY_SCREATE                          Shifted Create
+KEY_SDC                              Shifted Delete char
+KEY_SDL                              Shifted Delete line
+KEY_SELECT                           Select
+KEY_SEND                             Shifted End
+KEY_SEOL                             Shifted Clear line
+KEY_SEXIT                            Shifted Dxit
+KEY_SFIND                            Shifted Find
+KEY_SHELP                            Shifted Help
+KEY_SHOME                            Shifted Home
+KEY_SIC                              Shifted Input
+KEY_SLEFT                            Shifted Left arrow
+KEY_SMESSAGE                         Shifted Message
+KEY_SMOVE                            Shifted Move
+KEY_SNEXT                            Shifted Next
+KEY_SOPTIONS                         Shifted Options
+KEY_SPREVIOUS                        Shifted Prev
+KEY_SPRINT                           Shifted Print
+KEY_SREDO                            Shifted Redo
+KEY_SREPLACE                         Shifted Replace
+KEY_SRIGHT                           Shifted Right arrow
+KEY_SRSUME                           Shifted Resume
+KEY_SSAVE                            Shifted Save
+KEY_SSUSPEND                         Shifted Suspend
+KEY_SUNDO                            Shifted Undo
+KEY_SUSPEND                          Suspend
+KEY_UNDO                             Undo
+KEY_MOUSE                            Mouse event has occurred
+KEY_RESIZE                           Terminal resize event
+KEY_MAX                              Maximum key value
+
+On VT100s and their software emulations, such as X terminal emulators,
+there are normally at least four function keys (`KEY_F1', `KEY_F2',
+`KEY_F3', `KEY_F4') available, and the arrow keys mapped to `KEY_UP',
+`KEY_DOWN', `KEY_LEFT' and `KEY_RIGHT' in the obvious way.  If your
+machine has a PC keybboard, it is safe to expect arrow keys and twelve
+function keys (older PC keyboards may have only ten function keys);
+also, the following keypad mappings are standard:
+
+Keycap                               Constant
+------                               -----
+Insert                               KEY_IC
+Delete                               KEY_DC
+Home                                 KEY_HOME
+End                                  KEY_END
+Page Up                              KEY_NPAGE
+Page Down                            KEY_PPAGE
+
+The following table lists characters from the alternate character set.
+These are inherited from the VT100 terminal, and will generally be
+available on software emulations such as X terminals.  When there is no
+graphic available, curses falls back on a crude printable ASCII
+approximation.  _Note:_ These are available only after `initscr()' has
+been called.
+
+ACS code                             Meaning
+------                               -----
+ACS_BBSS                             alternate name for upper right
+                                     corner
+ACS_BLOCK                            solid square block
+ACS_BOARD                            board of squares
+ACS_BSBS                             alternate name for horizontal line
+ACS_BSSB                             alternate name for upper left corner
+ACS_BSSS                             alternate name for top tee
+ACS_BTEE                             bottom tee
+ACS_BULLET                           bullet
+ACS_CKBOARD                          checker board (stipple)
+ACS_DARROW                           arrow pointing down
+ACS_DEGREE                           degree symbol
+ACS_DIAMOND                          diamond
+ACS_GEQUAL                           greater-than-or-equal-to
+ACS_HLINE                            horizontal line
+ACS_LANTERN                          lantern symbol
+ACS_LARROW                           left arrow
+ACS_LEQUAL                           less-than-or-equal-to
+ACS_LLCORNER                         lower left-hand corner
+ACS_LRCORNER                         lower right-hand corner
+ACS_LTEE                             left tee
+ACS_NEQUAL                           not-equal sign
+ACS_PI                               letter pi
+ACS_PLMINUS                          plus-or-minus sign
+ACS_PLUS                             big plus sign
+ACS_RARROW                           right arrow
+ACS_RTEE                             right tee
+ACS_S1                               scan line 1
+ACS_S3                               scan line 3
+ACS_S7                               scan line 7
+ACS_S9                               scan line 9
+ACS_SBBS                             alternate name for lower right
+                                     corner
+ACS_SBSB                             alternate name for vertical line
+ACS_SBSS                             alternate name for right tee
+ACS_SSBB                             alternate name for lower left corner
+ACS_SSBS                             alternate name for bottom tee
+ACS_SSSB                             alternate name for left tee
+ACS_SSSS                             alternate name for crossover or big
+                                     plus
+ACS_STERLING                         pound sterling
+ACS_TTEE                             top tee
+ACS_UARROW                           up arrow
+ACS_ULCORNER                         upper left corner
+ACS_URCORNER                         upper right corner
+ACS_VLINE                            vertical line
+
+The following table lists the predefined colors:
+
+Constant                             Color
+------                               -----
+COLOR_BLACK                          Black
+COLOR_BLUE                           Blue
+COLOR_CYAN                           Cyan (light greenish blue)
+COLOR_GREEN                          Green
+COLOR_MAGENTA                        Magenta (purplish red)
+COLOR_RED                            Red
+COLOR_WHITE                          White
+COLOR_YELLOW                         Yellow
+
+
+File: python-lib.info,  Node: cursestextpad,  Next: curseswrapper,  Prev: curses,  Up: Generic Operating System Services
+
+Text input widget for curses programs
+=====================================
+
+Emacs-like input editing in a curses window.  _Added in Python version
+1.6_
+
+The `curses.textpad' module provides a `Textbox' class that handles
+elementary text editing in a curses window, supporting a set of
+keybindings resembling those of Emacs (thus, also of Netscape
+Navigator, BBedit 6.x, FrameMaker, and many other programs).  The
+module also provides a rectangle-drawing function useful for framing
+text boxes or for other purposes.
+
+The module `curses.textpad' defines the following function:
+
+`rectangle(win, uly, ulx, lry, lrx)'
+     Draw a rectangle.  The first argument must be a window object; the
+     remaining arguments are coordinates relative to that window.  The
+     second and third arguments are the y and x coordinates of the upper
+     left hand corner of the rectangle To be drawn; the fourth and fifth
+     arguments are the y and x coordinates of the lower right hand
+     corner.  The rectangle will be drawn using VT100/IBM PC forms
+     characters on terminals that make this possible (including xterm
+     and most other software terminal emulators).  Otherwise it will be
+     drawn with ASCII dashes, vertical bars, and plus signs.
+
+* Menu:
+
+* Textbox objects::
+
+
+File: python-lib.info,  Node: Textbox objects,  Prev: cursestextpad,  Up: cursestextpad
+
+Textbox objects
+---------------
+
+You can instantiate a `Textbox' object as follows:
+
+`Textbox(win)'
+     Return a textbox widget object.  The WIN argument should be a
+     curses `WindowObject' in which the textbox is to be contained.
+     The edit cursor of the textbox is initially located at the upper
+     left hand corner of the containin window, with coordinates `(0,
+     0)'.  The instance's `stripspaces' flag is initially on.
+
+`Textbox' objects have the following methods:
+
+`edit([validator])'
+     This is the entry point you will normally use.  It accepts editing
+     keystrokes until one of the termination keystrokes is entered.  If
+     VALIDATOR is supplied, it must be a function.  It will be called
+     for each keystroke entered with the keystroke as a parameter;
+     command dispatch is done on the result. This method returns the
+     window contents as a string; whether blanks in the window are
+     included is affected by the `stripspaces' member.
+
+`do_command(ch)'
+     Process a single command keystroke.  Here are the supported special
+     keystrokes:
+
+     Keystroke                          Action
+     ------                             -----
+     Control-A                          Go to left edge of window.
+     Control-B                          Cursor left, wrapping to previous
+                                        line if appropriate.
+     Control-D                          Delete character under cursor.
+     Control-E                          Go to right edge (stripspaces
+                                        off) or end of line (stripspaces
+                                        on).
+     Control-F                          Cursor right, wrapping to next
+                                        line when appropriate.
+     Control-G                          Terminate, returning the window
+                                        contents.
+     Control-H                          Delete character backward.
+     Control-J                          Terminate if the window is 1
+                                        line, otherwise insert newline.
+     Control-K                          If line is blank, delete it,
+                                        otherwise clear to end of line.
+     Control-L                          Refresh screen.
+     Control-N                          Cursor down; move down one line.
+     Control-O                          Insert a blank line at cursor
+                                        location.
+     Control-P                          Cursor up; move up one line.
+
+     Move operations do nothing if the cursor is at an edge where the
+     movement is not possible.  The following synonyms are supported
+     where possible:
+
+     Constant                           Keystroke
+     ------                             -----
+     KEY_LEFT                           <Control-B>
+     KEY_RIGHT                          <Control-F>
+     KEY_UP                             <Control-P>
+     KEY_DOWN                           <Control-N>
+     KEY_BACKSPACE                      <Control-h>
+
+     All other keystrokes are treated as a command to insert the given
+     character and move right (with line wrapping).
+
+`gather()'
+     This method returns the window contents as a string; whether
+     blanks in the window are included is affected by the `stripspaces'
+     member.
+
+`stripspaces'
+     This data member is a flag which controls the interpretation of
+     blanks in the window.  When it is on, trailing blanks on each line
+     are ignored; any cursor motion that would land the cursor on a
+     trailing blank goes to the end of that line instead, and trailing
+     blanks are stripped when the window contents is gathered.
+
+
+File: python-lib.info,  Node: curseswrapper,  Next: cursesascii,  Prev: cursestextpad,  Up: Generic Operating System Services
+
+Terminal handler for curses programs
+====================================
+
+Terminal configuration wrapper for curses programs.  _Added in Python
+version 1.6_
+
+This module supplies one function, `wrapper()', which runs another
+function which should be the rest of your curses-using application.  If
+the application raises an exception, `wrapper()' will restore the
+terminal to a sane state before passing it further up the stack and
+generating a traceback.
+
+`wrapper(func, ...)'
+     Wrapper function that initializes curses and calls another
+     function, FUNC, restoring normal keyboard/screen behavior on error.
+     The callable object FUNC is then passed the main window 'stdscr'
+     as its first argument, followed by any other arguments passed to
+     `wrapper()'.
+
+Before calling the hook function, `wrapper()' turns on cbreak mode,
+turns off echo, enables the terminal keypad, and initializes colors if
+the terminal has color support.  On exit (whether normally or by
+exception) it restores cooked mode, turns on echo, and disables the
+terminal keypad.
+
+
+File: python-lib.info,  Node: cursesascii,  Next: cursespanel,  Prev: curseswrapper,  Up: Generic Operating System Services
+
+Utilities for ASCII characters
+==============================
+
+Constants and set-membership functions for ASCII characters.
+
+_Added in Python version 1.6_
+
+The `curses.ascii' module supplies name constants for ASCII characters
+and functions to test membership in various ASCII character classes.
+The constants supplied are names for control characters as follows:
+
+Name                                 Meaning
+------                               -----
+NUL                                  
+SOH                                  Start of heading, console interrupt
+STX                                  Start of text
+ETX                                  End of text
+EOT                                  End of transmission
+ENQ                                  Enquiry, goes with `ACK' flow
+                                     control
+ACK                                  Acknowledgement
+BEL                                  Bell
+BS                                   Backspace
+TAB                                  Tab
+HT                                   Alias for `TAB': "Horizontal tab"
+LF                                   Line feed
+NL                                   Alias for `LF': "New line"
+VT                                   Vertical tab
+FF                                   Form feed
+CR                                   Carriage return
+SO                                   Shift-out, begin alternate
+                                     character set
+SI                                   Shift-in, resume default character
+                                     set
+DLE                                  Data-link escape
+DC1                                  XON, for flow control
+DC2                                  Device control 2, block-mode flow
+                                     control
+DC3                                  XOFF, for flow control
+DC4                                  Device control 4
+NAK                                  Negative acknowledgement
+SYN                                  Synchronous idle
+ETB                                  End transmission block
+CAN                                  Cancel
+EM                                   End of medium
+SUB                                  Substitute
+ESC                                  Escape
+FS                                   File separator
+GS                                   Group separator
+RS                                   Record separator, block-mode
+                                     terminator
+US                                   Unit separator
+SP                                   Space
+DEL                                  Delete
+
+Note that many of these have little practical significance in modern
+usage.  The mnemonics derive from teleprinter conventions that predate
+digital computers.
+
+The module supplies the following functions, patterned on those in the
+standard C library:
+
+`isalnum(c)'
+     Checks for an ASCII alphanumeric character; it is equivalent to
+     `isalpha(C) or isdigit(C)'.
+
+`isalpha(c)'
+     Checks for an ASCII alphabetic character; it is equivalent to
+     `isupper(C) or islower(C)'.
+
+`isascii(c)'
+     Checks for a character value that fits in the 7-bit ASCII set.
+
+`isblank(c)'
+     Checks for an ASCII whitespace character.
+
+`iscntrl(c)'
+     Checks for an ASCII control character (in the range 0x00 to 0x1f).
+
+`isdigit(c)'
+     Checks for an ASCII decimal digit, `0' through `9'.  This is
+     equivalent to `C in string.digits'.
+
+`isgraph(c)'
+     Checks for ASCII any printable character except space.
+
+`islower(c)'
+     Checks for an ASCII lower-case character.
+
+`isprint(c)'
+     Checks for any ASCII printable character including space.
+
+`ispunct(c)'
+     Checks for any printable ASCII character which is not a space or an
+     alphanumeric character.
+
+`isspace(c)'
+     Checks for ASCII white-space characters; space, line feed,
+     carriage return, form feed, horizontal tab, vertical tab.
+
+`isupper(c)'
+     Checks for an ASCII uppercase letter.
+
+`isxdigit(c)'
+     Checks for an ASCII hexadecimal digit.  This is equivalent to `C
+     in string.hexdigits'.
+
+`isctrl(c)'
+     Checks for an ASCII control character (ordinal values 0 to 31).
+
+`ismeta(c)'
+     Checks for a non-ASCII character (ordinal values 0x80 and above).
+
+These functions accept either integers or strings; when the argument is
+a string, it is first converted using the built-in function `ord()'.
+
+Note that all these functions check ordinal bit values derived from the
+first character of the string you pass in; they do not actually know
+anything about the host machine's character encoding.  For functions
+that know about the character encoding (and handle internationalization
+properly) see the `string' module.
+
+The following two functions take either a single-character string or
+integer byte value; they return a value of the same type.
+
+`ascii(c)'
+     Return the ASCII value corresponding to the low 7 bits of C.
+
+`ctrl(c)'
+     Return the control character corresponding to the given character
+     (the character bit value is bitwise-anded with 0x1f).
+
+`alt(c)'
+     Return the 8-bit character corresponding to the given ASCII
+     character (the character bit value is bitwise-ored with 0x80).
+
+The following function takes either a single-character string or
+integer value; it returns a string.
+
+`unctrl(c)'
+     Return a string representation of the ASCII character C.  If C is
+     printable, this string is the character itself.  If the character
+     is a control character (0x00-0x1f) the string consists of a caret
+     (`^') followed by the corresponding uppercase letter.  If the
+     character is an ASCII delete (0x7f) the string is `'^{}?''.  If
+     the character has its meta bit (0x80) set, the meta bit is
+     stripped, the preceding rules applied, and `!' prepended to the
+     result.
+
+`controlnames'
+     A 33-element string array that contains the ASCII mnemonics for the
+     thirty-two ASCII control characters from 0 (NUL) to 0x1f (US), in
+     order, plus the mnemonic `SP' for the space character.
+
+
+File: python-lib.info,  Node: cursespanel,  Next: getopt,  Prev: cursesascii,  Up: Generic Operating System Services
+
+A panel stack extension for curses.
+===================================
+
+A panel stack extension that adds depth to  curses windows.
+
+Panels are windows with the added feature of depth, so they can be
+stacked on top of each other, and only the visible portions of each
+window will be displayed.  Panels can be added, moved up or down in the
+stack, and removed.
+
+* Menu:
+
+* Functions 3::
+* Panel Objects::
+
+
+File: python-lib.info,  Node: Functions 3,  Next: Panel Objects,  Prev: cursespanel,  Up: cursespanel
+
+Functions
+---------
+
+The module `curses.panel' defines the following functions:
+
+`bottom_panel()'
+     Returns the bottom panel in the panel stack.
+
+`new_panel(win)'
+     Returns a panel object, associating it with the given window WIN.
+
+`top_panel()'
+     Returns the top panel in the panel stack.
+
+`update_panels()'
+     Updates the virtual screen after changes in the panel stack. This
+     does not call `curses.doupdate()', so you'll have to do this
+     yourself.
+
+
+File: python-lib.info,  Node: Panel Objects,  Prev: Functions 3,  Up: cursespanel
+
+Panel Objects
+-------------
+
+Panel objects, as returned by `new_panel()' above, are windows with a
+stacking order. There's always a window associated with a panel which
+determines the content, while the panel methods are responsible for the
+window's depth in the panel stack.
+
+Panel objects have the following methods:
+
+`above()'
+     Returns the panel above the current panel.
+
+`below()'
+     Returns the panel below the current panel.
+
+`bottom()'
+     Push the panel to the bottom of the stack.
+
+`hidden()'
+     Returns true if the panel is hidden (not visible), false otherwise.
+
+`hide()'
+     Hide the panel. This does not delete the object, it just makes the
+     window on screen invisible.
+
+`move(y, x)'
+     Move the panel to the screen coordinates `(Y, X)'.
+
+`replace(win)'
+     Change the window associated with the panel to the window WIN.
+
+`set_userptr(obj)'
+     Set the panel's user pointer to OBJ. This is used to associate an
+     arbitrary piece of data with the panel, and can be any Python
+     object.
+
+`show()'
+     Display the panel (which might have been hidden).
+
+`top()'
+     Push panel to the top of the stack.
+
+`userptr()'
+     Returns the user pointer for the panel.  This might be any Python
+     object.
+
+`window()'
+     Returns the window object associated with the panel.
+
+
+File: python-lib.info,  Node: getopt,  Next: optparse,  Prev: cursespanel,  Up: Generic Operating System Services
+
+Parser for command line options
+===============================
+
+Portable parser for command line options; support both short and long
+option names.
+
+This module helps scripts to parse the command line arguments in
+`sys.argv'.  It supports the same conventions as the UNIX `getopt()'
+function (including the special meanings of arguments of the form ``-''
+and ``-'`-'').  Long options similar to those supported by GNU software
+may be used as well via an optional third argument.  This module
+provides a single function and an exception:
+
+`getopt(args, options[, long_options])'
+     Parses command line options and parameter list.  ARGS is the
+     argument list to be parsed, without the leading reference to the
+     running program. Typically, this means `sys.argv[1:]'.  OPTIONS is
+     the string of option letters that the script wants to recognize,
+     with options that require an argument followed by a colon (`:';
+     i.e., the same format that UNIX `getopt()' uses).
+
+     _Note:_ Unlike GNU `getopt()', after a non-option argument, all
+     further arguments are considered also non-options. This is similar
+     to the way non-GNU UNIX systems work.
+
+     LONG_OPTIONS, if specified, must be a list of strings with the
+     names of the long options which should be supported.  The leading
+     `'-'`-'' characters should not be included in the option name.
+     Long options which require an argument should be followed by an
+     equal sign (`=').  To accept only long options, OPTIONS should be
+     an empty string.  Long options on the command line can be
+     recognized so long as they provide a prefix of the option name
+     that matches exactly one of the accepted options.  For example, it
+     LONG_OPTIONS is `['foo', 'frob']', the option `--fo' will match as
+     `--foo', but `--f' will not match uniquely, so `GetoptError' will
+     be raised.
+
+     The return value consists of two elements: the first is a list of
+     `(OPTION, VALUE)' pairs; the second is the list of program
+     arguments left after the option list was stripped (this is a
+     trailing slice of ARGS).  Each option-and-value pair returned has
+     the option as its first element, prefixed with a hyphen for short
+     options (e.g., `'-x'') or two hyphens for long options (e.g.,
+     `'-'`-long-option''), and the option argument as its second
+     element, or an empty string if the option has no argument.  The
+     options occur in the list in the same order in which they were
+     found, thus allowing multiple occurrences.  Long and short options
+     may be mixed.
+
+`gnu_getopt(args, options[, long_options])'
+     This function works like `getopt()', except that GNU style
+     scanning mode is used by default. This means that option and
+     non-option arguments may be intermixed. The `getopt()' function
+     stops processing options as soon as a non-option argument is
+     encountered.
+
+     If the first character of the option string is `+', or if the
+     environment variable POSIXLY_CORRECT is set, then option processing
+     stops as soon as a non-option argument is encountered.
+
+`GetoptError'
+     This is raised when an unrecognized option is found in the argument
+     list or when an option requiring an argument is given none.  The
+     argument to the exception is a string indicating the cause of the
+     error.  For long options, an argument given to an option which does
+     not require one will also cause this exception to be raised.  The
+     attributes `msg' and `opt' give the error message and related
+     option; if there is no specific option to which the exception
+     relates, `opt' is an empty string.
+
+     _Changed in Python version 1.6_
+
+`error'
+     Alias for `GetoptError'; for backward compatibility.
+
+An example using only UNIX style options:
+
+     >>> import getopt
+     >>> args = '-a -b -cfoo -d bar a1 a2'.split()
+     >>> args
+     ['-a', '-b', '-cfoo', '-d', 'bar', 'a1', 'a2']
+     >>> optlist, args = getopt.getopt(args, 'abc:d:')
+     >>> optlist
+     [('-a', ''), ('-b', ''), ('-c', 'foo'), ('-d', 'bar')]
+     >>> args
+     ['a1', 'a2']
+
+Using long option names is equally easy:
+
+     >>> s = '--condition=foo --testing --output-file abc.def -x a1 a2'
+     >>> args = s.split()
+     >>> args
+     ['--condition=foo', '--testing', '--output-file', 'abc.def', '-x', 'a1', 'a2']
+     >>> optlist, args = getopt.getopt(args, 'x', [
+     ...     'condition=', 'output-file=', 'testing'])
+     >>> optlist
+     [('--condition', 'foo'), ('--testing', ''), ('--output-file', 'abc.def'), ('-x',
+      '')]
+     >>> args
+     ['a1', 'a2']
+
+In a script, typical usage is something like this:
+
+     import getopt, sys
+     
+     def main():
+         try:
+             opts, args = getopt.getopt(sys.argv[1:], "ho:v", ["help", "output="])
+         except getopt.GetoptError:
+             # print help information and exit:
+             usage()
+             sys.exit(2)
+         output = None
+         verbose = False
+         for o, a in opts:
+             if o == "-v":
+                 verbose = True
+             if o in ("-h", "--help"):
+                 usage()
+                 sys.exit()
+             if o in ("-o", "--output"):
+                 output = a
+         # ...
+     
+     if __name__ == "__main__":
+         main()
+
+
+File: python-lib.info,  Node: optparse,  Next: tempfile,  Prev: getopt,  Up: Generic Operating System Services
+
+Powerful parser for command line options.
+=========================================
+
+Powerful, flexible, extensible, easy-to-use command-line parsing
+library.
+
+_Added in Python version 2.3_
+
+The `optparse' module is a powerful, flexible, extensible, easy-to-use
+command-line parsing library for Python.  Using `optparse', you can add
+intelligent, sophisticated handling of command-line options to your
+scripts with very little overhead.
+
+Here's an example of using `optparse' to add some command-line options
+to a simple script:
+
+     from optparse import OptionParser
+     
+     parser = OptionParser()
+     parser.add_option("-f", "--file", dest="filename",
+                       help="write report to FILE", metavar="FILE")
+     parser.add_option("-q", "--quiet",
+                       action="store_false", dest="verbose", default=True,
+                       help="don't print status messages to stdout")
+     
+     (options, args) = parser.parse_args()
+
+With these few lines of code, users of your script can now do the
+"usual thing" on the command-line:
+
+     $ <yourscript> -f outfile --quiet
+     $ <yourscript> -qfoutfile
+     $ <yourscript> --file=outfile -q
+     $ <yourscript> --quiet --file outfile
+
+(All of these result in `options.filename == "outfile"' and
+`options.verbose == False', just as you might expect.)
+
+Even niftier, users can run one of
+     $ <yourscript> -h
+     $ <yourscript> --help
+
+and `optparse' will print out a brief summary of your script's options:
+
+     usage: <yourscript> [options]
+     
+     options:
+       -h, --help           show this help message and exit
+       -fFILE, --file=FILE  write report to FILE
+       -q, --quiet          don't print status messages to stdout
+
+That's just a taste of the flexibility `optparse' gives you in parsing
+your command-line.
+
+* Menu:
+
+* Philosophy::
+* Basic Usage::
+* Advanced Usage 2::
+* Callback Options::
+* Extending optparse::
+
+
+File: python-lib.info,  Node: Philosophy,  Next: Basic Usage,  Prev: optparse,  Up: optparse
+
+Philosophy
+----------
+
+The purpose of `optparse' is to make it very easy to provide the most
+standard, obvious, straightforward, and user-friendly user interface
+for UNIX command-line programs.  The `optparse' philosophy is heavily
+influenced by the UNIX and GNU toolkits, and this section is meant to
+explain that philosophy.
+
+* Menu:
+
+* Terminology::
+* What are options for?::
+* What are positional arguments for?::
+

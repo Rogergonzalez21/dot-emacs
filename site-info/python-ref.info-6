@@ -1,0 +1,698 @@
+This is python-ref.info, produced by makeinfo version 4.3 from
+python-ref.texi.
+
+October 3, 2003
+
+
+File: python-ref.info,  Node: Class-Exception-Object Index,  Next: Function-Method-Variable Index,  Prev: Module Index,  Up: Top
+
+Class, Exception, and Object Index
+**********************************
+
+* Menu:
+
+* AssertionError:                        Assert statements.
+* AttributeError:                        Attribute references.
+* Boolean:                               standard type hierarchy.
+* built-in function <1>:                 Calls.
+* built-in function:                     standard type hierarchy.
+* built-in method <1>:                   Calls.
+* built-in method:                       standard type hierarchy.
+* callable <1>:                          Calls.
+* callable:                              standard type hierarchy.
+* class <1>:                             Class definitions.
+* class <2>:                             Calls.
+* class:                                 standard type hierarchy.
+* class instance <1>:                    Calls.
+* class instance:                        standard type hierarchy.
+* code:                                  standard type hierarchy.
+* complex:                               standard type hierarchy.
+* dictionary <1>:                        Assignment statements.
+* dictionary <2>:                        Subscriptions.
+* dictionary <3>:                        Dictionary displays.
+* dictionary <4>:                        Basic customization.
+* dictionary:                            standard type hierarchy.
+* Ellipsis:                              standard type hierarchy.
+* file <1>:                              Expression input.
+* file:                                  standard type hierarchy.
+* floating point:                        standard type hierarchy.
+* frame:                                 standard type hierarchy.
+* function <1>:                          Function definitions.
+* function <2>:                          Calls.
+* function:                              standard type hierarchy.
+* generator:                             standard type hierarchy.
+* immutable:                             standard type hierarchy.
+* immutable sequence:                    standard type hierarchy.
+* ImportError:                           import statement.
+* instance <1>:                          Calls.
+* instance:                              standard type hierarchy.
+* integer:                               standard type hierarchy.
+* list <1>:                              Assignment statements.
+* list <2>:                              Slicings.
+* list <3>:                              Subscriptions.
+* list <4>:                              Attribute references.
+* list <5>:                              List displays.
+* list:                                  standard type hierarchy.
+* long integer:                          standard type hierarchy.
+* mapping <1>:                           Assignment statements.
+* mapping <2>:                           Subscriptions.
+* mapping:                               standard type hierarchy.
+* method <1>:                            Calls.
+* method:                                standard type hierarchy.
+* module <1>:                            Attribute references.
+* module:                                standard type hierarchy.
+* mutable <1>:                           Assignment statements.
+* mutable:                               standard type hierarchy.
+* mutable sequence:                      standard type hierarchy.
+* NameError:                             Identifiers Names.
+* NoneNone:                              standard type hierarchy.
+* NotImplementedNotImplemented:          standard type hierarchy.
+* numeric:                               standard type hierarchy.
+* plain integer:                         standard type hierarchy.
+* recursive:                             String conversions.
+* RuntimeError:                          print statement.
+* sequence <1>:                          for statement.
+* sequence <2>:                          Assignment statements.
+* sequence <3>:                          Comparisons.
+* sequence <4>:                          Slicings.
+* sequence <5>:                          Subscriptions.
+* sequence:                              standard type hierarchy.
+* slice:                                 Emulating container types.
+* StopIteration:                         yield statement.
+* string <1>:                            Slicings.
+* string <2>:                            Subscriptions.
+* string:                                standard type hierarchy.
+* SyntaxError:                           import statement.
+* traceback <1>:                         try statement.
+* traceback <2>:                         raise statement.
+* traceback:                             standard type hierarchy.
+* tuple <1>:                             Expression lists.
+* tuple <2>:                             Slicings.
+* tuple <3>:                             Subscriptions.
+* tuple:                                 standard type hierarchy.
+* TypeError:                             Unary arithmetic operations.
+* unicode:                               standard type hierarchy.
+* user-defined function <1>:             Function definitions.
+* user-defined function <2>:             Calls.
+* user-defined function:                 standard type hierarchy.
+* user-defined method:                   standard type hierarchy.
+* ValueError:                            Shifting operations.
+* ZeroDivisionError:                     Binary arithmetic operations.
+
+
+File: python-ref.info,  Node: Function-Method-Variable Index,  Next: Miscellaneous Index,  Prev: Class-Exception-Object Index,  Up: Top
+
+Function, Method, and Variable Index
+************************************
+
+* Menu:
+
+* __add__:                               Emulating numeric types.
+* __call__:                              Emulating callable objects.
+* __cmp__:                               Basic customization.
+* __coerce__:                            Emulating numeric types.
+* __complex__:                           Emulating numeric types.
+* __contains__:                          Emulating container types.
+* __del__:                               Basic customization.
+* __delattr__:                           Customizing attribute access.
+* __delete__:                            Implementing Descriptors.
+* __delitem__:                           Emulating container types.
+* __delslice__:                          Additional methods for emulation of sequence types.
+* __div__:                               Emulating numeric types.
+* __get__:                               Implementing Descriptors.
+* __getattr__:                           Customizing attribute access.
+* __getattribute__:                      More attribute access for new-style classes.
+* __getitem__:                           Emulating container types.
+* __getslice__:                          Additional methods for emulation of sequence types.
+* __hash__:                              Basic customization.
+* __iadd__:                              Emulating numeric types.
+* __import__:                            import statement.
+* __init__:                              Basic customization.
+* __iter__:                              Emulating container types.
+* __len__:                               Emulating container types.
+* __lt__:                                Basic customization.
+* __metaclass__:                         Customizing class creation.
+* __neg__:                               Emulating numeric types.
+* __nonzero__:                           Basic customization.
+* __oct__:                               Emulating numeric types.
+* __radd__:                              Emulating numeric types.
+* __rcmp__:                              Basic customization.
+* __repr__:                              Basic customization.
+* __set__:                               Implementing Descriptors.
+* __setattr__:                           Customizing attribute access.
+* __setitem__:                           Emulating container types.
+* __setslice__:                          Additional methods for emulation of sequence types.
+* __slots__:                             __slots__.
+* __str__:                               Basic customization.
+* __unicode__:                           Basic customization.
+* abs:                                   Emulating numeric types.
+* chr:                                   standard type hierarchy.
+* cmp:                                   Basic customization.
+* compile:                               global statement.
+* complex:                               Emulating numeric types.
+* divmod:                                Emulating numeric types.
+* eval <1>:                              Expression input.
+* eval <2>:                              exec statement.
+* eval:                                  global statement.
+* execfile:                              global statement.
+* float:                                 Emulating numeric types.
+* globals:                               exec statement.
+* hash:                                  Basic customization.
+* hex:                                   Emulating numeric types.
+* id:                                    Objects.
+* indices:                               standard type hierarchy.
+* input:                                 Expression input.
+* int:                                   Emulating numeric types.
+* len <1>:                               Emulating container types.
+* len:                                   standard type hierarchy.
+* locals:                                exec statement.
+* long:                                  Emulating numeric types.
+* oct:                                   Emulating numeric types.
+* open:                                  standard type hierarchy.
+* ord:                                   standard type hierarchy.
+* pow:                                   Emulating numeric types.
+* range:                                 for statement.
+* raw_input:                             Expression input.
+* repr <1>:                              Expression statements.
+* repr <2>:                              String conversions.
+* repr:                                  Basic customization.
+* slice:                                 standard type hierarchy.
+* str <1>:                               String conversions.
+* str:                                   Basic customization.
+* type:                                  Objects.
+* unichr:                                standard type hierarchy.
+* unicode <1>:                           Basic customization.
+* unicode:                               standard type hierarchy.
+
+
+File: python-ref.info,  Node: Miscellaneous Index,  Prev: Function-Method-Variable Index,  Up: Top
+
+Miscellaneous Index
+*******************
+
+* Menu:
+
+* __add__():                             Emulating container types.
+* __all__:                               import statement.
+* __bases__:                             standard type hierarchy.
+* __builtins__:                          exec statement.
+* __call__():                            Calls.
+* __class__:                             standard type hierarchy.
+* __cmp__():                             Basic customization.
+* __coerce__():                          Emulating container types.
+* __contains__():                        Emulating container types.
+* __debug__:                             Assert statements.
+* __dict__ <1>:                          Customizing attribute access.
+* __dict__:                              standard type hierarchy.
+* __doc__:                               standard type hierarchy.
+* __file__:                              standard type hierarchy.
+* __getitem__():                         Special method names.
+* __iadd__():                            Emulating container types.
+* __imul__():                            Emulating container types.
+* __init__():                            standard type hierarchy.
+* __init__.py:                           import statement.
+* __iter__():                            Emulating container types.
+* __len__():                             Basic customization.
+* __module__:                            standard type hierarchy.
+* __mul__():                             Emulating container types.
+* __name__:                              standard type hierarchy.
+* __nonzero__():                         Emulating container types.
+* __radd__():                            Emulating container types.
+* __rmul__():                            Emulating container types.
+* __setattr__():                         Customizing attribute access.
+* addition:                              Binary arithmetic operations.
+* and:                                   Boolean operations.
+* anonmymous function:                   Lambdas.
+* append():                              Emulating container types.
+* arithmetic conversion:                 Arithmetic conversions.
+* ASCIIASCII <1>:                        standard type hierarchy.
+* ASCIIASCII <2>:                        Delimiters.
+* ASCIIASCII <3>:                        String literals.
+* ASCIIASCII:                            Notation.
+* assert:                                Assert statements.
+* assignment statement <1>:              Assignment statements.
+* assignment statement:                  standard type hierarchy.
+* atom:                                  Atoms.
+* attribute:                             standard type hierarchy.
+* attribute assignment:                  Assignment statements.
+* attribute deletion:                    del statement.
+* attribute reference:                   Attribute references.
+* augmented assignment:                  Augmented assignment statements.
+* back-quotes <1>:                       String conversions.
+* back-quotes:                           Basic customization.
+* backslash character:                   Explicit line joining.
+* backward quotes <1>:                   String conversions.
+* backward quotes:                       Basic customization.
+* binary arithmetic operation:           Binary arithmetic operations.
+* binary bit-wise operation:             Binary bit-wise operations.
+* binding name <1>:                      Assignment statements.
+* binding name:                          Naming and binding.
+* bit-wise and:                          Binary bit-wise operations.
+* bit-wise or:                           Binary bit-wise operations.
+* bit-wise xor:                          Binary bit-wise operations.
+* blank line:                            Blank lines.
+* block:                                 Naming and binding.
+* BNF <1>:                               Expressions.
+* BNF:                                   Notation.
+* Boolean operation:                     Boolean operations.
+* break <1>:                             try statement.
+* break <2>:                             for statement.
+* break <3>:                             while statement.
+* break:                                 break statement.
+* built-in function call:                Calls.
+* built-in method:                       standard type hierarchy.
+* built-in method call:                  Calls.
+* built-in module:                       import statement.
+* byte:                                  standard type hierarchy.
+* bytecode:                              standard type hierarchy.
+* C:                                     String literals.
+* C language <1>:                        Comparisons.
+* C language:                            standard type hierarchy.
+* call:                                  Calls.
+* call instance:                         Emulating callable objects.
+* chaining comparisons:                  Comparisons.
+* character <1>:                         Subscriptions.
+* character:                             standard type hierarchy.
+* character set:                         standard type hierarchy.
+* class:                                 Class definitions.
+* class attribute:                       standard type hierarchy.
+* class attribute assignment:            standard type hierarchy.
+* class constructor:                     Basic customization.
+* class definition <1>:                  Class definitions.
+* class definition:                      return statement.
+* class instance:                        standard type hierarchy.
+* class instance attribute:              standard type hierarchy.
+* class instance attribute assignment:   standard type hierarchy.
+* class instance call:                   Calls.
+* class name:                            Class definitions.
+* class object call <1>:                 Calls.
+* class object call:                     standard type hierarchy.
+* clause:                                Compound statements.
+* clear():                               Emulating container types.
+* co_argcount:                           standard type hierarchy.
+* co_cellvars:                           standard type hierarchy.
+* co_code:                               standard type hierarchy.
+* co_consts:                             standard type hierarchy.
+* co_filename:                           standard type hierarchy.
+* co_firstlineno:                        standard type hierarchy.
+* co_flags:                              standard type hierarchy.
+* co_freevars:                           standard type hierarchy.
+* co_lnotab:                             standard type hierarchy.
+* co_name:                               standard type hierarchy.
+* co_names:                              standard type hierarchy.
+* co_nlocals:                            standard type hierarchy.
+* co_stacksize:                          standard type hierarchy.
+* co_varnames:                           standard type hierarchy.
+* code block <1>:                        import statement.
+* code block:                            Naming and binding.
+* comma:                                 Parenthesized forms.
+* command line:                          Complete Python programs.
+* comment:                               Comments.
+* comparison:                            Comparisons.
+* comparisons:                           Basic customization.
+* complex number:                        standard type hierarchy.
+* complex!literal:                       Numeric literals.
+* compound statement:                    Compound statements.
+* constant:                              Literals.
+* container <1>:                         standard type hierarchy.
+* container:                             Objects.
+* continue <1>:                          try statement.
+* continue <2>:                          for statement.
+* continue <3>:                          while statement.
+* continue:                              continue statement.
+* copy():                                Emulating container types.
+* count():                               Emulating container types.
+* dangling else:                         Compound statements.
+* data:                                  Objects.
+* data type:                             standard type hierarchy.
+* datum:                                 Dictionary displays.
+* debugging assertions:                  Assert statements.
+* decimal literal:                       Numeric literals.
+* DEDENT token <1>:                      Compound statements.
+* DEDENT token:                          Indentation.
+* def:                                   Function definitions.
+* default parameter value:               Function definitions.
+* del <1>:                               del statement.
+* del <2>:                               Basic customization.
+* del:                                   standard type hierarchy.
+* delete:                                standard type hierarchy.
+* deletion target:                       del statement.
+* deletion target list:                  del statement.
+* delimiters:                            Delimiters.
+* destructor <1>:                        Assignment statements.
+* destructor:                            Basic customization.
+* dictionary display:                    Dictionary displays.
+* division:                              Binary arithmetic operations.
+* documentation string:                  standard type hierarchy.
+* EBCDIC:                                standard type hierarchy.
+* elif:                                  if statement.
+* else <1>:                              try statement.
+* else <2>:                              for statement.
+* else <3>:                              while statement.
+* else <4>:                              if statement.
+* else:                                  break statement.
+* empty list:                            List displays.
+* empty tuple <1>:                       Parenthesized forms.
+* empty tuple:                           standard type hierarchy.
+* environment:                           Naming and binding.
+* error handling:                        Exceptions.
+* errors:                                Exceptions.
+* escape sequence:                       String literals.
+* evaluation order:                      Evaluation order.
+* exc_info:                              standard type hierarchy.
+* exc_traceback <1>:                     try statement.
+* exc_traceback:                         standard type hierarchy.
+* exc_type:                              try statement.
+* exc_value:                             try statement.
+* except:                                try statement.
+* exception <1>:                         raise statement.
+* exception:                             Exceptions.
+* exception handler <1>:                 Exceptions.
+* exception handler:                     standard type hierarchy.
+* exclusive or:                          Binary bit-wise operations.
+* exec <1>:                              exec statement.
+* exec:                                  global statement.
+* execution frame <1>:                   Class definitions.
+* execution frame:                       Naming and binding.
+* execution model:                       Execution model.
+* execution stack:                       standard type hierarchy.
+* expression:                            Expressions.
+* expression list <1>:                   Assignment statements.
+* expression list <2>:                   Expression statements.
+* expression list:                       Expression lists.
+* expression statement:                  Expression statements.
+* extend():                              Emulating container types.
+* extended print statement:              print statement.
+* extended slicing <1>:                  Slicings.
+* extended slicing:                      standard type hierarchy.
+* extension module:                      standard type hierarchy.
+* f_back:                                standard type hierarchy.
+* f_builtins:                            standard type hierarchy.
+* f_code:                                standard type hierarchy.
+* f_exc_traceback:                       standard type hierarchy.
+* f_exc_type:                            standard type hierarchy.
+* f_exc_value:                           standard type hierarchy.
+* f_globals:                             standard type hierarchy.
+* f_lasti:                               standard type hierarchy.
+* f_lineno:                              standard type hierarchy.
+* f_locals:                              standard type hierarchy.
+* f_restricted:                          standard type hierarchy.
+* f_trace:                               standard type hierarchy.
+* False:                                 standard type hierarchy.
+* filename extension:                    import statement.
+* finally <1>:                           try statement.
+* finally <2>:                           continue statement.
+* finally <3>:                           break statement.
+* finally:                               return statement.
+* floating point literal:                Numeric literals.
+* floating point number:                 standard type hierarchy.
+* for <1>:                               for statement.
+* for <2>:                               continue statement.
+* for:                                   break statement.
+* free variable <1>:                     del statement.
+* free variable:                         Naming and binding.
+* from <1>:                              import statement.
+* from:                                  Naming and binding.
+* func_closure:                          standard type hierarchy.
+* func_code:                             standard type hierarchy.
+* func_defaults:                         standard type hierarchy.
+* func_dict:                             standard type hierarchy.
+* func_doc:                              standard type hierarchy.
+* func_globals:                          standard type hierarchy.
+* function argument:                     standard type hierarchy.
+* function call <1>:                     Calls.
+* function call:                         standard type hierarchy.
+* function definition <1>:               Function definitions.
+* function definition:                   return statement.
+* function name:                         Function definitions.
+* function!generator:                    yield statement.
+* future statement:                      Future statements.
+* garbage collection:                    Objects.
+* generator!function <1>:                yield statement.
+* generator!function:                    standard type hierarchy.
+* generator!iterator <1>:                yield statement.
+* generator!iterator:                    standard type hierarchy.
+* generic special attribute:             standard type hierarchy.
+* get():                                 Emulating container types.
+* global <1>:                            global statement.
+* global <2>:                            del statement.
+* global:                                Assignment statements.
+* global name binding:                   global statement.
+* global namespace:                      standard type hierarchy.
+* grammar:                               Notation.
+* grouping:                              Indentation.
+* handle an exception:                   Exceptions.
+* has_key():                             Emulating container types.
+* hash character:                        Comments.
+* hexadecimal literal:                   Numeric literals.
+* hierarchical module names:             import statement.
+* identifier <1>:                        Identifiers Names.
+* identifier:                            Identifiers and keywords.
+* identity of an object:                 Objects.
+* identity test:                         Comparisons.
+* if:                                    if statement.
+* im_class:                              standard type hierarchy.
+* im_func:                               standard type hierarchy.
+* im_self:                               standard type hierarchy.
+* imaginary literal:                     Numeric literals.
+* immutable data type:                   Literals 2.
+* immutable object <1>:                  Dictionary displays.
+* immutable object <2>:                  Literals 2.
+* immutable object:                      Objects.
+* import <1>:                            import statement.
+* import:                                standard type hierarchy.
+* in <1>:                                for statement.
+* in:                                    Comparisons.
+* inclusive or:                          Binary bit-wise operations.
+* INDENT token:                          Indentation.
+* indentation:                           Indentation.
+* index operation:                       standard type hierarchy.
+* index():                               Emulating container types.
+* inheritance:                           Class definitions.
+* input:                                 Expression input.
+* input!raw:                             Expression input.
+* insert():                              Emulating container types.
+* instance call:                         Calls.
+* integer:                               standard type hierarchy.
+* integer literal:                       Numeric literals.
+* integer representation:                standard type hierarchy.
+* interactive mode:                      Complete Python programs.
+* internal type:                         standard type hierarchy.
+* interpreter:                           Top-level components.
+* inversion:                             Unary arithmetic operations.
+* invocation:                            standard type hierarchy.
+* is:                                    Comparisons.
+* is not:                                Comparisons.
+* item selection:                        standard type hierarchy.
+* items():                               Emulating container types.
+* iteritems():                           Emulating container types.
+* iterkeys():                            Emulating container types.
+* itervalues():                          Emulating container types.
+* Java language:                         standard type hierarchy.
+* key:                                   Dictionary displays.
+* key/datum pair:                        Dictionary displays.
+* keys():                                Emulating container types.
+* keyword:                               Keywords.
+* lambda expression:                     Lambdas.
+* lambda form <1>:                       Function definitions.
+* lambda form:                           Lambdas.
+* last_traceback:                        standard type hierarchy.
+* leading whitespace:                    Indentation.
+* lexical analysis:                      Lexical analysis.
+* lexical definitions:                   Notation.
+* line continuation:                     Explicit line joining.
+* line joining <1>:                      Explicit line joining.
+* line joining:                          Logical lines.
+* line structure:                        Line structure.
+* list comprehensions:                   List displays.
+* list display:                          List displays.
+* literal <1>:                           Literals 2.
+* literal:                               Literals.
+* logical line:                          Logical lines.
+* long integer literal:                  Numeric literals.
+* loop control target:                   break statement.
+* loop statement <1>:                    for statement.
+* loop statement <2>:                    while statement.
+* loop statement <3>:                    continue statement.
+* loop statement:                        break statement.
+* loop!over mutable sequence:            for statement.
+* makefile():                            standard type hierarchy.
+* membership test:                       Comparisons.
+* method call:                           Calls.
+* minus:                                 Unary arithmetic operations.
+* module initialization:                 import statement.
+* module name:                           import statement.
+* module namespace:                      standard type hierarchy.
+* module search path:                    import statement.
+* module!importing:                      import statement.
+* modules:                               import statement.
+* modulo:                                Binary arithmetic operations.
+* multiplication:                        Binary arithmetic operations.
+* mutable object:                        Objects.
+* mutable sequence!loop over:            for statement.
+* name <1>:                              Identifiers Names.
+* name <2>:                              Naming and binding.
+* name:                                  Identifiers and keywords.
+* name binding <1>:                      Class definitions.
+* name binding <2>:                      Function definitions.
+* name binding:                          import statement.
+* name mangling:                         Identifiers Names.
+* NameError:                             Naming and binding.
+* namespace:                             Naming and binding.
+* negation:                              Unary arithmetic operations.
+* newline suppression:                   print statement.
+* NEWLINE token <1>:                     Compound statements.
+* NEWLINE token:                         Logical lines.
+* None <1>:                              Expression statements.
+* None:                                  standard type hierarchy.
+* not:                                   Boolean operations.
+* not in:                                Comparisons.
+* notation:                              Notation.
+* NotImplemented:                        standard type hierarchy.
+* null operation:                        pass statement.
+* number:                                Numeric literals.
+* numeric literal:                       Numeric literals.
+* object:                                Objects.
+* octal literal:                         Numeric literals.
+* operator overloading:                  Special method names.
+* operator precedence:                   Summary.
+* operators:                             Operators.
+* or:                                    Boolean operations.
+* output <1>:                            print statement.
+* output:                                Expression statements.
+* OverflowError:                         standard type hierarchy.
+* packages:                              import statement.
+* parenthesized form:                    Parenthesized forms.
+* parser:                                Lexical analysis.
+* Pascal language:                       for statement.
+* pass:                                  pass statement.
+* physical line <1>:                     String literals.
+* physical line <2>:                     Explicit line joining.
+* physical line:                         Logical lines.
+* plain integer literal:                 Numeric literals.
+* plus:                                  Unary arithmetic operations.
+* pop():                                 Emulating container types.
+* popen():                               standard type hierarchy.
+* popitem():                             Emulating container types.
+* primary:                               Primaries.
+* print <1>:                             print statement.
+* print:                                 Basic customization.
+* private names:                         Identifiers Names.
+* procedure call:                        Expression statements.
+* program:                               Complete Python programs.
+* raise:                                 raise statement.
+* raise an exception:                    Exceptions.
+* raising exception:                     raise statement.
+* raw input:                             Expression input.
+* raw string:                            String literals.
+* readline():                            Expression input.
+* rebinding name:                        Assignment statements.
+* reference counting:                    Objects.
+* remove():                              Emulating container types.
+* reserved word:                         Keywords.
+* restricted execution:                  Naming and binding.
+* return <1>:                            try statement.
+* return:                                return statement.
+* reverse quotes <1>:                    String conversions.
+* reverse quotes:                        Basic customization.
+* reverse():                             Emulating container types.
+* scope:                                 Naming and binding.
+* sequence item:                         Subscriptions.
+* setdefault():                          Emulating container types.
+* shifting operation:                    Shifting operations.
+* simple statement:                      Simple statements.
+* singleton tuple:                       standard type hierarchy.
+* slice:                                 Slicings.
+* slicing <1>:                           Slicings.
+* slicing:                               standard type hierarchy.
+* slicing assignment:                    Assignment statements.
+* sort():                                Emulating container types.
+* space:                                 Indentation.
+* special attribute:                     standard type hierarchy.
+* stack trace:                           standard type hierarchy.
+* Standard C:                            String literals.
+* standard input:                        Complete Python programs.
+* standard output <1>:                   print statement.
+* standard output:                       Expression statements.
+* start <1>:                             Slicings.
+* start:                                 standard type hierarchy.
+* statement grouping:                    Indentation.
+* statement!assignment, augmented:       Augmented assignment statements.
+* stderr:                                standard type hierarchy.
+* stdin:                                 standard type hierarchy.
+* stdio:                                 standard type hierarchy.
+* stdout <1>:                            print statement.
+* stdout:                                standard type hierarchy.
+* step <1>:                              Slicings.
+* step:                                  standard type hierarchy.
+* stop <1>:                              Slicings.
+* stop:                                  standard type hierarchy.
+* string comparison:                     standard type hierarchy.
+* string conversion <1>:                 Expression statements.
+* string conversion <2>:                 String conversions.
+* string conversion:                     Basic customization.
+* string item:                           Subscriptions.
+* string literal:                        String literals.
+* string!Unicode:                        String literals.
+* subscription <1>:                      Subscriptions.
+* subscription:                          standard type hierarchy.
+* subscription assignment:               Assignment statements.
+* subtraction:                           Binary arithmetic operations.
+* suite:                                 Compound statements.
+* syntax <1>:                            Expressions.
+* syntax:                                Notation.
+* sys.exc_info:                          standard type hierarchy.
+* sys.exc_traceback:                     standard type hierarchy.
+* sys.last_traceback:                    standard type hierarchy.
+* sys.modules:                           import statement.
+* sys.stderr:                            standard type hierarchy.
+* sys.stdin:                             standard type hierarchy.
+* sys.stdout:                            standard type hierarchy.
+* SystemExit:                            Exceptions.
+* tab:                                   Indentation.
+* target:                                Assignment statements.
+* target list <1>:                       for statement.
+* target list:                           Assignment statements.
+* target list assignment:                Assignment statements.
+* tb_frame:                              standard type hierarchy.
+* tb_lasti:                              standard type hierarchy.
+* tb_lineno:                             standard type hierarchy.
+* tb_next:                               standard type hierarchy.
+* termination model:                     Exceptions.
+* token:                                 Lexical analysis.
+* trailing comma <1>:                    print statement.
+* trailing comma:                        Expression lists.
+* triple-quoted string:                  String literals.
+* True:                                  standard type hierarchy.
+* try <1>:                               try statement.
+* try:                                   standard type hierarchy.
+* tuple display:                         Parenthesized forms.
+* type:                                  standard type hierarchy.
+* type hierarchy:                        standard type hierarchy.
+* type of an object:                     Objects.
+* types, internal:                       standard type hierarchy.
+* unary arithmetic operation:            Unary arithmetic operations.
+* unary bit-wise operation:              Unary arithmetic operations.
+* unbinding name:                        del statement.
+* UnboundLocalError:                     Naming and binding.
+* Unicode:                               standard type hierarchy.
+* Unicode Consortium:                    String literals.
+* UNIX:                                  Complete Python programs.
+* unreachable object:                    Objects.
+* unrecognized escape sequence:          String literals.
+* update():                              Emulating container types.
+* user-defined function:                 standard type hierarchy.
+* user-defined function call:            Calls.
+* user-defined method:                   standard type hierarchy.
+* user-defined module:                   import statement.
+* value of an object:                    Objects.
+* values():                              Emulating container types.
+* while <1>:                             while statement.
+* while <2>:                             continue statement.
+* while:                                 break statement.
+* whitespace:                            Indentation.
+* writing values <1>:                    print statement.
+* writing values:                        Expression statements.
+* yield:                                 yield statement.
+
+

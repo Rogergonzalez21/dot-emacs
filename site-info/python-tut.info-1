@@ -1,0 +1,1369 @@
+This is python-tut.info, produced by makeinfo version 4.3 from
+python-tut.texi.
+
+October 3, 2003
+
+
+File: python-tut.info,  Node: Top,  Next: Front Matter,  Prev: (dir),  Up: (dir)
+
+Python Tutorial
+***************
+
+* Menu:
+
+* Front Matter::
+* Whetting Your Appetite::
+* Using the Python Interpreter::
+* An Informal Introduction to Python::
+* More Control Flow Tools::
+* Data Structures::
+* Modules::
+* Input and Output::
+* Errors and Exceptions::
+* Classes::
+* What Now?::
+* Interactive Input Editing and History Substitution::
+* Floating Point Arithmetic  Issues and Limitations::
+* History and License::
+* Module Index::
+* Class-Exception-Object Index::
+* Function-Method-Variable Index::
+* Miscellaneous Index::
+
+
+File: python-tut.info,  Node: Front Matter,  Next: Whetting Your Appetite,  Prev: Top,  Up: Top
+
+Front Matter
+************
+
+Copyright (C) 2001, 2002, 2003 Python Software Foundation.  All rights
+reserved.
+
+Copyright (C) 2000 BeOpen.com.  All rights reserved.
+
+Copyright (C) 1995-2000 Corporation for National Research Initiatives.
+All rights reserved.
+
+Copyright (C) 1991-1995 Stichting Mathematisch Centrum.  All rights
+reserved.
+
+See the end of this document for complete license and permissions
+information.
+
+     Python is an easy to learn, powerful programming language.  It has
+     efficient high-level data structures and a simple but effective
+     approach to object-oriented programming.  Python's elegant syntax
+     and dynamic typing, together with its interpreted nature, make it
+     an ideal language for scripting and rapid application development
+     in many areas on most platforms.
+
+     The Python interpreter and the extensive standard library are
+     freely available in source or binary form for all major platforms
+     from the Python Web site, <http://www.python.org/>, and can be
+     freely distributed.  The same site also contains distributions of
+     and pointers to many free third party Python modules, programs and
+     tools, and additional documentation.
+
+     The Python interpreter is easily extended with new functions and
+     data types implemented in C or C++ (or other languages callable
+     from C).  Python is also suitable as an extension language for
+     customizable applications.
+
+     This tutorial introduces the reader informally to the basic
+     concepts and features of the Python language and system.  It helps
+     to have a Python interpreter handy for hands-on experience, but
+     all examples are self-contained, so the tutorial can be read
+     off-line as well.
+
+     For a description of standard objects and modules, see the
+     document.  The  gives a more formal definition of the language.
+     To write extensions in C or C++, read  and .  There are also
+     several books covering Python in depth.
+
+     This tutorial does not attempt to be comprehensive and cover every
+     single feature, or even every commonly used feature.  Instead, it
+     introduces many of Python's most noteworthy features, and will give
+     you a good idea of the language's flavor and style.  After reading
+     it, you will be able to read and write Python modules and
+     programs, and you will be ready to learn more about the various
+     Python library modules described in the .
+
+
+
+File: python-tut.info,  Node: Whetting Your Appetite,  Next: Using the Python Interpreter,  Prev: Front Matter,  Up: Top
+
+Whetting Your Appetite
+**********************
+
+If you ever wrote a large shell script, you probably know this feeling:
+you'd love to add yet another feature, but it's already so slow, and so
+big, and so complicated; or the feature involves a system call or other
+function that is only accessible from C ...Usually the problem at hand
+isn't serious enough to warrant rewriting the script in C; perhaps the
+problem requires variable-length strings or other data types (like
+sorted lists of file names) that are easy in the shell but lots of work
+to implement in C, or perhaps you're not sufficiently familiar with C.
+
+Another situation: perhaps you have to work with several C libraries,
+and the usual C write/compile/test/re-compile cycle is too slow.  You
+need to develop software more quickly.  Possibly perhaps you've written
+a program that could use an extension language, and you don't want to
+design a language, write and debug an interpreter for it, then tie it
+into your application.
+
+In such cases, Python may be just the language for you.  Python is
+simple to use, but it is a real programming language, offering much
+more structure and support for large programs than the shell has.  On
+the other hand, it also offers much more error checking than C, and,
+being a _very-high-level language_, it has high-level data types built
+in, such as flexible arrays and dictionaries that would cost you days
+to implement efficiently in C.  Because of its more general data types
+Python is applicable to a much larger problem domain than _Awk_ or even
+_Perl_, yet many things are at least as easy in Python as in those
+languages.
+
+Python allows you to split up your program in modules that can be
+reused in other Python programs.  It comes with a large collection of
+standard modules that you can use as the basis of your programs -- or
+as examples to start learning to program in Python.  There are also
+built-in modules that provide things like file I/O, system calls,
+sockets, and even interfaces to graphical user interface toolkits like
+Tk.
+
+Python is an interpreted language, which can save you considerable time
+during program development because no compilation and linking is
+necessary.  The interpreter can be used interactively, which makes it
+easy to experiment with features of the language, to write throw-away
+programs, or to test functions during bottom-up program development.
+It is also a handy desk calculator.
+
+Python allows writing very compact and readable programs.  Programs
+written in Python are typically much shorter than equivalent C or C++
+programs, for several reasons:
+   * the high-level data types allow you to express complex operations
+     in a single statement;
+
+   * statement grouping is done by indentation instead of beginning and
+     ending brackets;
+
+   * no variable or argument declarations are necessary.
+
+Python is _extensible_: if you know how to program in C it is easy to
+add a new built-in function or module to the interpreter, either to
+perform critical operations at maximum speed, or to link Python
+programs to libraries that may only be available in binary form (such
+as a vendor-specific graphics library).  Once you are really hooked,
+you can link the Python interpreter into an application written in C
+and use it as an extension or command language for that application.
+
+By the way, the language is named after the BBC show "Monty Python's
+Flying Circus" and has nothing to do with nasty reptiles.  Making
+references to Monty Python skits in documentation is not only allowed,
+it is encouraged!
+
+Now that you are all excited about Python, you'll want to examine it in
+some more detail.  Since the best way to learn a language is using it,
+you are invited here to do so.
+
+In the next chapter, the mechanics of using the interpreter are
+explained.  This is rather mundane information, but essential for
+trying out the examples shown later.
+
+The rest of the tutorial introduces various features of the Python
+language and system through examples, beginning with simple
+expressions, statements and data types, through functions and modules,
+and finally touching upon advanced concepts like exceptions and
+user-defined classes.
+
+
+File: python-tut.info,  Node: Using the Python Interpreter,  Next: An Informal Introduction to Python,  Prev: Whetting Your Appetite,  Up: Top
+
+Using the Python Interpreter
+****************************
+
+* Menu:
+
+* Invoking the Interpreter::
+* Interpreter and Its Environment::
+
+
+File: python-tut.info,  Node: Invoking the Interpreter,  Next: Interpreter and Its Environment,  Prev: Using the Python Interpreter,  Up: Using the Python Interpreter
+
+Invoking the Interpreter
+========================
+
+The Python interpreter is usually installed as `/usr/local/bin/python'
+on those machines where it is available; putting `/usr/local/bin' in
+your UNIX shell's search path makes it possible to start it by typing
+the command
+
+     python
+
+to the shell.  Since the choice of the directory where the interpreter
+lives is an installation option, other places are possible; check with
+your local Python guru or system administrator.  (E.g.,
+`/usr/local/python' is a popular alternative location.)
+
+Typing an end-of-file character (<Control-D> on UNIX, <Control-Z> on
+Windows) at the primary prompt causes the interpreter to exit with a
+zero exit status.  If that doesn't work, you can exit the interpreter
+by typing the following commands: `import sys; sys.exit()'.
+
+The interpreter's line-editing features usually aren't very
+sophisticated.  On UNIX, whoever installed the interpreter may have
+enabled support for the GNU readline library, which adds more elaborate
+interactive editing and history features. Perhaps the quickest check to
+see whether command line editing is supported is typing Control-P to
+the first Python prompt you get.  If it beeps, you have command line
+editing; see Appendix *Note Interactive Input Editing and History
+Substitution:: for an introduction to the keys.  If nothing appears to
+happen, or if `^P' is echoed, command line editing isn't available;
+you'll only be able to use backspace to remove characters from the
+current line.
+
+The interpreter operates somewhat like the UNIX shell: when called with
+standard input connected to a tty device, it reads and executes
+commands interactively; when called with a file name argument or with a
+file as standard input, it reads and executes a _script_ from that file.
+
+A second way of starting the interpreter is ``python' `-c' COMMAND
+[arg] ...', which executes the statement(s) in COMMAND, analogous to
+the shell's `-c' option.  Since Python statements often contain spaces
+or other characters that are special to the shell, it is best to quote
+COMMAND in its entirety with double quotes.
+
+Note that there is a difference between `python file' and `python
+<file'.  In the latter case, input requests from the program, such as
+calls to `input()' and `raw_input()', are satisfied from _file_.  Since
+this file has already been read until the end by the parser before the
+program starts executing, the program will encounter end-of-file
+immediately.  In the former case (which is usually what you want) they
+are satisfied from whatever file or device is connected to standard
+input of the Python interpreter.
+
+When a script file is used, it is sometimes useful to be able to run
+the script and enter interactive mode afterwards.  This can be done by
+passing `-i' before the script.  (This does not work if the script is
+read from standard input, for the same reason as explained in the
+previous paragraph.)
+
+* Menu:
+
+* Argument Passing::
+* Interactive Mode::
+
+
+File: python-tut.info,  Node: Argument Passing,  Next: Interactive Mode,  Prev: Invoking the Interpreter,  Up: Invoking the Interpreter
+
+Argument Passing
+----------------
+
+When known to the interpreter, the script name and additional arguments
+thereafter are passed to the script in the variable `sys.argv', which
+is a list of strings.  Its length is at least one; when no script and
+no arguments are given, `sys.argv[0]' is an empty string.  When the
+script name is given as `'-'' (meaning standard input), `sys.argv[0]'
+is set to `'-''.  When `-c' COMMAND is used, `sys.argv[0]' is set to
+`'-c''.  Options found after `-c' COMMAND are not consumed by the
+Python interpreter's option processing but left in `sys.argv' for the
+command to handle.
+
+
+File: python-tut.info,  Node: Interactive Mode,  Prev: Argument Passing,  Up: Invoking the Interpreter
+
+Interactive Mode
+----------------
+
+When commands are read from a tty, the interpreter is said to be in
+_interactive mode_.  In this mode it prompts for the next command with
+the _primary prompt_, usually three greater-than signs (`>`>'>~'); for
+continuation lines it prompts with the _secondary prompt_, by default
+three dots (`...~').  The interpreter prints a welcome message stating
+its version number and a copyright notice before printing the first
+prompt:
+
+     python
+     Python 1.5.2b2 (#1, Feb 28 1999, 00:02:06)  [GCC 2.8.1] on sunos5
+     Copyright 1991-1995 Stichting Mathematisch Centrum, Amsterdam
+     >>>
+
+Continuation lines are needed when entering a multi-line construct.  As
+an example, take a look at this `if' statement:
+
+     >>> the_world_is_flat = 1
+     >>> if the_world_is_flat:
+     ...     print "Be careful not to fall off!"
+     ...
+     Be careful not to fall off!
+
+
+File: python-tut.info,  Node: Interpreter and Its Environment,  Prev: Invoking the Interpreter,  Up: Using the Python Interpreter
+
+The Interpreter and Its Environment
+===================================
+
+* Menu:
+
+* Error Handling::
+* Executable Python Scripts::
+* Source Code Encoding::
+* Interactive Startup File::
+
+
+File: python-tut.info,  Node: Error Handling,  Next: Executable Python Scripts,  Prev: Interpreter and Its Environment,  Up: Interpreter and Its Environment
+
+Error Handling
+--------------
+
+When an error occurs, the interpreter prints an error message and a
+stack trace.  In interactive mode, it then returns to the primary
+prompt; when input came from a file, it exits with a nonzero exit
+status after printing the stack trace.  (Exceptions handled by an
+`except' clause in a `try' statement are not errors in this context.)
+Some errors are unconditionally fatal and cause an exit with a nonzero
+exit; this applies to internal inconsistencies and some cases of
+running out of memory.  All error messages are written to the standard
+error stream; normal output from the executed commands is written to
+standard output.
+
+Typing the interrupt character (usually Control-C or DEL) to the
+primary or secondary prompt cancels the input and returns to the
+primary prompt.(1) Typing an interrupt while a command is executing
+raises the `KeyboardInterrupt' exception, which may be handled by a
+`try' statement.
+
+---------- Footnotes ----------
+
+(1)  A problem with the GNU Readline package may prevent this.
+
+
+File: python-tut.info,  Node: Executable Python Scripts,  Next: Source Code Encoding,  Prev: Error Handling,  Up: Interpreter and Its Environment
+
+Executable Python Scripts
+-------------------------
+
+On BSD'ish UNIX systems, Python scripts can be made directly
+executable, like shell scripts, by putting the line
+
+     #! /usr/bin/env python
+
+(assuming that the interpreter is on the user's `PATH') at the
+beginning of the script and giving the file an executable mode.  The
+`#!' must be the first two characters of the file.  On some platforms,
+this first line must end with a UNIX-style line ending (`\n'), not a
+Mac OS (`\r') or Windows (`\r\n') line ending.  Note that the hash, or
+pound, character, `#', is used to start a comment in Python.
+
+The script can be given a executable mode, or permission, using the
+`chmod' command:
+
+     $ chmod +x myscript.py
+
+
+File: python-tut.info,  Node: Source Code Encoding,  Next: Interactive Startup File,  Prev: Executable Python Scripts,  Up: Interpreter and Its Environment
+
+Source Code Encoding
+--------------------
+
+It is possible to use encodings different than ASCII in Python source
+files. The best way to do it is to put one more special comment line
+right after the `#!' line to define the source file encoding:
+
+     # -*- coding: iso-8859-1 -*-
+
+With that declaration, all characters in the source file will be
+treated as {}`iso-8859-1', and it will be possible to directly write
+Unicode string literals in the selected encoding.  The list of possible
+encodings can be found in the , in the section on `codecs'.
+
+If your editor supports saving files as `UTF-8' with an UTF-8 signature
+(aka BOM - Byte Order Mark), you can use that instead of an encoding
+declaration. IDLE supports this capability if `Options/General/Default
+Source Encoding/UTF-8' is set. Notice that this signature is not
+understood in older Python releases (2.2 and earlier), and also not
+understood by the operating system for `#!' files.
+
+By using UTF-8 (either through the signature or an encoding
+declaration), characters of most languages in the world can be used
+simultaneously in string literals and comments. Using non-ASCII
+characters in identifiers is not supported. To display all these
+characters properly, your editor must recognize that the file is UTF-8,
+and it must use a font that supports all the characters in the file.
+
+
+File: python-tut.info,  Node: Interactive Startup File,  Prev: Source Code Encoding,  Up: Interpreter and Its Environment
+
+The Interactive Startup File
+----------------------------
+
+When you use Python interactively, it is frequently handy to have some
+standard commands executed every time the interpreter is started.  You
+can do this by setting an environment variable named `PYTHONSTARTUP' to
+the name of a file containing your start-up commands.  This is similar
+to the `.profile' feature of the UNIX shells.
+
+This file is only read in interactive sessions, not when Python reads
+commands from a script, and not when `/dev/tty' is given as the
+explicit source of commands (which otherwise behaves like an
+interactive session).  It is executed in the same namespace where
+interactive commands are executed, so that objects that it defines or
+imports can be used without qualification in the interactive session.
+You can also change the prompts `sys.ps1' and `sys.ps2' in this file.
+
+If you want to read an additional start-up file from the current
+directory, you can program this in the global start-up file using code
+like `if os.path.isfile('.pythonrc.py'): execfile('.pythonrc.py')'.  If
+you want to use the startup file in a script, you must do this
+explicitly in the script:
+
+     import os
+     filename = os.environ.get('PYTHONSTARTUP')
+     if filename and os.path.isfile(filename):
+         execfile(filename)
+
+
+File: python-tut.info,  Node: An Informal Introduction to Python,  Next: More Control Flow Tools,  Prev: Using the Python Interpreter,  Up: Top
+
+An Informal Introduction to Python
+**********************************
+
+In the following examples, input and output are distinguished by the
+presence or absence of prompts (`>`>'>~' and `...~'): to repeat the
+example, you must type everything after the prompt, when the prompt
+appears; lines that do not begin with a prompt are output from the
+interpreter. Note that a secondary prompt on a line by itself in an
+example means you must type a blank line; this is used to end a
+multi-line command.
+
+Many of the examples in this manual, even those entered at the
+interactive prompt, include comments.  Comments in Python start with
+the hash character, `#', and extend to the end of the physical line.  A
+comment may appear at the start of a line or following whitespace or
+code, but not within a string literal.  A hash character within a
+string literal is just a hash character.
+
+Some examples:
+
+     # this is the first comment
+     SPAM = 1                 # and this is the second comment
+                              # ... and now a third!
+     STRING = "# This is not a comment."
+
+* Menu:
+
+* Using Python as a Calculator::
+* First Steps Towards Programming::
+
+
+File: python-tut.info,  Node: Using Python as a Calculator,  Next: First Steps Towards Programming,  Prev: An Informal Introduction to Python,  Up: An Informal Introduction to Python
+
+Using Python as a Calculator
+============================
+
+Let's try some simple Python commands.  Start the interpreter and wait
+for the primary prompt, `>`>'>~'.  (It shouldn't take long.)
+
+* Menu:
+
+* Numbers::
+* Strings::
+* Unicode Strings::
+* Lists::
+
+
+File: python-tut.info,  Node: Numbers,  Next: Strings,  Prev: Using Python as a Calculator,  Up: Using Python as a Calculator
+
+Numbers
+-------
+
+The interpreter acts as a simple calculator: you can type an expression
+at it and it will write the value.  Expression syntax is
+straightforward: the operators `+', `-', `*' and `/' work just like in
+most other languages (for example, Pascal or C); parentheses can be
+used for grouping.  For example:
+
+     >>> 2+2
+     4
+     >>> # This is a comment
+     ... 2+2
+     4
+     >>> 2+2  # and a comment on the same line as code
+     4
+     >>> (50-5*6)/4
+     5
+     >>> # Integer division returns the floor:
+     ... 7/3
+     2
+     >>> 7/-3
+     -3
+
+Like in C, the equal sign (`=') is used to assign a value to a
+variable.  The value of an assignment is not written:
+
+     >>> width = 20
+     >>> height = 5*9
+     >>> width * height
+     900
+
+A value can be assigned to several variables simultaneously:
+
+     >>> x = y = z = 0  # Zero x, y and z
+     >>> x
+     0
+     >>> y
+     0
+     >>> z
+     0
+
+There is full support for floating point; operators with mixed type
+operands convert the integer operand to floating point:
+
+     >>> 3 * 3.75 / 1.5
+     7.5
+     >>> 7.0 / 2
+     3.5
+
+Complex numbers are also supported; imaginary numbers are written with
+a suffix of `j' or `J'.  Complex numbers with a nonzero real component
+are written as `(REAL+IMAGj)', or can be created with the
+`complex(REAL, IMAG)' function.
+
+     >>> 1j * 1J
+     (-1+0j)
+     >>> 1j * complex(0,1)
+     (-1+0j)
+     >>> 3+1j*3
+     (3+3j)
+     >>> (3+1j)*3
+     (9+3j)
+     >>> (1+2j)/(1+1j)
+     (1.5+0.5j)
+
+Complex numbers are always represented as two floating point numbers,
+the real and imaginary part.  To extract these parts from a complex
+number Z, use `Z.real' and `Z.imag'.
+
+     >>> a=1.5+0.5j
+     >>> a.real
+     1.5
+     >>> a.imag
+     0.5
+
+The conversion functions to floating point and integer (`float()',
+`int()' and `long()') don't work for complex numbers -- there is no one
+correct way to convert a complex number to a real number.  Use `abs(Z)'
+to get its magnitude (as a float) or `z.real' to get its real part.
+
+     >>> a=3.0+4.0j
+     >>> float(a)
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     TypeError: can't convert complex to float; use abs(z)
+     >>> a.real
+     3.0
+     >>> a.imag
+     4.0
+     >>> abs(a)  # sqrt(a.real**2 + a.imag**2)
+     5.0
+     >>>
+
+In interactive mode, the last printed expression is assigned to the
+variable `_'.  This means that when you are using Python as a desk
+calculator, it is somewhat easier to continue calculations, for example:
+
+     >>> tax = 12.5 / 100
+     >>> price = 100.50
+     >>> price * tax
+     12.5625
+     >>> price + _
+     113.0625
+     >>> round(_, 2)
+     113.06
+     >>>
+
+This variable should be treated as read-only by the user.  Don't
+explicitly assign a value to it -- you would create an independent
+local variable with the same name masking the built-in variable with
+its magic behavior.
+
+
+File: python-tut.info,  Node: Strings,  Next: Unicode Strings,  Prev: Numbers,  Up: Using Python as a Calculator
+
+Strings
+-------
+
+Besides numbers, Python can also manipulate strings, which can be
+expressed in several ways.  They can be enclosed in single quotes or
+double quotes:
+
+     >>> 'spam eggs'
+     'spam eggs'
+     >>> 'doesn\'t'
+     "doesn't"
+     >>> "doesn't"
+     "doesn't"
+     >>> '"Yes," he said.'
+     '"Yes," he said.'
+     >>> "\"Yes,\" he said."
+     '"Yes," he said.'
+     >>> '"Isn\'t," she said.'
+     '"Isn\'t," she said.'
+
+String literals can span multiple lines in several ways.  Continuation
+lines can be used, with a backslash as the last character on the line
+indicating that the next line is a logical continuation of the line:
+
+     hello = "This is a rather long string containing\n\
+     several lines of text just as you would do in C.\n\
+         Note that whitespace at the beginning of the line is\
+      significant."
+     
+     print hello
+
+Note that newlines would still need to be embedded in the string using
+`\n'; the newline following the trailing backslash is discarded.  This
+example would print the following:
+
+     This is a rather long string containing
+     several lines of text just as you would do in C.
+         Note that whitespace at the beginning of the line is significant.
+
+If we make the string literal a "raw" string, however, the `\n'
+sequences are not converted to newlines, but the backslash at the end
+of the line, and the newline character in the source, are both included
+in the string as data.  Thus, the example:
+
+     hello = r"This is a rather long string containing\n\
+     several lines of text much as you would do in C."
+     
+     print hello
+
+would print:
+
+     This is a rather long string containing\n\
+     several lines of text much as you would do in C.
+
+Or, strings can be surrounded in a pair of matching triple-quotes:
+`"""' or `'`''''.  End of lines do not need to be escaped when using
+triple-quotes, but they will be included in the string.
+
+     print """
+     Usage: thingy [OPTIONS]
+          -h                        Display this usage message
+          -H hostname               Hostname to connect to
+     """
+
+produces the following output:
+
+     Usage: thingy [OPTIONS]
+          -h                        Display this usage message
+          -H hostname               Hostname to connect to
+
+The interpreter prints the result of string operations in the same way
+as they are typed for input: inside quotes, and with quotes and other
+funny characters escaped by backslashes, to show the precise value.
+The string is enclosed in double quotes if the string contains a single
+quote and no double quotes, else it's enclosed in single quotes.  (The
+`print' statement, described later, can be used to write strings
+without quotes or escapes.)
+
+Strings can be concatenated (glued together) with the `+' operator, and
+repeated with `*':
+
+     >>> word = 'Help' + 'A'
+     >>> word
+     'HelpA'
+     >>> '<' + word*5 + '>'
+     '<HelpAHelpAHelpAHelpAHelpA>'
+
+Two string literals next to each other are automatically concatenated;
+the first line above could also have been written `word = 'Help' 'A'';
+this only works with two literals, not with arbitrary string
+expressions:
+
+     >>> import string
+     >>> 'str' 'ing'                   #  <-  This is ok
+     'string'
+     >>> string.strip('str') + 'ing'   #  <-  This is ok
+     'string'
+     >>> string.strip('str') 'ing'     #  <-  This is invalid
+       File "<stdin>", line 1, in ?
+         string.strip('str') 'ing'
+                                 ^
+     SyntaxError: invalid syntax
+
+Strings can be subscripted (indexed); like in C, the first character of
+a string has subscript (index) 0.  There is no separate character type;
+a character is simply a string of size one.  Like in Icon, substrings
+can be specified with the _slice notation_: two indices separated by a
+colon.
+
+     >>> word[4]
+     'A'
+     >>> word[0:2]
+     'He'
+     >>> word[2:4]
+     'lp'
+
+Slice indices have useful defaults; an omitted first index defaults to
+zero, an omitted second index defaults to the size of the string being
+sliced.
+
+     >>> word[:2]    # The first two characters
+     'He'
+     >>> word[2:]    # All but the first two characters
+     'lpA'
+
+Unlike a C string, Python strings cannot be changed.  Assigning to an
+indexed position in the string results in an error:
+
+     >>> word[0] = 'x'
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     TypeError: object doesn't support item assignment
+     >>> word[:1] = 'Splat'
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     TypeError: object doesn't support slice assignment
+
+However, creating a new string with the combined content is easy and
+efficient:
+
+     >>> 'x' + word[1:]
+     'xelpA'
+     >>> 'Splat' + word[4]
+     'SplatA'
+
+Here's a useful invariant of slice operations: `s[:i] + s[i:]' equals
+`s'.
+
+     >>> word[:2] + word[2:]
+     'HelpA'
+     >>> word[:3] + word[3:]
+     'HelpA'
+
+Degenerate slice indices are handled gracefully: an index that is too
+large is replaced by the string size, an upper bound smaller than the
+lower bound returns an empty string.
+
+     >>> word[1:100]
+     'elpA'
+     >>> word[10:]
+     ''
+     >>> word[2:1]
+     ''
+
+Indices may be negative numbers, to start counting from the right.  For
+example:
+
+     >>> word[-1]     # The last character
+     'A'
+     >>> word[-2]     # The last-but-one character
+     'p'
+     >>> word[-2:]    # The last two characters
+     'pA'
+     >>> word[:-2]    # All but the last two characters
+     'Hel'
+
+But note that -0 is really the same as 0, so it does not count from the
+right!
+
+     >>> word[-0]     # (since -0 equals 0)
+     'H'
+
+Out-of-range negative slice indices are truncated, but don't try this
+for single-element (non-slice) indices:
+
+     >>> word[-100:]
+     'HelpA'
+     >>> word[-10]    # error
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     IndexError: string index out of range
+
+The best way to remember how slices work is to think of the indices as
+pointing _between_ characters, with the left edge of the first
+character numbered 0.  Then the right edge of the last character of a
+string of N characters has index N, for example:
+
+      +---+---+---+---+---+
+      | H | e | l | p | A |
+      +---+---+---+---+---+
+      0   1   2   3   4   5
+     -5  -4  -3  -2  -1
+
+The first row of numbers gives the position of the indices 0...5 in the
+string; the second row gives the corresponding negative indices.  The
+slice from I to J consists of all characters between the edges labeled
+I and J, respectively.
+
+For non-negative indices, the length of a slice is the difference of
+the indices, if both are within bounds.  For example, the length of
+`word[1:3]' is 2.
+
+The built-in function `len()' returns the length of a string:
+
+     >>> s = 'supercalifragilisticexpialidocious'
+     >>> len(s)
+     34
+
+
+File: python-tut.info,  Node: Unicode Strings,  Next: Lists,  Prev: Strings,  Up: Using Python as a Calculator
+
+Unicode Strings
+---------------
+
+Starting with Python 2.0 a new data type for storing text data is
+available to the programmer: the Unicode object. It can be used to
+store and manipulate Unicode data (see <http://www.unicode.org/>) and
+integrates well with the existing string objects providing
+auto-conversions where necessary.
+
+Unicode has the advantage of providing one ordinal for every character
+in every script used in modern and ancient texts. Previously, there
+were only 256 possible ordinals for script characters and texts were
+typically bound to a code page which mapped the ordinals to script
+characters. This lead to very much confusion especially with respect to
+internationalization (usually written as `i18n' -- `i' + 18 characters
++ `n') of software.  Unicode solves these problems by defining one code
+page for all scripts.
+
+Creating Unicode strings in Python is just as simple as creating normal
+strings:
+
+     >>> u'Hello World !'
+     u'Hello World !'
+
+The small `u' in front of the quote indicates that an Unicode string is
+supposed to be created. If you want to include special characters in
+the string, you can do so by using the Python _Unicode-Escape_
+encoding. The following example shows how:
+
+     >>> u'Hello\u0020World !'
+     u'Hello World !'
+
+The escape sequence `\u0020' indicates to insert the Unicode character
+with the ordinal value 0x0020 (the space character) at the given
+position.
+
+Other characters are interpreted by using their respective ordinal
+values directly as Unicode ordinals.  If you have literal strings in
+the standard Latin-1 encoding that is used in many Western countries,
+you will find it convenient that the lower 256 characters of Unicode
+are the same as the 256 characters of Latin-1.
+
+For experts, there is also a raw mode just like the one for normal
+strings. You have to prefix the opening quote with 'ur' to have Python
+use the _Raw-Unicode-Escape_ encoding. It will only apply the above
+`\uXXXX' conversion if there is an uneven number of backslashes in
+front of the small 'u'.
+
+     >>> ur'Hello\u0020World !'
+     u'Hello World !'
+     >>> ur'Hello\\u0020World !'
+     u'Hello\\\\u0020World !'
+
+The raw mode is most useful when you have to enter lots of backslashes,
+as can be necessary in regular expressions.
+
+Apart from these standard encodings, Python provides a whole set of
+other ways of creating Unicode strings on the basis of a known encoding.
+
+The built-in function `unicode()'  provides access to all registered
+Unicode codecs (COders and DECoders). Some of the more well known
+encodings which these codecs can convert are _Latin-1_, _ASCII_,
+_UTF-8_, and _UTF-16_.  The latter two are variable-length encodings
+that store each Unicode character in one or more bytes. The default
+encoding is normally set to ASCII, which passes through characters in
+the range 0 to 127 and rejects any other characters with an error.
+When a Unicode string is printed, written to a file, or converted with
+`str()', conversion takes place using this default encoding.
+
+     >>> u"abc"
+     u'abc'
+     >>> str(u"abc")
+     'abc'
+     >>> u"הצü"
+     u'\xe4\xf6\xfc'
+     >>> str(u"הצü")
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     UnicodeEncodeError: 'ascii' codec can't encode characters in position 0-2: ordinal not in range(128)
+
+To convert a Unicode string into an 8-bit string using a specific
+encoding, Unicode objects provide an `encode()' method that takes one
+argument, the name of the encoding.  Lowercase names for encodings are
+preferred.
+
+     >>> u"הצü".encode('utf-8')
+     '\xc3\xa4\xc3\xb6\xc3\xbc'
+
+If you have data in a specific encoding and want to produce a
+corresponding Unicode string from it, you can use the `unicode()'
+function with the encoding name as the second argument.
+
+     >>> unicode('\xc3\xa4\xc3\xb6\xc3\xbc', 'utf-8')
+     u'\xe4\xf6\xfc'
+
+
+File: python-tut.info,  Node: Lists,  Prev: Unicode Strings,  Up: Using Python as a Calculator
+
+Lists
+-----
+
+Python knows a number of _compound_ data types, used to group together
+other values.  The most versatile is the _list_, which can be written
+as a list of comma-separated values (items) between square brackets.
+List items need not all have the same type.
+
+     >>> a = ['spam', 'eggs', 100, 1234]
+     >>> a
+     ['spam', 'eggs', 100, 1234]
+
+Like string indices, list indices start at 0, and lists can be sliced,
+concatenated and so on:
+
+     >>> a[0]
+     'spam'
+     >>> a[3]
+     1234
+     >>> a[-2]
+     100
+     >>> a[1:-1]
+     ['eggs', 100]
+     >>> a[:2] + ['bacon', 2*2]
+     ['spam', 'eggs', 'bacon', 4]
+     >>> 3*a[:3] + ['Boe!']
+     ['spam', 'eggs', 100, 'spam', 'eggs', 100, 'spam', 'eggs', 100, 'Boe!']
+
+Unlike strings, which are _immutable_, it is possible to change
+individual elements of a list:
+
+     >>> a
+     ['spam', 'eggs', 100, 1234]
+     >>> a[2] = a[2] + 23
+     >>> a
+     ['spam', 'eggs', 123, 1234]
+
+Assignment to slices is also possible, and this can even change the size
+of the list:
+
+     >>> # Replace some items:
+     ... a[0:2] = [1, 12]
+     >>> a
+     [1, 12, 123, 1234]
+     >>> # Remove some:
+     ... a[0:2] = []
+     >>> a
+     [123, 1234]
+     >>> # Insert some:
+     ... a[1:1] = ['bletch', 'xyzzy']
+     >>> a
+     [123, 'bletch', 'xyzzy', 1234]
+     >>> a[:0] = a     # Insert (a copy of) itself at the beginning
+     >>> a
+     [123, 'bletch', 'xyzzy', 1234, 123, 'bletch', 'xyzzy', 1234]
+
+The built-in function `len()' also applies to lists:
+
+     >>> len(a)
+     8
+
+It is possible to nest lists (create lists containing other lists), for
+example:
+
+     >>> q = [2, 3]
+     >>> p = [1, q, 4]
+     >>> len(p)
+     3
+     >>> p[1]
+     [2, 3]
+     >>> p[1][0]
+     2
+     >>> p[1].append('xtra')     # See section 5.1
+     >>> p
+     [1, [2, 3, 'xtra'], 4]
+     >>> q
+     [2, 3, 'xtra']
+
+Note that in the last example, `p[1]' and `q' really refer to the same
+object!  We'll come back to _object semantics_ later.
+
+
+File: python-tut.info,  Node: First Steps Towards Programming,  Prev: Using Python as a Calculator,  Up: An Informal Introduction to Python
+
+First Steps Towards Programming
+===============================
+
+Of course, we can use Python for more complicated tasks than adding two
+and two together.  For instance, we can write an initial sub-sequence
+of the _Fibonacci_ series as follows:
+
+     >>> # Fibonacci series:
+     ... # the sum of two elements defines the next
+     ... a, b = 0, 1
+     >>> while b < 10:
+     ...       print b
+     ...       a, b = b, a+b
+     ...
+     1
+     1
+     2
+     3
+     5
+     8
+
+This example introduces several new features.
+
+   * The first line contains a _multiple assignment_: the variables `a'
+     and `b' simultaneously get the new values 0 and 1.  On the last
+     line this is used again, demonstrating that the expressions on the
+     right-hand side are all evaluated first before any of the
+     assignments take place.  The right-hand side expressions are
+     evaluated from the left to the right.
+
+   * The `while' loop executes as long as the condition (here: `b <
+     10') remains true.  In Python, like in C, any non-zero integer
+     value is true; zero is false.  The condition may also be a string
+     or list value, in fact any sequence; anything with a non-zero
+     length is true, empty sequences are false.  The test used in the
+     example is a simple comparison.  The standard comparison operators
+     are written the same as in C: `<' (less than), `>' (greater than),
+     `==' (equal to), `<=' (less than or equal to), `>=' (greater than
+     or equal to) and `!=' (not equal to).
+
+   * The _body_ of the loop is _indented_: indentation is Python's way
+     of grouping statements.  Python does not (yet!) provide an
+     intelligent input line editing facility, so you have to type a tab
+     or space(s) for each indented line.  In practice you will prepare
+     more complicated input for Python with a text editor; most text
+     editors have an auto-indent facility.  When a compound statement
+     is entered interactively, it must be followed by a blank line to
+     indicate completion (since the parser cannot guess when you have
+     typed the last line).  Note that each line within a basic block
+     must be indented by the same amount.
+
+   * The `print' statement writes the value of the expression(s) it is
+     given.  It differs from just writing the expression you want to
+     write (as we did earlier in the calculator examples) in the way it
+     handles multiple expressions and strings.  Strings are printed
+     without quotes, and a space is inserted between items, so you can
+     format things nicely, like this:
+
+          >>> i = 256*256
+          >>> print 'The value of i is', i
+          The value of i is 65536
+
+     A trailing comma avoids the newline after the output:
+
+          >>> a, b = 0, 1
+          >>> while b < 1000:
+          ...     print b,
+          ...     a, b = b, a+b
+          ...
+          1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987
+
+     Note that the interpreter inserts a newline before it prints the
+     next prompt if the last line was not completed.
+
+
+
+File: python-tut.info,  Node: More Control Flow Tools,  Next: Data Structures,  Prev: An Informal Introduction to Python,  Up: Top
+
+More Control Flow Tools
+***********************
+
+Besides the `while' statement just introduced, Python knows the usual
+control flow statements known from other languages, with some twists.
+
+* Menu:
+
+* if Statements::
+* for Statements::
+* range Function::
+* break and continue Statements::
+* pass Statements::
+* Defining Functions::
+* More on Defining Functions::
+
+
+File: python-tut.info,  Node: if Statements,  Next: for Statements,  Prev: More Control Flow Tools,  Up: More Control Flow Tools
+
+`if' Statements
+===============
+
+Perhaps the most well-known statement type is the `if' statement.  For
+example:
+
+     >>> x = int(raw_input("Please enter an integer: "))
+     >>> if x < 0:
+     ...      x = 0
+     ...      print 'Negative changed to zero'
+     ... elif x == 0:
+     ...      print 'Zero'
+     ... elif x == 1:
+     ...      print 'Single'
+     ... else:
+     ...      print 'More'
+     ...
+
+There can be zero or more `elif' parts, and the `else' part is
+optional.  The keyword ``elif'' is short for `else if', and is useful
+to avoid excessive indentation.  An `if' ... `elif' ... `elif' ...
+sequence is a substitute for the `switch' or `case' statements found in
+other languages.
+
+
+File: python-tut.info,  Node: for Statements,  Next: range Function,  Prev: if Statements,  Up: More Control Flow Tools
+
+`for' Statements
+================
+
+The `for'  statement in Python differs a bit from what you may be used
+to in C or Pascal.  Rather than always iterating over an arithmetic
+progression of numbers (like in Pascal), or giving the user the ability
+to define both the iteration step and halting condition (as C), Python's
+`for'  statement iterates over the items of any sequence (a list or a
+string), in the order that they appear in the sequence.  For example
+(no pun intended):
+
+     >>> # Measure some strings:
+     ... a = ['cat', 'window', 'defenestrate']
+     >>> for x in a:
+     ...     print x, len(x)
+     ...
+     cat 3
+     window 6
+     defenestrate 12
+
+It is not safe to modify the sequence being iterated over in the loop
+(this can only happen for mutable sequence types, such as lists).  If
+you need to modify the list you are iterating over (for example, to
+duplicate selected items) you must iterate over a copy.  The slice
+notation makes this particularly convenient:
+
+     >>> for x in a[:]: # make a slice copy of the entire list
+     ...    if len(x) > 6: a.insert(0, x)
+     ...
+     >>> a
+     ['defenestrate', 'cat', 'window', 'defenestrate']
+
+
+File: python-tut.info,  Node: range Function,  Next: break and continue Statements,  Prev: for Statements,  Up: More Control Flow Tools
+
+The `range()' Function
+======================
+
+If you do need to iterate over a sequence of numbers, the built-in
+function `range()' comes in handy.  It generates lists containing
+arithmetic progressions:
+
+     >>> range(10)
+     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+The given end point is never part of the generated list; `range(10)'
+generates a list of 10 values, exactly the legal indices for items of a
+sequence of length 10.  It is possible to let the range start at
+another number, or to specify a different increment (even negative;
+sometimes this is called the `step'):
+
+     >>> range(5, 10)
+     [5, 6, 7, 8, 9]
+     >>> range(0, 10, 3)
+     [0, 3, 6, 9]
+     >>> range(-10, -100, -30)
+     [-10, -40, -70]
+
+To iterate over the indices of a sequence, combine `range()' and
+`len()' as follows:
+
+     >>> a = ['Mary', 'had', 'a', 'little', 'lamb']
+     >>> for i in range(len(a)):
+     ...     print i, a[i]
+     ...
+     0 Mary
+     1 had
+     2 a
+     3 little
+     4 lamb
+
+
+File: python-tut.info,  Node: break and continue Statements,  Next: pass Statements,  Prev: range Function,  Up: More Control Flow Tools
+
+`break' and `continue' Statements, and `else' Clauses on Loops
+==============================================================
+
+The `break' statement, like in C, breaks out of the smallest enclosing
+`for' or `while' loop.
+
+The `continue' statement, also borrowed from C, continues with the next
+iteration of the loop.
+
+Loop statements may have an `else' clause; it is executed when the loop
+terminates through exhaustion of the list (with `for') or when the
+condition becomes false (with `while'), but not when the loop is
+terminated by a `break' statement.  This is exemplified by the
+following loop, which searches for prime numbers:
+
+     >>> for n in range(2, 10):
+     ...     for x in range(2, n):
+     ...         if n % x == 0:
+     ...             print n, 'equals', x, '*', n/x
+     ...             break
+     ...     else:
+     ...         # loop fell through without finding a factor
+     ...         print n, 'is a prime number'
+     ...
+     2 is a prime number
+     3 is a prime number
+     4 equals 2 * 2
+     5 is a prime number
+     6 equals 2 * 3
+     7 is a prime number
+     8 equals 2 * 4
+     9 equals 3 * 3
+
+
+File: python-tut.info,  Node: pass Statements,  Next: Defining Functions,  Prev: break and continue Statements,  Up: More Control Flow Tools
+
+`pass' Statements
+=================
+
+The `pass' statement does nothing.  It can be used when a statement is
+required syntactically but the program requires no action.  For example:
+
+     >>> while True:
+     ...       pass # Busy-wait for keyboard interrupt
+     ...
+
+
+File: python-tut.info,  Node: Defining Functions,  Next: More on Defining Functions,  Prev: pass Statements,  Up: More Control Flow Tools
+
+Defining Functions
+==================
+
+We can create a function that writes the Fibonacci series to an
+arbitrary boundary:
+
+     >>> def fib(n):    # write Fibonacci series up to n
+     ...     """Print a Fibonacci series up to n."""
+     ...     a, b = 0, 1
+     ...     while b < n:
+     ...         print b,
+     ...         a, b = b, a+b
+     ...
+     >>> # Now call the function we just defined:
+     ... fib(2000)
+     1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 1597
+
+The keyword `def' introduces a function _definition_.  It must be
+followed by the function name and the parenthesized list of formal
+parameters.  The statements that form the body of the function start at
+the next line, and must be indented.  The first statement of the
+function body can optionally be a string literal; this string literal
+is the function's documentation string, or "docstring".
+
+There are tools which use docstrings to automatically produce online or
+printed documentation, or to let the user interactively browse through
+code; it's good practice to include docstrings in code that you write,
+so try to make a habit of it.
+
+The _execution_ of a function introduces a new symbol table used for
+the local variables of the function.  More precisely, all variable
+assignments in a function store the value in the local symbol table;
+whereas variable references first look in the local symbol table, then
+in the global symbol table, and then in the table of built-in names.
+Thus,  global variables cannot be directly assigned a value within a
+function (unless named in a `global' statement), although they may be
+referenced.
+
+The actual parameters (arguments) to a function call are introduced in
+the local symbol table of the called function when it is called; thus,
+arguments are passed using _call by value_ (where the _value_ is always
+an object _reference_, not the value of the object).(1) When a function
+calls another function, a new local symbol table is created for that
+call.
+
+A function definition introduces the function name in the current
+symbol table.  The value of the function name has a type that is
+recognized by the interpreter as a user-defined function.  This value
+can be assigned to another name which can then also be used as a
+function.  This serves as a general renaming mechanism:
+
+     >>> fib
+     <function object at 10042ed0>
+     >>> f = fib
+     >>> f(100)
+     1 1 2 3 5 8 13 21 34 55 89
+
+You might object that `fib' is not a function but a procedure.  In
+Python, like in C, procedures are just functions that don't return a
+value.  In fact, technically speaking, procedures do return a value,
+albeit a rather boring one.  This value is called `None' (it's a
+built-in name).  Writing the value `None' is normally suppressed by the
+interpreter if it would be the only value written.  You can see it if
+you really want to:
+
+     >>> print fib(0)
+     None
+
+It is simple to write a function that returns a list of the numbers of
+the Fibonacci series, instead of printing it:
+
+     >>> def fib2(n): # return Fibonacci series up to n
+     ...     """Return a list containing the Fibonacci series up to n."""
+     ...     result = []
+     ...     a, b = 0, 1
+     ...     while b < n:
+     ...         result.append(b)    # see below
+     ...         a, b = b, a+b
+     ...     return result
+     ...
+     >>> f100 = fib2(100)    # call it
+     >>> f100                # write the result
+     [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
+
+This example, as usual, demonstrates some new Python features:
+
+   * The `return' statement returns with a value from a function.
+     `return' without an expression argument returns `None'.  Falling
+     off the end of a procedure also returns `None'.
+
+   * The statement `result.append(b)' calls a _method_ of the list
+     object `result'.  A method is a function that `belongs' to an
+     object and is named `obj.methodname', where `obj' is some object
+     (this may be an expression), and `methodname' is the name of a
+     method that is defined by the object's type.  Different types
+     define different methods.  Methods of different types may have the
+     same name without causing ambiguity.  (It is possible to define
+     your own object types and methods, using _classes_, as discussed
+     later in this tutorial.)  The method `append()' shown in the
+     example, is defined for list objects; it adds a new element at the
+     end of the list.  In this example it is equivalent to `result =
+     result + [b]', but more efficient.
+
+
+---------- Footnotes ----------
+
+(1)  Actually, _call by object reference_ would be a better
+description, since if a mutable object is passed, the caller will see
+any changes the callee makes to it (items inserted into a list).
+
+
+File: python-tut.info,  Node: More on Defining Functions,  Prev: Defining Functions,  Up: More Control Flow Tools
+
+More on Defining Functions
+==========================
+
+It is also possible to define functions with a variable number of
+arguments.  There are three forms, which can be combined.
+
+* Menu:
+
+* Default Argument Values::
+* Keyword Arguments::
+* Arbitrary Argument Lists::
+* Unpacking Argument Lists::
+* Lambda Forms::
+* Documentation Strings::
+

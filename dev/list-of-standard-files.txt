@@ -1,0 +1,6 @@
+c:/home/dev/eclipse
+c:/home/tmp
+
+---
+/Users/bongu/Dropbox/
+/Users/bongu/tmp

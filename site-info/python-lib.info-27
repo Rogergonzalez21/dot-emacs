@@ -1,0 +1,1209 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: fcntl,  Next: pipes,  Prev: pty,  Up: Unix Specific Services
+
+The `fcntl()' and `ioctl()' system calls
+========================================
+
+The `fcntl()' and `ioctl()' system calls.
+
+This module performs file control and I/O control on file descriptors.
+It is an interface to the `fcntl()' and `ioctl()' UNIX routines.
+
+All functions in this module take a file descriptor FD as their first
+argument.  This can be an integer file descriptor, such as returned by
+`sys.stdin.fileno()', or a file object, such as `sys.stdin' itself,
+which provides a `fileno()' which returns a genuine file descriptor.
+
+The module defines the following functions:
+
+`fcntl(fd, op[, arg])'
+     Perform the requested operation on file descriptor FD (file
+     objects providing a `fileno()' method are accepted as well).  The
+     operation is defined by OP and is operating system dependent.
+     These codes are also found in the `fcntl' module. The argument ARG
+     is optional, and defaults to the integer value `0'.  When present,
+     it can either be an integer value, or a string.  With the argument
+     missing or an integer value, the return value of this function is
+     the integer return value of the C `fcntl()' call.  When the
+     argument is a string it represents a binary structure, e.g.
+     created by `struct.pack()'. The binary data is copied to a buffer
+     whose address is passed to the C `fcntl()' call.  The return value
+     after a successful call is the contents of the buffer, converted
+     to a string object.  The length of the returned string will be the
+     same as the length of the ARG argument.  This is limited to 1024
+     bytes.  If the information returned in the buffer by the operating
+     system is larger than 1024 bytes, this is most likely to result in
+     a segmentation violation or a more subtle data corruption.
+
+     If the `fcntl()' fails, an `IOError' is raised.
+
+`ioctl(fd, op[, arg[, mutate_flag]])'
+     This function is identical to the `fcntl()' function, except that
+     the operations are typically defined in the library module
+     `termios' and the argument handling is even more complicated.
+
+     The parameter ARG can be one of an integer, absent (treated
+     identically to the integer `0'), an object supporting the
+     read-only buffer interface (most likely a plain Python string) or
+     an object supporting the read-write buffer interface.
+
+     In all but the last case, behaviour is as for the `fcntl()'
+     function.
+
+     If a mutable buffer is passed, then the behaviour is determined by
+     the value of the MUTATE_FLAG parameter.
+
+     If it is false, the buffer's mutability is ignored and behaviour is
+     as for a read-only buffer, except that the 1024 byte limit
+     mentioned above is avoided - so long as the buffer you pass is
+     longer than what the operating system wants to put there, things
+     should work.
+
+     If MUTATE_FLAG is true, then the buffer is (in effect) passed to
+     the underlying `ioctl()' system call, the latter's return code is
+     passed back to the calling Python, and the buffer's new contents
+     reflect the action of the `ioctl'.  This is a slight
+     simplification, because if the supplied buffer is less than 1024
+     bytes long it is first copied into a static buffer 1024 bytes long
+     which is then passed to `ioctl' and copied back into the supplied
+     buffer.
+
+     If MUTATE_FLAG is not supplied, then in 2.3 it defaults to false.
+     This is planned to change over the next few Python versions: in
+     2.4 failing to supply MUTATE_FLAG will get a warning but the same
+     behavior and in versions later than 2.5 it will default to true.
+
+     An example:
+
+          >>> import array, fnctl, struct, termios, os
+          >>> os.getpgrp()
+          13341
+          >>> struct.unpack('h', fcntl.ioctl(0, termios.TIOCGPGRP, "  "))[0]
+          13341
+          >>> buf = array.array('h', [0])
+          >>> fcntl.ioctl(0, termios.TIOCGPGRP, buf, 1)
+          0
+          >>> buf
+          array('h', [13341])
+
+`flock(fd, op)'
+     Perform the lock operation OP on file descriptor FD (file objects
+     providing a `fileno()' method are accepted as well).  See the UNIX
+     manual `flock(3)' for details.  (On some systems, this function is
+     emulated using `fcntl()'.)
+
+`lockf(fd, operation, [len, [start, [whence]]])'
+     This is essentially a wrapper around the `fcntl()' locking calls.
+     FD is the file descriptor of the file to lock or unlock, and
+     OPERATION is one of the following values:
+
+        * `LOCK_UN' - unlock
+
+        * `LOCK_SH' - acquire a shared lock
+
+        * `LOCK_EX' - acquire an exclusive lock
+
+     When OPERATION is `LOCK_SH' or `LOCK_EX', it can also be bit-wise
+     OR'd with `LOCK_NB' to avoid blocking on lock acquisition.  If
+     `LOCK_NB' is used and the lock cannot be acquired, an `IOError'
+     will be raised and the exception will have an ERRNO attribute set
+     to `EACCES' or `EAGAIN' (depending on the operating system; for
+     portability, check for both values).  On at least some systems,
+     `LOCK_EX' can only be used if the file descriptor refers to a file
+     opened for writing.
+
+     LENGTH is the number of bytes to lock, START is the byte offset at
+     which the lock starts, relative to WHENCE, and WHENCE is as with
+     `fileobj.seek()', specifically:
+
+        * `0' - relative to the start of the file (`SEEK_SET')
+
+        * `1' - relative to the current buffer position (`SEEK_CUR')
+
+        * `2' - relative to the end of the file (`SEEK_END')
+
+     The default for START is 0, which means to start at the beginning
+     of the file.  The default for LENGTH is 0 which means to lock to
+     the end of the file.  The default for WHENCE is also 0.
+
+Examples (all on a SVR4 compliant system):
+
+     import struct, fcntl
+     
+     file = open(...)
+     rv = fcntl(file, fcntl.F_SETFL, os.O_NDELAY)
+     
+     lockdata = struct.pack('hhllhh', fcntl.F_WRLCK, 0, 0, 0, 0, 0)
+     rv = fcntl.fcntl(file, fcntl.F_SETLKW, lockdata)
+
+Note that in the first example the return value variable RV will hold
+an integer value; in the second example it will hold a string value.
+The structure lay-out for the LOCKDATA variable is system dependent --
+therefore using the `flock()' call may be better.
+
+See also:
+     *Note os:: The `os.open' function supports locking flags and is
+     available on a wider variety of platforms than  the `fcntl.lockf'
+     and `fcntl.flock' functions, providing a more platform-independent
+     file locking facility.
+
+
+File: python-lib.info,  Node: pipes,  Next: posixfile,  Prev: fcntl,  Up: Unix Specific Services
+
+Interface to shell pipelines
+============================
+
+A Python interface to UNIX shell pipelines.
+
+The `pipes' module defines a class to abstract the concept of a
+_pipeline_ -- a sequence of convertors from one file to another.
+
+Because the module uses `/bin/sh' command lines, a POSIX or compatible
+shell for `os.system()' and `os.popen()' is required.
+
+The `pipes' module defines the following class:
+
+`Template()'
+     An abstraction of a pipeline.
+
+Example:
+
+     >>> import pipes
+     >>> t=pipes.Template()
+     >>> t.append('tr a-z A-Z', '--')
+     >>> f=t.open('/tmp/1', 'w')
+     >>> f.write('hello world')
+     >>> f.close()
+     >>> open('/tmp/1').read()
+     'HELLO WORLD'
+
+* Menu:
+
+* Template Objects::
+
+
+File: python-lib.info,  Node: Template Objects,  Prev: pipes,  Up: pipes
+
+Template Objects
+----------------
+
+Template objects following methods:
+
+`reset()'
+     Restore a pipeline template to its initial state.
+
+`clone()'
+     Return a new, equivalent, pipeline template.
+
+`debug(flag)'
+     If FLAG is true, turn debugging on. Otherwise, turn debugging off.
+     When debugging is on, commands to be executed are printed, and the
+     shell is given `set -x' command to be more verbose.
+
+`append(cmd, kind)'
+     Append a new action at the end. The CMD variable must be a valid
+     bourne shell command. The KIND variable consists of two letters.
+
+     The first letter can be either of `'-'' (which means the command
+     reads its standard input), `'f'' (which means the commands reads a
+     given file on the command line) or `'.'' (which means the commands
+     reads no input, and hence must be first.)
+
+     Similarly, the second letter can be either of `'-'' (which means
+     the command writes to standard output), `'f'' (which means the
+     command writes a file on the command line) or `'.'' (which means
+     the command does not write anything, and hence must be last.)
+
+`prepend(cmd, kind)'
+     Add a new action at the beginning. See `append()' for explanations
+     of the arguments.
+
+`open(file, mode)'
+     Return a file-like object, open to FILE, but read from or written
+     to by the pipeline.  Note that only one of `'r'', `'w'' may be
+     given.
+
+`copy(infile, outfile)'
+     Copy INFILE to OUTFILE through the pipe.
+
+
+File: python-lib.info,  Node: posixfile,  Next: resource,  Prev: pipes,  Up: Unix Specific Services
+
+File-like objects with locking support
+======================================
+
+A file-like object with support for locking.
+
+_This is deprecated in Python 1.5.  The locking operation that this
+module provides is done better and more portably by the
+``fcntl'.lockf()' call.  _
+
+This module implements some additional functionality over the built-in
+file objects.  In particular, it implements file locking, control over
+the file flags, and an easy interface to duplicate the file object.
+The module defines a new file object, the posixfile object.  It has all
+the standard file object methods and adds the methods described below.
+This module only works for certain flavors of UNIX, since it uses
+`fcntl.fcntl()' for file locking.
+
+To instantiate a posixfile object, use the `open()' function in the
+`posixfile' module.  The resulting object looks and feels roughly the
+same as a standard file object.
+
+The `posixfile' module defines the following constants:
+
+`SEEK_SET'
+     Offset is calculated from the start of the file.
+
+`SEEK_CUR'
+     Offset is calculated from the current position in the file.
+
+`SEEK_END'
+     Offset is calculated from the end of the file.
+
+The `posixfile' module defines the following functions:
+
+`open(filename[, mode[, bufsize]])'
+     Create a new posixfile object with the given filename and mode.
+     The FILENAME, MODE and BUFSIZE arguments are interpreted the same
+     way as by the built-in `open()' function.
+
+`fileopen(fileobject)'
+     Create a new posixfile object with the given standard file object.
+     The resulting object has the same filename and mode as the original
+     file object.
+
+The posixfile object defines the following additional methods:
+
+`lock(fmt, [len[, start[, whence]]])'
+     Lock the specified section of the file that the file object is
+     referring to.  The format is explained below in a table.  The LEN
+     argument specifies the length of the section that should be
+     locked. The default is `0'. START specifies the starting offset of
+     the section, where the default is `0'.  The WHENCE argument
+     specifies where the offset is relative to. It accepts one of the
+     constants `SEEK_SET', `SEEK_CUR' or `SEEK_END'.  The default is
+     `SEEK_SET'.  For more information about the arguments refer to the
+     `fcntl(2)' manual page on your system.
+
+`flags([flags])'
+     Set the specified flags for the file that the file object is
+     referring to.  The new flags are ORed with the old flags, unless
+     specified otherwise.  The format is explained below in a table.
+     Without the FLAGS argument a string indicating the current flags
+     is returned (this is the same as the `?' modifier).  For more
+     information about the flags refer to the `fcntl(2)' manual page on
+     your system.
+
+`dup()'
+     Duplicate the file object and the underlying file pointer and file
+     descriptor.  The resulting object behaves as if it were newly
+     opened.
+
+`dup2(fd)'
+     Duplicate the file object and the underlying file pointer and file
+     descriptor.  The new object will have the given file descriptor.
+     Otherwise the resulting object behaves as if it were newly opened.
+
+`file()'
+     Return the standard file object that the posixfile object is based
+     on.  This is sometimes necessary for functions that insist on a
+     standard file object.
+
+All methods raise `IOError' when the request fails.
+
+Format characters for the `lock()' method have the following meaning:
+
+Format                               Meaning
+------                               -----
+u                                    unlock the specified region
+r                                    request a read lock for the
+                                     specified section
+w                                    request a write lock for the
+                                     specified section
+
+In addition the following modifiers can be added to the format:
+
+Modifier                 Meaning                  Notes
+------                   -----                    -----
+|                        wait until the lock has  
+                         been granted             
+?                        return the first lock    (1)
+                         conflicting with the     
+                         requested lock, or       
+                         `None' if there is no    
+                         conflict.                
+
+Note:
+
+`(1)'
+     The lock returned is in the format `(MODE, LEN, START, WHENCE,
+     PID)' where MODE is a character representing the type of lock ('r'
+     or 'w').  This modifier prevents a request from being granted; it
+     is for query purposes only.
+
+Format characters for the `flags()' method have the following meanings:
+
+Format                               Meaning
+------                               -----
+a                                    append only flag
+c                                    close on exec flag
+n                                    no delay flag (also called
+                                     non-blocking flag)
+s                                    synchronization flag
+
+In addition the following modifiers can be added to the format:
+
+Modifier                 Meaning                  Notes
+------                   -----                    -----
+!                        turn the specified       (1)
+                         flags 'off', instead of  
+                         the default 'on'         
+=                        replace the flags,       (1)
+                         instead of the default   
+                         'OR' operation           
+?                        return a string in       (2)
+                         which the characters     
+                         represent the flags      
+                         that are set.            
+
+Notes:
+
+`(1)'
+     The `!' and `=' modifiers are mutually exclusive.
+
+`(2)'
+     This string represents the flags after they may have been altered
+     by the same call.
+
+Examples:
+
+     import posixfile
+     
+     file = posixfile.open('/tmp/test', 'w')
+     file.lock('w|')
+     ...
+     file.lock('u')
+     file.close()
+
+
+File: python-lib.info,  Node: resource,  Next: nis,  Prev: posixfile,  Up: Unix Specific Services
+
+Resource usage information
+==========================
+
+An interface to provide resource usage information on the current
+process.
+
+This module provides basic mechanisms for measuring and controlling
+system resources utilized by a program.
+
+Symbolic constants are used to specify particular system resources and
+to request usage information about either the current process or its
+children.
+
+A single exception is defined for errors:
+
+`error'
+     The functions described below may raise this error if the
+     underlying system call failures unexpectedly.
+
+* Menu:
+
+* Resource Limits::
+* Resource Usage::
+
+
+File: python-lib.info,  Node: Resource Limits,  Next: Resource Usage,  Prev: resource,  Up: resource
+
+Resource Limits
+---------------
+
+Resources usage can be limited using the `setrlimit()' function
+described below. Each resource is controlled by a pair of limits: a
+soft limit and a hard limit. The soft limit is the current limit, and
+may be lowered or raised by a process over time. The soft limit can
+never exceed the hard limit. The hard limit can be lowered to any value
+greater than the soft limit, but not raised. (Only processes with the
+effective UID of the super-user can raise a hard limit.)
+
+The specific resources that can be limited are system dependent. They
+are described in the `getrlimit(2)' man page.  The resources listed
+below are supported when the underlying operating system supports them;
+resources which cannot be checked or controlled by the operating system
+are not defined in this module for those platforms.
+
+`getrlimit(resource)'
+     Returns a tuple `(SOFT, HARD)' with the current soft and hard
+     limits of RESOURCE. Raises `ValueError' if an invalid resource is
+     specified, or `error' if the underyling system call fails
+     unexpectedly.
+
+`setrlimit(resource, limits)'
+     Sets new limits of consumption of RESOURCE. The LIMITS argument
+     must be a tuple `(SOFT, HARD)' of two integers describing the new
+     limits. A value of `-1' can be used to specify the maximum
+     possible upper limit.
+
+     Raises `ValueError' if an invalid resource is specified, if the
+     new soft limit exceeds the hard limit, or if a process tries to
+     raise its hard limit (unless the process has an effective UID of
+     super-user).  Can also raise `error' if the underyling system call
+     fails.
+
+These symbols define resources whose consumption can be controlled
+using the `setrlimit()' and `getrlimit()' functions described below.
+The values of these symbols are exactly the constants used by C
+programs.
+
+The UNIX man page for `getrlimit(2)' lists the available resources.
+Note that not all systems use the same symbol or same value to denote
+the same resource.  This module does not attempt to mask platform
+differences -- symbols not defined for a platform will not be available
+from this module on that platform.
+
+`RLIMIT_CORE'
+     The maximum size (in bytes) of a core file that the current process
+     can create.  This may result in the creation of a partial core file
+     if a larger core would be required to contain the entire process
+     image.
+
+`RLIMIT_CPU'
+     The maximum amount of processor time (in seconds) that a process
+     can use. If this limit is exceeded, a `SIGXCPU' signal is sent to
+     the process. (See the `signal' module documentation for
+     information about how to catch this signal and do something useful,
+     e.g. flush open files to disk.)
+
+`RLIMIT_FSIZE'
+     The maximum size of a file which the process may create.  This only
+     affects the stack of the main thread in a multi-threaded process.
+
+`RLIMIT_DATA'
+     The maximum size (in bytes) of the process's heap.
+
+`RLIMIT_STACK'
+     The maximum size (in bytes) of the call stack for the current
+     process.
+
+`RLIMIT_RSS'
+     The maximum resident set size that should be made available to the
+     process.
+
+`RLIMIT_NPROC'
+     The maximum number of processes the current process may create.
+
+`RLIMIT_NOFILE'
+     The maximum number of open file descriptors for the current
+     process.
+
+`RLIMIT_OFILE'
+     The BSD name for `RLIMIT_NOFILE'.
+
+`RLIMIT_MEMLOCK'
+     The maximum address space which may be locked in memory.
+
+`RLIMIT_VMEM'
+     The largest area of mapped memory which the process may occupy.
+
+`RLIMIT_AS'
+     The maximum area (in bytes) of address space which may be taken by
+     the process.
+
+
+File: python-lib.info,  Node: Resource Usage,  Prev: Resource Limits,  Up: resource
+
+Resource Usage
+--------------
+
+These functions are used to retrieve resource usage information:
+
+`getrusage(who)'
+     This function returns an object that describes the resources
+     consumed by either the current process or its children, as
+     specified by the WHO parameter.  The WHO parameter should be
+     specified using one of the `RUSAGE_*' constants described below.
+
+     The fields of the return value each describe how a particular
+     system resource has been used, e.g. amount of time spent running
+     is user mode or number of times the process was swapped out of
+     main memory. Some values are dependent on the clock tick internal,
+     e.g. the amount of memory the process is using.
+
+     For backward compatibility, the return value is also accessible as
+     a tuple of 16 elements.
+
+     The fields `ru_utime' and `ru_stime' of the return value are
+     floating point values representing the amount of time spent
+     executing in user mode and the amount of time spent executing in
+     system mode, respectively. The remaining values are integers.
+     Consult the `getrusage(2)' man page for detailed information about
+     these values. A brief summary is presented here:
+
+     Index                  Field                  Resource
+     ------                 -----                  -----
+     0                      `ru_utime'             time in user mode
+                                                   (float)
+     1                      `ru_stime'             time in system mode
+                                                   (float)
+     2                      `ru_maxrss'            maximum resident set
+                                                   size
+     3                      `ru_ixrss'             shared memory size
+     4                      `ru_idrss'             unshared memory size
+     5                      `ru_isrss'             unshared stack size
+     6                      `ru_minflt'            page faults not
+                                                   requiring I/O
+     7                      `ru_majflt'            page faults requiring
+                                                   I/O
+     8                      `ru_nswap'             number of swap outs
+     9                      `ru_inblock'           block input operations
+     10                     `ru_oublock'           block output
+                                                   operations
+     11                     `ru_msgsnd'            messages sent
+     12                     `ru_msgrcv'            messages received
+     13                     `ru_nsignals'          signals received
+     14                     `ru_nvcsw'             voluntary context
+                                                   switches
+     15                     `ru_nivcsw'            involuntary context
+                                                   switches
+
+     This function will raise a `ValueError' if an invalid WHO
+     parameter is specified. It may also raise `error' exception in
+     unusual circumstances.
+
+     _Changed in Python version 2.3_
+
+`getpagesize()'
+     Returns the number of bytes in a system page. (This need not be the
+     same as the hardware page size.) This function is useful for
+     determining the number of bytes of memory a process is using. The
+     third element of the tuple returned by `getrusage()' describes
+     memory usage in pages; multiplying by page size produces number of
+     bytes.
+
+The following `RUSAGE_*' symbols are passed to the `getrusage()'
+function to specify which processes information should be provided for.
+
+`RUSAGE_SELF'
+     `RUSAGE_SELF' should be used to request information pertaining
+     only to the process itself.
+
+`RUSAGE_CHILDREN'
+     Pass to `getrusage()' to request resource information for child
+     processes of the calling process.
+
+`RUSAGE_BOTH'
+     Pass to `getrusage()' to request resources consumed by both the
+     current process and child processes.  May not be available on all
+     systems.
+
+
+File: python-lib.info,  Node: nis,  Next: syslog,  Prev: resource,  Up: Unix Specific Services
+
+Interface to Sun's NIS (Yellow Pages)
+=====================================
+
+Interface to Sun's NIS (Yellow Pages) library.
+
+The `nis' module gives a thin wrapper around the NIS library, useful
+for central administration of several hosts.
+
+Because NIS exists only on UNIX systems, this module is only available
+for UNIX.
+
+The `nis' module defines the following functions:
+
+`match(key, mapname)'
+     Return the match for KEY in map MAPNAME, or raise an error
+     (`nis.error') if there is none.  Both should be strings, KEY is
+     8-bit clean.  Return value is an arbitrary array of bytes (may
+     contain `NULL' and other joys).
+
+     Note that MAPNAME is first checked if it is an alias to another
+     name.
+
+`cat(mapname)'
+     Return a dictionary mapping KEY to VALUE such that `match(KEY,
+     MAPNAME)==VALUE'.  Note that both keys and values of the
+     dictionary are arbitrary arrays of bytes.
+
+     Note that MAPNAME is first checked if it is an alias to another
+     name.
+
+`maps()'
+     Return a list of all valid maps.
+
+The `nis' module defines the following exception:
+
+`error'
+     An error raised when a NIS function returns an error code.
+
+
+File: python-lib.info,  Node: syslog,  Next: commands,  Prev: nis,  Up: Unix Specific Services
+
+UNIX syslog library routines
+============================
+
+An interface to the UNIX syslog library routines.
+
+This module provides an interface to the UNIX `syslog' library
+routines.  Refer to the UNIX manual pages for a detailed description of
+the `syslog' facility.
+
+The module defines the following functions:
+
+`syslog([priority,] message)'
+     Send the string MESSAGE to the system logger.  A trailing newline
+     is added if necessary.  Each message is tagged with a priority
+     composed of a FACILITY and a LEVEL.  The optional PRIORITY
+     argument, which defaults to `LOG_INFO', determines the message
+     priority.  If the facility is not encoded in PRIORITY using
+     logical-or (`LOG_INFO | LOG_USER'), the value given in the
+     `openlog()' call is used.
+
+`openlog(ident[, logopt[, facility]])'
+     Logging options other than the defaults can be set by explicitly
+     opening the log file with `openlog()' prior to calling `syslog()'.
+     The defaults are (usually) IDENT = `'syslog'', LOGOPT = `0',
+     FACILITY = `LOG_USER'.  The IDENT argument is a string which is
+     prepended to every message.  The optional LOGOPT argument is a bit
+     field - see below for possible values to combine.  The optional
+     FACILITY argument sets the default facility for messages which do
+     not have a facility explicitly encoded.
+
+`closelog()'
+     Close the log file.
+
+`setlogmask(maskpri)'
+     Set the priority mask to MASKPRI and return the previous mask
+     value.  Calls to `syslog()' with a priority level not set in
+     MASKPRI are ignored.  The default is to log all priorities.  The
+     function `LOG_MASK(PRI)' calculates the mask for the individual
+     priority PRI.  The function `LOG_UPTO(PRI)' calculates the mask
+     for all priorities up to and including PRI.
+
+The module defines the following constants:
+
+`Priority levels (high to low):'
+     `LOG_EMERG', `LOG_ALERT', `LOG_CRIT', `LOG_ERR', `LOG_WARNING',
+     `LOG_NOTICE', `LOG_INFO', `LOG_DEBUG'.
+
+`Facilities:'
+     `LOG_KERN', `LOG_USER', `LOG_MAIL', `LOG_DAEMON', `LOG_AUTH',
+     `LOG_LPR', `LOG_NEWS', `LOG_UUCP', `LOG_CRON' and `LOG_LOCAL0' to
+     `LOG_LOCAL7'.
+
+`Log options:'
+     `LOG_PID', `LOG_CONS', `LOG_NDELAY', `LOG_NOWAIT' and `LOG_PERROR'
+     if defined in `<syslog.h>'.
+
+
+File: python-lib.info,  Node: commands,  Prev: syslog,  Up: Unix Specific Services
+
+Utilities for running commands
+==============================
+
+Utility functions for running external commands.
+
+The `commands' module contains wrapper functions for `os.popen()' which
+take a system command as a string and return any output generated by
+the command and, optionally, the exit status.
+
+The `commands' module defines the following functions:
+
+`getstatusoutput(cmd)'
+     Execute the string CMD in a shell with `os.popen()' and return a
+     2-tuple `(STATUS, OUTPUT)'.  CMD is actually run as `{ CMD ; }
+     2>&1', so that the returned output will contain output or error
+     messages. A trailing newline is stripped from the output. The exit
+     status for the command can be interpreted according to the rules
+     for the C function `wait()'.
+
+`getoutput(cmd)'
+     Like `getstatusoutput()', except the exit status is ignored and
+     the return value is a string containing the command's output.
+
+`getstatus(file)'
+     Return the output of `ls -ld FILE' as a string.  This function
+     uses the `getoutput()' function, and properly escapes backslashes
+     and dollar signs in the argument.
+
+Example:
+
+     >>> import commands
+     >>> commands.getstatusoutput('ls /bin/ls')
+     (0, '/bin/ls')
+     >>> commands.getstatusoutput('cat /bin/junk')
+     (256, 'cat: /bin/junk: No such file or directory')
+     >>> commands.getstatusoutput('/bin/junk')
+     (256, 'sh: /bin/junk: not found')
+     >>> commands.getoutput('ls /bin/ls')
+     '/bin/ls'
+     >>> commands.getstatus('/bin/ls')
+     '-rwxr-xr-x  1 root        13352 Oct 14  1994 /bin/ls'
+
+
+File: python-lib.info,  Node: Python Debugger,  Next: Python Profiler,  Prev: Unix Specific Services,  Up: Top
+
+The Python Debugger
+*******************
+
+The Python debugger for interactive interpreters.
+
+The module `pdb' defines an interactive source code debugger  for
+Python programs.  It supports setting (conditional) breakpoints and
+single stepping at the source line level, inspection of stack frames,
+source code listing, and evaluation of arbitrary Python code in the
+context of any stack frame.  It also supports post-mortem debugging and
+can be called under program control.
+
+The debugger is extensible -- it is actually defined as the class `Pdb'
+.  This is currently undocumented but easily understood by reading the
+source.  The extension interface uses the modules `bdb'  (undocumented)
+and `cmd' .
+
+The debugger's prompt is `(Pdb) '.  Typical usage to run a program
+under control of the debugger is:
+
+     >>> import pdb
+     >>> import mymodule
+     >>> pdb.run('mymodule.test()')
+     > <string>(0)?()
+     (Pdb) continue
+     > <string>(1)?()
+     (Pdb) continue
+     NameError: 'spam'
+     > <string>(1)?()
+     (Pdb)
+
+`pdb.py' can also be invoked as a script to debug other scripts.  For
+example:
+
+     python /usr/local/lib/python1.5/pdb.py myscript.py
+
+Typical usage to inspect a crashed program is:
+
+     >>> import pdb
+     >>> import mymodule
+     >>> mymodule.test()
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+       File "./mymodule.py", line 4, in test
+         test2()
+       File "./mymodule.py", line 3, in test2
+         print spam
+     NameError: spam
+     >>> pdb.pm()
+     > ./mymodule.py(3)test2()
+     -> print spam
+     (Pdb)
+
+The module defines the following functions; each enters the debugger in
+a slightly different way:
+
+`run(statement[, globals[, locals]])'
+     Execute the STATEMENT (given as a string) under debugger control.
+     The debugger prompt appears before any code is executed; you can
+     set breakpoints and type `continue', or you can step through the
+     statement using `step' or `next' (all these commands are explained
+     below).  The optional GLOBALS and LOCALS arguments specify the
+     environment in which the code is executed; by default the
+     dictionary of the module `__main__' is used.  (See the explanation
+     of the `exec' statement or the `eval()' built-in function.)
+
+`runeval(expression[, globals[, locals]])'
+     Evaluate the EXPRESSION (given as a string) under debugger
+     control.  When `runeval()' returns, it returns the value of the
+     expression.  Otherwise this function is similar to `run()'.
+
+`runcall(function[, argument, ...])'
+     Call the FUNCTION (a function or method object, not a string) with
+     the given arguments.  When `runcall()' returns, it returns
+     whatever the function call returned.  The debugger prompt appears
+     as soon as the function is entered.
+
+`set_trace()'
+     Enter the debugger at the calling stack frame.  This is useful to
+     hard-code a breakpoint at a given point in a program, even if the
+     code is not otherwise being debugged (e.g. when an assertion
+     fails).
+
+`post_mortem(traceback)'
+     Enter post-mortem debugging of the given TRACEBACK object.
+
+`pm()'
+     Enter post-mortem debugging of the traceback found in
+     `sys.last_traceback'.
+
+* Menu:
+
+* Debugger Commands::
+* How It Works::
+
+
+File: python-lib.info,  Node: Debugger Commands,  Next: How It Works,  Prev: Python Debugger,  Up: Python Debugger
+
+Debugger Commands
+=================
+
+The debugger recognizes the following commands.  Most commands can be
+abbreviated to one or two letters; e.g. `h(elp)' means that either `h'
+or `help' can be used to enter the help command (but not `he' or `hel',
+nor `H' or `Help' or `HELP').  Arguments to commands must be separated
+by whitespace (spaces or tabs).  Optional arguments are enclosed in
+square brackets (`[]') in the command syntax; the square brackets must
+not be typed.  Alternatives in the command syntax are separated by a
+vertical bar (`|').
+
+Entering a blank line repeats the last command entered.  Exception: if
+the last command was a `list' command, the next 11 lines are listed.
+
+Commands that the debugger doesn't recognize are assumed to be Python
+statements and are executed in the context of the program being
+debugged.  Python statements can also be prefixed with an exclamation
+point (`!').  This is a powerful way to inspect the program being
+debugged; it is even possible to change a variable or call a function.
+When an exception occurs in such a statement, the exception name is
+printed but the debugger's state is not changed.
+
+Multiple commands may be entered on a single line, separated by `;;'.
+(A single `;' is not used as it is the separator for multiple commands
+in a line that is passed to the Python parser.)  No intelligence is
+applied to separating the commands; the input is split at the first
+`;;' pair, even if it is in the middle of a quoted string.
+
+The debugger supports aliases.  Aliases can have parameters which
+allows one a certain level of adaptability to the context under
+examination.
+
+If a file `.pdbrc' exists in the user's home directory or in the
+current directory, it is read in and executed as if it had been typed
+at the debugger prompt.  This is particularly useful for aliases.  If
+both files exist, the one in the home directory is read first and
+aliases defined there can be overridden by the local file.
+
+`h(elp) [COMMAND]'
+     Without argument, print the list of available commands.  With a
+     COMMAND as argument, print help about that command.  `help pdb'
+     displays the full documentation file; if the environment variable
+     `PAGER' is defined, the file is piped through that command
+     instead.  Since the COMMAND argument must be an identifier, `help
+     exec' must be entered to get help on the `!' command.
+
+`w(here)'
+     Print a stack trace, with the most recent frame at the bottom.  An
+     arrow indicates the current frame, which determines the context of
+     most commands.
+
+`d(own)'
+     Move the current frame one level down in the stack trace (to an
+     newer frame).
+
+`u(p)'
+     Move the current frame one level up in the stack trace (to a older
+     frame).
+
+`b(reak) [[FILENAME:]LINENO`{|}'FUNCTION[, CONDITION]]'
+     With a LINENO argument, set a break there in the current file.
+     With a FUNCTION argument, set a break at the first executable
+     statement within that function.  The line number may be prefixed
+     with a filename and a colon, to specify a breakpoint in another
+     file (probably one that hasn't been loaded yet).  The file is
+     searched on `sys.path'.  Note that each breakpoint is assigned a
+     number to which all the other breakpoint commands refer.
+
+     If a second argument is present, it is an expression which must
+     evaluate to true before the breakpoint is honored.
+
+     Without argument, list all breaks, including for each breakpoint,
+     the number of times that breakpoint has been hit, the current
+     ignore count, and the associated condition if any.
+
+`tbreak [[FILENAME:]LINENO`{|}'FUNCTION[, CONDITION]]'
+     Temporary breakpoint, which is removed automatically when it is
+     first hit.  The arguments are the same as break.
+
+`cl(ear) [BPNUMBER [BPNUMBER ...]]'
+     With a space separated list of breakpoint numbers, clear those
+     breakpoints.  Without argument, clear all breaks (but first ask
+     confirmation).
+
+`disable [BPNUMBER [BPNUMBER ...]]'
+     Disables the breakpoints given as a space separated list of
+     breakpoint numbers.  Disabling a breakpoint means it cannot cause
+     the program to stop execution, but unlike clearing a breakpoint, it
+     remains in the list of breakpoints and can be (re-)enabled.
+
+`enable [BPNUMBER [BPNUMBER ...]]'
+     Enables the breakpoints specified.
+
+`ignore BPNUMBER [COUNT]'
+     Sets the ignore count for the given breakpoint number.  If count
+     is omitted, the ignore count is set to 0.  A breakpoint becomes
+     active when the ignore count is zero.  When non-zero, the count is
+     decremented each time the breakpoint is reached and the breakpoint
+     is not disabled and any associated condition evaluates to true.
+
+`condition BPNUMBER [CONDITION]'
+     Condition is an expression which must evaluate to true before the
+     breakpoint is honored.  If condition is absent, any existing
+     condition is removed; i.e., the breakpoint is made unconditional.
+
+`s(tep)'
+     Execute the current line, stop at the first possible occasion
+     (either in a function that is called or on the next line in the
+     current function).
+
+`n(ext)'
+     Continue execution until the next line in the current function is
+     reached or it returns.  (The difference between `next' and `step'
+     is that `step' stops inside a called function, while `next'
+     executes called functions at (nearly) full speed, only stopping at
+     the next line in the current function.)
+
+`r(eturn)'
+     Continue execution until the current function returns.
+
+`c(ont(inue))'
+     Continue execution, only stop when a breakpoint is encountered.
+
+`j(ump) LINENO'
+     Set the next line that will be executed.  Only available in the
+     bottom-most frame.  This lets you jump back and execute code
+     again, or jump forward to skip code that you don't want to run.
+
+     It should be noted that not all jumps are allowed -- for instance
+     it is not possible to jump into the middle of a `for' loop or out
+     of a `finally' clause.
+
+`l(ist) [FIRST[, LAST]]'
+     List source code for the current file.  Without arguments, list 11
+     lines around the current line or continue the previous listing.
+     With one argument, list 11 lines around at that line.  With two
+     arguments, list the given range; if the second argument is less
+     than the first, it is interpreted as a count.
+
+`a(rgs)'
+     Print the argument list of the current function.
+
+`p EXPRESSION'
+     Evaluate the EXPRESSION in the current context and print its
+     value.  _Note:_ `print' can also be used, but is not a debugger
+     command -- this executes the Python `print' statement.
+
+`pp EXPRESSION'
+     Like the `p' command, except the value of the exception is
+     pretty-printed using the `pprint' module.
+
+`alias [NAME [command]]'
+     Creates an alias called NAME that executes COMMAND.  The command
+     must _not_ be enclosed in quotes.  Replaceable parameters can be
+     indicated by `%1', `%2', and so on, while `%*' is replaced by all
+     the parameters.  If no command is given, the current alias for
+     NAME is shown. If no arguments are given, all aliases are listed.
+
+     Aliases may be nested and can contain anything that can be legally
+     typed at the pdb prompt.  Note that internal pdb commands _can_ be
+     overridden by aliases.  Such a command is then hidden until the
+     alias is removed.  Aliasing is recursively applied to the first
+     word of the command line; all other words in the line are left
+     alone.
+
+     As an example, here are two useful aliases (especially when placed
+     in the `.pdbrc' file):
+
+          #Print instance variables (usage "pi classInst")
+          alias pi for k in %1.__dict__.keys(): print "%1.",k,"=",%1.__dict__[k]
+          #Print instance variables in self
+          alias ps pi self
+
+`unalias NAME'
+     Deletes the specified alias.
+
+`[!]STATEMENT'
+     Execute the (one-line) STATEMENT in the context of the current
+     stack frame.  The exclamation point can be omitted unless the
+     first word of the statement resembles a debugger command.  To set
+     a global variable, you can prefix the assignment command with a
+     `global' command on the same line, e.g.:
+
+          (Pdb) global list_options; list_options = ['-l']
+          (Pdb)
+
+`q(uit)'
+     Quit from the debugger.  The program being executed is aborted.
+
+
+File: python-lib.info,  Node: How It Works,  Prev: Debugger Commands,  Up: Python Debugger
+
+How It Works
+============
+
+Some changes were made to the interpreter:
+
+   * `sys.settrace(FUNC)' sets the global trace function
+
+   * there can also a local trace function (see later)
+
+Trace functions have three arguments: FRAME, EVENT, and ARG. FRAME is
+the current stack frame.  EVENT is a string: `'call'', `'line'',
+`'return'' or `'exception''.  ARG depends on the event type.
+
+The global trace function is invoked (with EVENT set to `'call'')
+whenever a new local scope is entered; it should return a reference to
+the local trace function to be used that scope, or `None' if the scope
+shouldn't be traced.
+
+The local trace function should return a reference to itself (or to
+another function for further tracing in that scope), or `None' to turn
+off tracing in that scope.
+
+Instance methods are accepted (and very useful!) as trace functions.
+
+The events have the following meaning:
+
+``'call'''
+     A function is called (or some other code block entered).  The
+     global trace function is called; ARG is `None'; the return value
+     specifies the local trace function.
+
+``'line'''
+     The interpreter is about to execute a new line of code (sometimes
+     multiple line events on one line exist).  The local trace function
+     is called; ARG is `None'; the return value specifies the new local
+     trace function.
+
+``'return'''
+     A function (or other code block) is about to return.  The local
+     trace function is called; ARG is the value that will be returned.
+     The trace function's return value is ignored.
+
+``'exception'''
+     An exception has occurred.  The local trace function is called;
+     ARG is a triple `(EXCEPTION, VALUE, TRACEBACK)'; the return value
+     specifies the new local trace function.
+
+Note that as an exception is propagated down the chain of callers, an
+`'exception'' event is generated at each level.
+
+For more information on code and frame objects, refer to the .
+
+
+File: python-lib.info,  Node: Python Profiler,  Next: Internet Protocols and Support,  Prev: Python Debugger,  Up: Top
+
+The Python Profiler
+*******************
+
+Copyright (C) 1994, by InfoSeek Corporation, all rights reserved.
+
+Written by James Roskind.(1)
+
+Permission to use, copy, modify, and distribute this Python software
+and its associated documentation for any purpose (subject to the
+restriction in the following sentence) without fee is hereby granted,
+provided that the above copyright notice appears in all copies, and
+that both that copyright notice and this permission notice appear in
+supporting documentation, and that the name of InfoSeek not be used in
+advertising or publicity pertaining to distribution of the software
+without specific, written prior permission.  This permission is
+explicitly restricted to the copying and modification of the software
+to remain in Python, compiled Python, or other languages (such as C)
+wherein the modified or derived code is exclusively imported into a
+Python module.
+
+INFOSEEK CORPORATION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS. IN NO EVENT SHALL INFOSEEK CORPORATION BE LIABLE FOR ANY
+SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
+CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+The profiler was written after only programming in Python for 3 weeks.
+As a result, it is probably clumsy code, but I don't know for sure yet
+'cause I'm a beginner :-).  I did work hard to make the code run fast,
+so that profiling would be a reasonable thing to do.  I tried not to
+repeat code fragments, but I'm sure I did some stuff in really awkward
+ways at times.  Please send suggestions for improvements to:
+<jar@netscape.com>.  I won't promise _any_ support.  ...but I'd
+appreciate the feedback.
+
+* Menu:
+
+* Profiler Introduction::
+* Profiler Changes::
+* Instant Users Manual::
+* Deterministic Profiling::
+* Reference Manual::
+* Limitations::
+* Calibration::
+* Profiler Extensions::
+* hotshot::
+* timeit::
+
+---------- Footnotes ----------
+
+(1)  Updated and converted to LaTeX by Guido van Rossum.  The
+references to the old profiler are left in the text, although it no
+longer exists.
+
+
+File: python-lib.info,  Node: Profiler Introduction,  Next: Profiler Changes,  Prev: Python Profiler,  Up: Python Profiler
+
+Introduction to the profiler
+============================
+
+A "profiler" is a program that describes the run time performance of a
+program, providing a variety of statistics.  This documentation
+describes the profiler functionality provided in the modules `profile'
+and `pstats'.  This profiler provides "deterministic profiling" of any
+Python programs.  It also provides a series of report generation tools
+to allow users to rapidly examine the results of a profile operation.
+
+
+File: python-lib.info,  Node: Profiler Changes,  Next: Instant Users Manual,  Prev: Profiler Introduction,  Up: Python Profiler
+
+How Is This Profiler Different From The Old Profiler?
+=====================================================
+
+(This section is of historical importance only; the old profiler
+discussed here was last seen in Python 1.1.)
+
+The big changes from old profiling module are that you get more
+information, and you pay less CPU time.  It's not a trade-off, it's a
+trade-up.
+
+To be specific:
+
+`Bugs removed:'
+     Local stack frame is no longer molested, execution time is now
+     charged to correct functions.
+
+`Accuracy increased:'
+     Profiler execution time is no longer charged to user's code,
+     calibration for platform is supported, file reads are not done _by_
+     profiler _during_ profiling (and charged to user's code!).
+
+`Speed increased:'
+     Overhead CPU cost was reduced by more than a factor of two
+     (perhaps a factor of five), lightweight profiler module is all
+     that must be loaded, and the report generating module (`pstats')
+     is not needed during profiling.
+
+`Recursive functions support:'
+     Cumulative times in recursive functions are correctly calculated;
+     recursive entries are counted.
+
+`Large growth in report generating UI:'
+     Distinct profiles runs can be added together forming a
+     comprehensive report; functions that import statistics take
+     arbitrary lists of files; sorting criteria is now based on
+     keywords (instead of 4 integer options); reports shows what
+     functions were profiled as well as what profile file was
+     referenced; output format has been improved.
+

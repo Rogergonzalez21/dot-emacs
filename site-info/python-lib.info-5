@@ -1,0 +1,1121 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: sys,  Next: gc,  Prev: Python Runtime Services,  Up: Python Runtime Services
+
+System-specific parameters and functions
+========================================
+
+Access system-specific parameters and functions.
+
+This module provides access to some variables used or maintained by the
+interpreter and to functions that interact strongly with the
+interpreter.  It is always available.
+
+`argv'
+     The list of command line arguments passed to a Python script.
+     `argv[0]' is the script name (it is operating system dependent
+     whether this is a full pathname or not).  If the command was
+     executed using the `-c' command line option to the interpreter,
+     `argv[0]' is set to the string `'-c''.  If no script name was
+     passed to the Python interpreter, `argv' has zero length.
+
+`byteorder'
+     An indicator of the native byte order.  This will have the value
+     `'big'' on big-endian (most-signigicant byte first) platforms, and
+     `'little'' on little-endian (least-significant byte first)
+     platforms.  _Added in Python version 2.0_
+
+`builtin_module_names'
+     A tuple of strings giving the names of all modules that are
+     compiled into this Python interpreter.  (This information is not
+     available in any other way -- `modules.keys()' only lists the
+     imported modules.)
+
+`copyright'
+     A string containing the copyright pertaining to the Python
+     interpreter.
+
+`dllhandle'
+     Integer specifying the handle of the Python DLL.  Availability:
+     Windows.
+
+`displayhook(VALUE)'
+     If VALUE is not `None', this function prints it to `sys.stdout',
+     and saves it in `__builtin__._'.
+
+     `sys.displayhook' is called on the result of evaluating an
+     expression entered in an interactive Python session.  The display
+     of these values can be customized by assigning another one-argument
+     function to `sys.displayhook'.
+
+`excepthook(TYPE, VALUE, TRACEBACK)'
+     This function prints out a given traceback and exception to
+     `sys.stderr'.
+
+     When an exception is raised and uncaught, the interpreter calls
+     `sys.excepthook' with three arguments, the exception class,
+     exception instance, and a traceback object.  In an interactive
+     session this happens just before control is returned to the prompt;
+     in a Python program this happens just before the program exits.
+     The handling of such top-level exceptions can be customized by
+     assigning another three-argument function to `sys.excepthook'.
+
+`__displayhook__'
+
+`__excepthook__'
+     These objects contain the original values of `displayhook' and
+     `excepthook' at the start of the program.  They are saved so that
+     `displayhook' and `excepthook' can be restored in case they happen
+     to get replaced with broken objects.
+
+`exc_info()'
+     This function returns a tuple of three values that give information
+     about the exception that is currently being handled.  The
+     information returned is specific both to the current thread and to
+     the current stack frame.  If the current stack frame is not
+     handling an exception, the information is taken from the calling
+     stack frame, or its caller, and so on until a stack frame is found
+     that is handling an exception.  Here, "handling an exception" is
+     defined as "executing or having executed an except clause."  For
+     any stack frame, only information about the most recently handled
+     exception is accessible.
+
+     If no exception is being handled anywhere on the stack, a tuple
+     containing three `None' values is returned.  Otherwise, the values
+     returned are `(TYPE, VALUE, TRACEBACK)'.  Their meaning is: TYPE
+     gets the exception type of the exception being handled (a class
+     object); VALUE gets the exception parameter (its "associated value"
+     or the second argument to `raise', which is always a class
+     instance if the exception type is a class object); TRACEBACK gets
+     a traceback object (see the Reference Manual) which encapsulates
+     the call stack at the point where the exception originally
+     occurred.
+
+     If `exc_clear()' is called, this function will return three `None'
+     values until either another exception is raised in the current
+     thread or the execution stack returns to a frame where another
+     exception is being handled.
+
+     _Assigning the TRACEBACK return value to a local variable in a
+     function that is handling an exception will cause a circular
+     reference.  This will prevent anything referenced by a local
+     variable in the same function or by the traceback from being
+     garbage collected.  Since most functions don't need access to the
+     traceback, the best solution is to use something like `exctype,
+     value = sys.exc_info()[:2]' to extract only the exception type and
+     value.  If you do need the traceback, make sure to delete it after
+     use (best done with a `try' ... `finally' statement) or to call
+     `exc_info()' in a function that does not itself handle an
+     exception._ _Note:_ Beginning with Python 2.2, such cycles are
+     automatically reclaimed when garbage collection is enabled and
+     they become unreachable, but it remains more efficient to avoid
+     creating cycles.
+
+`exc_clear()'
+     This function clears all information relating to the current or
+     last exception that occured in the current thread.  After calling
+     this function, `exc_info()' will return three `None' values until
+     another exception is raised in the current thread or the execution
+     stack returns to a frame where another exception is being handled.
+
+     This function is only needed in only a few obscure situations.
+     These include logging and error handling systems that report
+     information on the last or current exception.  This function can
+     also be used to try to free resources and trigger object
+     finalization, though no guarantee is made as to what objects will
+     be freed, if any.  _Added in Python version 2.3_
+
+`exc_type'
+
+`exc_value'
+
+`exc_traceback'
+     _This is deprecated in Python 1.5.  Use `exc_info()' instead._
+     Since they are global variables, they are not specific to the
+     current thread, so their use is not safe in a multi-threaded
+     program.  When no exception is being handled, `exc_type' is set to
+     `None' and the other two are undefined.
+
+`exec_prefix'
+     A string giving the site-specific directory prefix where the
+     platform-dependent Python files are installed; by default, this is
+     also `'/usr/local''.  This can be set at build time with the
+     `--exec-prefix' argument to the `configure' script.  Specifically,
+     all configuration files (e.g. the `pyconfig.h' header file) are
+     installed in the directory `exec_prefix +
+     '/lib/pythonVERSION/config'', and shared library modules are
+     installed in `exec_prefix + '/lib/pythonVERSION/lib-dynload'',
+     where VERSION is equal to `version[:3]'.
+
+`executable'
+     A string giving the name of the executable binary for the Python
+     interpreter, on systems where this makes sense.
+
+`exit([arg])'
+     Exit from Python.  This is implemented by raising the `SystemExit'
+     exception, so cleanup actions specified by finally clauses of
+     `try' statements are honored, and it is possible to intercept the
+     exit attempt at an outer level.  The optional argument ARG can be
+     an integer giving the exit status (defaulting to zero), or another
+     type of object.  If it is an integer, zero is considered
+     "successful termination" and any nonzero value is considered
+     "abnormal termination" by shells and the like.  Most systems
+     require it to be in the range 0-127, and produce undefined results
+     otherwise.  Some systems have a convention for assigning specific
+     meanings to specific exit codes, but these are generally
+     underdeveloped; UNIX programs generally use 2 for command line
+     syntax errors and 1 for all other kind of errors.  If another type
+     of object is passed, `None' is equivalent to passing zero, and any
+     other object is printed to `sys.stderr' and results in an exit
+     code of 1.  In particular, `sys.exit("some error message")' is a
+     quick way to exit a program when an error occurs.
+
+`exitfunc'
+     This value is not actually defined by the module, but can be set by
+     the user (or by a program) to specify a clean-up action at program
+     exit.  When set, it should be a parameterless function.  This
+     function will be called when the interpreter exits.  Only one
+     function may be installed in this way; to allow multiple functions
+     which will be called at termination, use the `atexit' module.
+     _Note:_ The exit function is not called when the program is killed
+     by a signal, when a Python fatal internal error is detected, or
+     when `os._exit()' is called.
+
+`getcheckinterval()'
+     Return the interpreter's "check interval"; see
+     `setcheckinterval()'.  _Added in Python version 2.3_
+
+`getdefaultencoding()'
+     Return the name of the current default string encoding used by the
+     Unicode implementation.  _Added in Python version 2.0_
+
+`getdlopenflags()'
+     Return the current value of the flags that are used for `dlopen()'
+     calls. The flag constants are defined in the `dl' and `DLFCN'
+     modules.  Availability: UNIX.  _Added in Python version 2.2_
+
+`getfilesystemencoding()'
+     Return the name of the encoding used to convert Unicode filenames
+     into system file names, or `None' if the system default encoding
+     is used. The result value depends on the operating system:
+        * On Windows 9x, the encoding is "mbcs".
+
+        * On Mac OS X, the encoding is "utf-8".
+
+        * On Unix, the encoding is the user's preference according to
+          the result of nl_langinfo(CODESET), or None if the
+          nl_langinfo(CODESET) failed.
+
+        * On Windows NT+, file names are Unicode natively, so no
+          conversion is performed.
+
+     _Added in Python version 2.3_
+
+`getrefcount(object)'
+     Return the reference count of the OBJECT.  The count returned is
+     generally one higher than you might expect, because it includes
+     the (temporary) reference as an argument to `getrefcount()'.
+
+`getrecursionlimit()'
+     Return the current value of the recursion limit, the maximum depth
+     of the Python interpreter stack.  This limit prevents infinite
+     recursion from causing an overflow of the C stack and crashing
+     Python.  It can be set by `setrecursionlimit()'.
+
+`_getframe([depth])'
+     Return a frame object from the call stack.  If optional integer
+     DEPTH is given, return the frame object that many calls below the
+     top of the stack.  If that is deeper than the call stack,
+     `ValueError' is raised.  The default for DEPTH is zero, returning
+     the frame at the top of the call stack.
+
+     This function should be used for internal and specialized purposes
+     only.
+
+`getwindowsversion()'
+     Return a tuple containing five components, describing the Windows
+     version currently running.  The elements are MAJOR, MINOR, BUILD,
+     PLATFORM, and TEXT.  TEXT contains a string while all other values
+     are integers.
+
+     PLATFORM may be one of the following values:
+
+    `0 (`VER_PLATFORM_WIN32s')'
+          Win32s on Windows 3.1.
+
+    `1 (`VER_PLATFORM_WIN32_WINDOWS')'
+          Windows 95/98/ME
+
+    `2 (`VER_PLATFORM_WIN32_NT')'
+          Windows NT/2000/XP
+
+    `3 (`VER_PLATFORM_WIN32_CE')'
+          Windows CE.
+
+     This function wraps the Win32 `GetVersionEx()' function; see the
+     Microsoft Documentation for more information about these fields.
+
+     Availability: Windows.  _Added in Python version 2.3_
+
+`hexversion'
+     The version number encoded as a single integer.  This is guaranteed
+     to increase with each version, including proper support for
+     non-production releases.  For example, to test that the Python
+     interpreter is at least version 1.5.2, use:
+
+          if sys.hexversion >= 0x010502F0:
+              # use some advanced feature
+              ...
+          else:
+              # use an alternative implementation or warn the user
+              ...
+
+     This is called `hexversion' since it only really looks meaningful
+     when viewed as the result of passing it to the built-in `hex()'
+     function.  The `version_info' value may be used for a more
+     human-friendly encoding of the same information.  _Added in Python
+     version 1.5.2_
+
+`last_type'
+
+`last_value'
+
+`last_traceback'
+     These three variables are not always defined; they are set when an
+     exception is not handled and the interpreter prints an error
+     message and a stack traceback.  Their intended use is to allow an
+     interactive user to import a debugger module and engage in
+     post-mortem debugging without having to re-execute the command that
+     caused the error.  (Typical use is `import pdb; pdb.pm()' to enter
+     the post-mortem debugger; see chapter *Note Python Debugger::, "The
+     Python Debugger," for more information.)
+
+     The meaning of the variables is the same as that of the return
+     values from `exc_info()' above.  (Since there is only one
+     interactive thread, thread-safety is not a concern for these
+     variables, unlike for `exc_type' etc.)
+
+`maxint'
+     The largest positive integer supported by Python's regular integer
+     type.  This is at least 2**31-1.  The largest negative integer is
+     `-maxint-1' -- the asymmetry results from the use of 2's
+     complement binary arithmetic.
+
+`maxunicode'
+     An integer giving the largest supported code point for a Unicode
+     character.  The value of this depends on the configuration option
+     that specifies whether Unicode characters are stored as UCS-2 or
+     UCS-4.
+
+`modules'
+     This is a dictionary that maps module names to modules which have
+     already been loaded.  This can be manipulated to force reloading of
+     modules and other tricks.  Note that removing a module from this
+     dictionary is _not_ the same as calling `reload()'  on the
+     corresponding module object.
+
+`path'
+     A list of strings that specifies the search path for modules.
+     Initialized from the environment variable `PYTHONPATH', plus an
+     installation-dependent default.
+
+     As initialized upon program startup, the first item of this list,
+     `path[0]', is the directory containing the script that was used to
+     invoke the Python interpreter.  If the script directory is not
+     available (e.g.  if the interpreter is invoked interactively or if
+     the script is read from standard input), `path[0]' is the empty
+     string, which directs Python to search modules in the current
+     directory first.  Notice that the script directory is inserted
+     _before_ the entries inserted as a result of `PYTHONPATH'.
+
+     A program is free to modify this list for its own purposes.
+
+     _Changed in Python version 2.3_
+
+`platform'
+     This string contains a platform identifier, e.g. `'sunos5'' or
+     `'linux1''.  This can be used to append platform-specific
+     components to `path', for instance.
+
+`prefix'
+     A string giving the site-specific directory prefix where the
+     platform independent Python files are installed; by default, this
+     is the string `'/usr/local''.  This can be set at build time with
+     the `--prefix' argument to the `configure' script.  The main
+     collection of Python library modules is installed in the directory
+     `prefix + '/lib/pythonVERSION'' while the platform independent
+     header files (all except `pyconfig.h') are stored in `prefix +
+     '/include/pythonVERSION'', where VERSION is equal to `version[:3]'.
+
+`ps1'
+
+`ps2'
+     Strings specifying the primary and secondary prompt of the
+     interpreter.  These are only defined if the interpreter is in
+     interactive mode.  Their initial values in this case are `'>`>'>
+     '' and `'... ''.  If a non-string object is assigned to either
+     variable, its `str()' is re-evaluated each time the interpreter
+     prepares to read a new interactive command; this can be used to
+     implement a dynamic prompt.
+
+`setcheckinterval(interval)'
+     Set the interpreter's "check interval".  This integer value
+     determines how often the interpreter checks for periodic things
+     such as thread switches and signal handlers.  The default is `100',
+     meaning the check is performed every 100 Python virtual
+     instructions.  Setting it to a larger value may increase
+     performance for programs using threads.  Setting it to a value
+     `<=' 0 checks every virtual instruction, maximizing responsiveness
+     as well as overhead.
+
+`setdefaultencoding(name)'
+     Set the current default string encoding used by the Unicode
+     implementation.  If NAME does not match any available encoding,
+     `LookupError' is raised.  This function is only intended to be
+     used by the `site' module implementation and, where needed, by
+     `sitecustomize'.  Once used by the `site' module, it is removed
+     from the `sys' module's namespace.  _Added in Python version 2.0_
+
+`setdlopenflags(n)'
+     Set the flags used by the interpreter for `dlopen()' calls, such
+     as when the interpreter loads extension modules.  Among other
+     things, this will enable a lazy resolving of symbols when
+     importing a module, if called as `sys.setdlopenflags(0)'.  To
+     share symbols across extension modules, call as
+     `sys.setdlopenflags(dl.RTLD_NOW | dl.RTLD_GLOBAL)'.  Symbolic
+     names for the flag modules can be either found in the `dl' module,
+     or in the `DLFCN' module. If `DLFCN' is not available, it can be
+     generated from `/usr/include/dlfcn.h' using the `h2py' script.
+     Availability: UNIX.  _Added in Python version 2.2_
+
+`setprofile(profilefunc)'
+     Set the system's profile function,  which allows you to implement
+     a Python source code profiler in Python.    See chapter *Note
+     Reference Manual:: for more information on the Python profiler.
+     The system's profile function is called similarly to the system's
+     trace function (see `settrace()'), but it isn't called for each
+     executed line of code (only on call and return, but the return
+     event is reported even when an exception has been set).  The
+     function is thread-specific, but there is no way for the profiler
+     to know about context switches between threads, so it does not
+     make sense to use this in the presence of multiple threads.  Also,
+     its return value is not used, so it can simply return `None'.
+
+`setrecursionlimit(limit)'
+     Set the maximum depth of the Python interpreter stack to LIMIT.
+     This limit prevents infinite recursion from causing an overflow of
+     the C stack and crashing Python.
+
+     The highest possible limit is platform-dependent.  A user may need
+     to set the limit higher when she has a program that requires deep
+     recursion and a platform that supports a higher limit.  This should
+     be done with care, because a too-high limit can lead to a crash.
+
+`settrace(tracefunc)'
+     Set the system's trace function,  which allows you to implement a
+     Python source code debugger in Python.  See section *Note How It
+     Works::, "How It Works," in the chapter on the Python debugger.
+     The function is thread-specific; for a debugger to support
+     multiple threads, it must be registered using `settrace()' for
+     each thread being debugged.
+
+`stdin'
+
+`stdout'
+
+`stderr'
+     File objects corresponding to the interpreter's standard input,
+     output and error streams.  `stdin' is used for all interpreter
+     input except for scripts but including calls to `input()'  and
+     `raw_input()' .  `stdout' is used for the output of `print' and
+     expression statements and for the prompts of `input()' and
+     `raw_input()'.  The interpreter's own prompts and (almost all of)
+     its error messages go to `stderr'.  `stdout' and `stderr' needn't
+     be built-in file objects: any object is acceptable as long as it
+     has a `write()' method that takes a string argument.  (Changing
+     these objects doesn't affect the standard I/O streams of processes
+     executed by `os.popen()', `os.system()' or the `exec*()' family of
+     functions in the `os' module.)
+
+`__stdin__'
+
+`__stdout__'
+
+`__stderr__'
+     These objects contain the original values of `stdin', `stderr' and
+     `stdout' at the start of the program.  They are used during
+     finalization, and could be useful to restore the actual files to
+     known working file objects in case they have been overwritten with
+     a broken object.
+
+`tracebacklimit'
+     When this variable is set to an integer value, it determines the
+     maximum number of levels of traceback information printed when an
+     unhandled exception occurs.  The default is `1000'.  When set to
+     `0' or less, all traceback information is suppressed and only the
+     exception type and value are printed.
+
+`version'
+     A string containing the version number of the Python interpreter
+     plus additional information on the build number and compiler used.
+     It has a value of the form `'VERSION (#BUILD_NUMBER, BUILD_DATE,
+     BUILD_TIME) [COMPILER]''.  The first three characters are used to
+     identify the version in the installation directories (where
+     appropriate on each platform).  An example:
+
+          >>> import sys
+          >>> sys.version
+          '1.5.2 (#0 Apr 13 1999, 10:51:12) [MSC 32 bit (Intel)]'
+
+`api_version'
+     The C API version for this interpreter.  Programmers may find this
+     useful when debugging version conflicts between Python and
+     extension modules. _Added in Python version 2.3_
+
+`version_info'
+     A tuple containing the five components of the version number:
+     MAJOR, MINOR, MICRO, RELEASELEVEL, and SERIAL.  All values except
+     RELEASELEVEL are integers; the release level is `'alpha'',
+     `'beta'', `'candidate'', or `'final''.  The `version_info' value
+     corresponding to the Python version 2.0 is `(2, 0, 0, 'final', 0)'.
+     _Added in Python version 2.0_
+
+`warnoptions'
+     This is an implementation detail of the warnings framework; do not
+     modify this value.  Refer to the `warnings' module for more
+     information on the warnings framework.
+
+`winver'
+     The version number used to form registry keys on Windows platforms.
+     This is stored as string resource 1000 in the Python DLL.  The
+     value is normally the first three characters of `version'.  It is
+     provided in the `sys' module for informational purposes; modifying
+     this value has no effect on the registry keys used by Python.
+     Availability: Windows.
+
+See also:
+     *Note site:: This describes how to use .pth files to extend
+     `sys.path'.
+
+
+File: python-lib.info,  Node: gc,  Next: weakref,  Prev: sys,  Up: Python Runtime Services
+
+Garbage Collector interface
+===========================
+
+Interface to the cycle-detecting garbage collector.
+
+The `gc' module is only available if the interpreter was built with the
+optional cyclic garbage detector (enabled by default).  If this was not
+enabled, an `ImportError' is raised by attempts to import this module.
+
+This module provides an interface to the optional garbage collector.  It
+provides the ability to disable the collector, tune the collection
+frequency, and set debugging options.  It also provides access to
+unreachable objects that the collector found but cannot free.  Since the
+collector supplements the reference counting already used in Python, you
+can disable the collector if you are sure your program does not create
+reference cycles.  Automatic collection can be disabled by calling
+`gc.disable()'.  To debug a leaking program call
+`gc.set_debug(gc.DEBUG_LEAK)'.
+
+The `gc' module provides the following functions:
+
+`enable()'
+     Enable automatic garbage collection.
+
+`disable()'
+     Disable automatic garbage collection.
+
+`isenabled()'
+     Returns true if automatic collection is enabled.
+
+`collect()'
+     Run a full collection.  All generations are examined and the
+     number of unreachable objects found is returned.
+
+`set_debug(flags)'
+     Set the garbage collection debugging flags.  Debugging information
+     will be written to `sys.stderr'.  See below for a list of
+     debugging flags which can be combined using bit operations to
+     control debugging.
+
+`get_debug()'
+     Return the debugging flags currently set.
+
+`get_objects()'
+     Returns a list of all objects tracked by the collector, excluding
+     the list returned.  _Added in Python version 2.2_
+
+`set_threshold(threshold0[, threshold1[, threshold2]])'
+     Set the garbage collection thresholds (the collection frequency).
+     Setting THRESHOLD0 to zero disables collection.
+
+     The GC classifies objects into three generations depending on how
+     many collection sweeps they have survived.  New objects are placed
+     in the youngest generation (generation `0').  If an object
+     survives a collection it is moved into the next older generation.
+     Since generation `2' is the oldest generation, objects in that
+     generation remain there after a collection.  In order to decide
+     when to run, the collector keeps track of the number object
+     allocations and deallocations since the last collection.  When the
+     number of allocations minus the number of deallocations exceeds
+     THRESHOLD0, collection starts.  Initially only generation `0' is
+     examined.  If generation `0' has been examined more than
+     THRESHOLD1 times since generation `1' has been examined, then
+     generation `1' is examined as well.  Similarly, THRESHOLD2
+     controls the number of collections of generation `1' before
+     collecting generation `2'.
+
+`get_threshold()'
+     Return the current collection thresholds as a tuple of
+     `(THRESHOLD0, THRESHOLD1, THRESHOLD2)'.
+
+`get_referrers(*objs)'
+     Return the list of objects that directly refer to any of objs. This
+     function will only locate those containers which support garbage
+     collection; extension types which do refer to other objects but do
+     not support garbage collection will not be found.
+
+     Note that objects which have already been dereferenced, but which
+     live in cycles and have not yet been collected by the garbage
+     collector can be listed among the resulting referrers.  To get
+     only currently live objects, call `collect()' before calling
+     `get_referrers()'.
+
+     _Added in Python version 2.2_
+
+`get_referents(*objs)'
+     Return a list of objects directly referred to by any of the
+     arguments.  The referents returned are those objects visited by
+     the arguments' C-level `tp_traverse' methods (if any), and may not
+     be all objects actually directly reachable.  `tp_traverse' methods
+     are supported only by objects that support garbage collection, and
+     are only required to visit objects that may be involved in a
+     cycle.  So, for example, if an integer is directly reachable from
+     an argument, that integer object may or may not appear in the
+     result list.
+
+     _Added in Python version 2.3_
+
+The following variable is provided for read-only access (you can mutate
+its value but should not rebind it):
+
+`garbage'
+     A list of objects which the collector found to be unreachable but
+     could not be freed (uncollectable objects).  By default, this list
+     contains only objects with `__del__()' methods.(1) Objects that
+     have `__del__()' methods and are part of a reference cycle cause
+     the entire reference cycle to be uncollectable, including objects
+     not necessarily in the cycle but reachable only from it.  Python
+     doesn't collect such cycles automatically because, in general, it
+     isn't possible for Python to guess a safe order in which to run
+     the `__del__()' methods.  If you know a safe order, you can force
+     the issue by examining the GARBAGE list, and explicitly breaking
+     cycles due to your objects within the list.  Note that these
+     objects are kept alive even so by virtue of being in the GARBAGE
+     list, so they should be removed from GARBAGE too.  For example,
+     after breaking cycles, do `del gc.garbage[:]' to empty the list.
+     It's generally better to avoid the issue by not creating cycles
+     containing objects with `__del__()' methods, and GARBAGE can be
+     examined in that case to verify that no such cycles are being
+     created.
+
+     If `DEBUG_SAVEALL' is set, then all unreachable objects will be
+     added to this list rather than freed.
+
+The following constants are provided for use with `set_debug()':
+
+`DEBUG_STATS'
+     Print statistics during collection.  This information can be
+     useful when tuning the collection frequency.
+
+`DEBUG_COLLECTABLE'
+     Print information on collectable objects found.
+
+`DEBUG_UNCOLLECTABLE'
+     Print information of uncollectable objects found (objects which are
+     not reachable but cannot be freed by the collector).  These objects
+     will be added to the `garbage' list.
+
+`DEBUG_INSTANCES'
+     When `DEBUG_COLLECTABLE' or `DEBUG_UNCOLLECTABLE' is set, print
+     information about instance objects found.
+
+`DEBUG_OBJECTS'
+     When `DEBUG_COLLECTABLE' or `DEBUG_UNCOLLECTABLE' is set, print
+     information about objects other than instance objects found.
+
+`DEBUG_SAVEALL'
+     When set, all unreachable objects found will be appended to
+     GARBAGE rather than being freed.  This can be useful for debugging
+     a leaking program.
+
+`DEBUG_LEAK'
+     The debugging flags necessary for the collector to print
+     information about a leaking program (equal to `DEBUG_COLLECTABLE |
+     DEBUG_UNCOLLECTABLE | DEBUG_INSTANCES | DEBUG_OBJECTS |
+     DEBUG_SAVEALL').
+
+---------- Footnotes ----------
+
+(1) Prior to Python 2.2, the list contained all instance objects in
+unreachable cycles,  not only those with `__del__()' methods.
+
+
+File: python-lib.info,  Node: weakref,  Next: fpectl,  Prev: gc,  Up: Python Runtime Services
+
+Weak references
+===============
+
+Support for weak references and weak dictionaries.
+
+_Added in Python version 2.1_
+
+The `weakref' module allows the Python programmer to create "weak
+references" to objects.
+
+In the discussion which follows, the term "referent" means the object
+which is referred to by a weak reference.
+
+XXX -- need to say more here!
+
+Not all objects can be weakly referenced; those objects which can
+include class instances, functions written in Python (but not in C),
+and methods (both bound and unbound).  Extension types can easily be
+made to support weak references; see section *Note fpectl::, "Weak
+References in Extension Types," for more information.
+
+`ref(object[, callback])'
+     Return a weak reference to OBJECT.  The original object can be
+     retrieved by calling the reference object if the referent is still
+     alive; if the referent is no longer alive, calling the reference
+     object will cause `None' to be returned.  If CALLBACK is provided,
+     it will be called when the object is about to be finalized; the
+     weak reference object will be passed as the only parameter to the
+     callback; the referent will no longer be available.
+
+     It is allowable for many weak references to be constructed for the
+     same object.  Callbacks registered for each weak reference will be
+     called from the most recently registered callback to the oldest
+     registered callback.
+
+     Exceptions raised by the callback will be noted on the standard
+     error output, but cannot be propagated; they are handled in exactly
+     the same way as exceptions raised from an object's `__del__()'
+     method.
+
+     Weak references are hashable if the OBJECT is hashable.  They will
+     maintain their hash value even after the OBJECT was deleted.  If
+     `hash()' is called the first time only after the OBJECT was
+     deleted, the call will raise `TypeError'.
+
+     Weak references support tests for equality, but not ordering.  If
+     the referents are still alive, two references have the same
+     equality relationship as their referents (regardless of the
+     CALLBACK).  If either referent has been deleted, the references
+     are equal only if the reference objects are the same object.
+
+`proxy(object[, callback])'
+     Return a proxy to OBJECT which uses a weak reference.  This
+     supports use of the proxy in most contexts instead of requiring the
+     explicit dereferencing used with weak reference objects.  The
+     returned object will have a type of either `ProxyType' or
+     `CallableProxyType', depending on whether OBJECT is callable.
+     Proxy objects are not hashable regardless of the referent; this
+     avoids a number of problems related to their fundamentally mutable
+     nature, and prevent their use as dictionary keys.  CALLBACK is the
+     same as the parameter of the same name to the `ref()' function.
+
+`getweakrefcount(object)'
+     Return the number of weak references and proxies which refer to
+     OBJECT.
+
+`getweakrefs(object)'
+     Return a list of all weak reference and proxy objects which refer
+     to OBJECT.
+
+`WeakKeyDictionary([dict])'
+     Mapping class that references keys weakly.  Entries in the
+     dictionary will be discarded when there is no longer a strong
+     reference to the key.  This can be used to associate additional
+     data with an object owned by other parts of an application without
+     adding attributes to those objects.  This can be especially useful
+     with objects that override attribute accesses.
+
+`WeakValueDictionary([dict])'
+     Mapping class that references values weakly.  Entries in the
+     dictionary will be discarded when no strong reference to the value
+     exists any more.
+
+`ReferenceType'
+     The type object for weak references objects.
+
+`ProxyType'
+     The type object for proxies of objects which are not callable.
+
+`CallableProxyType'
+     The type object for proxies of callable objects.
+
+`ProxyTypes'
+     Sequence containing all the type objects for proxies.  This can
+     make it simpler to test if an object is a proxy without being
+     dependent on naming both proxy types.
+
+`ReferenceError'
+     Exception raised when a proxy object is used but the underlying
+     object has been collected.  This is the same as the standard
+     `ReferenceError' exception.
+
+See also:
+    *PEP0205 Weak References*
+          The proposal and rationale for this feature, including links
+          to earlier implementations and information about similar
+          features in other languages.
+
+* Menu:
+
+* Weak Reference Objects::
+* Example::
+* Weak References in Extension Types::
+
+
+File: python-lib.info,  Node: Weak Reference Objects,  Next: Example,  Prev: weakref,  Up: weakref
+
+Weak Reference Objects
+----------------------
+
+Weak reference objects have no attributes or methods, but do allow the
+referent to be obtained, if it still exists, by calling it:
+
+     >>> import weakref
+     >>> class Object:
+     ...     pass
+     ...
+     >>> o = Object()
+     >>> r = weakref.ref(o)
+     >>> o2 = r()
+     >>> o is o2
+     1
+
+If the referent no longer exists, calling the reference object returns
+`None':
+
+     >>> del o, o2
+     >>> print r()
+     None
+
+Testing that a weak reference object is still live should be done using
+the expression `REF() is not None'.  Normally, application code that
+needs to use a reference object should follow this pattern:
+
+     # r is a weak reference object
+     o = r()
+     if o is None:
+         # referent has been garbage collected
+         print "Object has been allocated; can't frobnicate."
+     else:
+         print "Object is still live!"
+         o.do_something_useful()
+
+Using a separate test for "liveness" creates race conditions in
+threaded applications; another thread can cause a weak reference to
+become invalidated before the weak reference is called; the idiom shown
+above is safe in threaded applications as well as single-threaded
+applications.
+
+
+File: python-lib.info,  Node: Example,  Next: Weak References in Extension Types,  Prev: Weak Reference Objects,  Up: weakref
+
+Example
+-------
+
+This simple example shows how an application can use objects IDs to
+retrieve objects that it has seen before.  The IDs of the objects can
+then be used in other data structures without forcing the objects to
+remain alive, but the objects can still be retrieved by ID if they do.
+
+     import weakref
+     
+     _id2obj_dict = weakref.WeakValueDictionary()
+     
+     def remember(obj):
+         oid = id(obj)
+         _id2obj_dict[oid] = obj
+         return oid
+     
+     def id2obj(oid):
+         return _id2obj_dict[oid]
+
+
+File: python-lib.info,  Node: Weak References in Extension Types,  Prev: Example,  Up: weakref
+
+Weak References in Extension Types
+----------------------------------
+
+One of the goals of the implementation is to allow any type to
+participate in the weak reference mechanism without incurring the
+overhead on those objects which do not benefit by weak referencing
+(such as numbers).
+
+For an object to be weakly referencable, the extension must include a
+`PyObject*' field in the instance structure for the use of the weak
+reference mechanism; it must be initialized to `NULL' by the object's
+constructor.  It must also set the `tp_weaklistoffset' field of the
+corresponding type object to the offset of the field.  Also, it needs
+to add `Py_TPFLAGS_HAVE_WEAKREFS' to the tp_flags slot.  For example,
+the instance type is defined with the following structure:
+
+     typedef struct {
+         PyObject_HEAD
+         PyClassObject *in_class;       /* The class object */
+         PyObject      *in_dict;        /* A dictionary */
+         PyObject      *in_weakreflist; /* List of weak references */
+     } PyInstanceObject;
+
+The statically-declared type object for instances is defined this way:
+
+     PyTypeObject PyInstance_Type = {
+         PyObject_HEAD_INIT(&PyType_Type)
+         0,
+         "module.instance",
+     
+         /* Lots of stuff omitted for brevity... */
+     
+         Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_WEAKREFS   /* tp_flags */
+         0,                                          /* tp_doc */
+         0,                                          /* tp_traverse */
+         0,                                          /* tp_clear */
+         0,                                          /* tp_richcompare */
+         offsetof(PyInstanceObject, in_weakreflist), /* tp_weaklistoffset */
+     };
+
+The type constructor is responsible for initializing the weak reference
+list to `NULL':
+
+     static PyObject *
+     instance_new() {
+         /* Other initialization stuff omitted for brevity */
+     
+         self->in_weakreflist = NULL;
+     
+         return (PyObject *) self;
+     }
+
+The only further addition is that the destructor needs to call the weak
+reference manager to clear any weak references.  This should be done
+before any other parts of the destruction have occurred, but is only
+required if the weak reference list is non-`NULL':
+
+     static void
+     instance_dealloc(PyInstanceObject *inst)
+     {
+         /* Allocate temporaries if needed, but do not begin
+            destruction just yet.
+          */
+     
+         if (inst->in_weakreflist != NULL)
+             PyObject_ClearWeakRefs((PyObject *) inst);
+     
+         /* Proceed with object destruction normally. */
+     }
+
+
+File: python-lib.info,  Node: fpectl,  Next: atexit,  Prev: weakref,  Up: Python Runtime Services
+
+Floating point exception control
+================================
+
+Provide control for floating point exception handling.
+
+Most computers carry out floating point operations in conformance with
+the so-called IEEE-754 standard.  On any real computer, some floating
+point operations produce results that cannot be expressed as a normal
+floating point value.  For example, try
+
+     >>> import math
+     >>> math.exp(1000)
+     inf
+     >>> math.exp(1000) / math.exp(1000)
+     nan
+
+(The example above will work on many platforms.  DEC Alpha may be one
+exception.)  "Inf" is a special, non-numeric value in IEEE-754 that
+stands for "infinity", and "nan" means "not a number."  Note that,
+other than the non-numeric results, nothing special happened when you
+asked Python to carry out those calculations.  That is in fact the
+default behaviour prescribed in the IEEE-754 standard, and if it works
+for you, stop reading now.
+
+In some circumstances, it would be better to raise an exception and
+stop processing at the point where the faulty operation was attempted.
+The `fpectl' module is for use in that situation.  It provides control
+over floating point units from several hardware manufacturers, allowing
+the user to turn on the generation of `SIGFPE' whenever any of the
+IEEE-754 exceptions Division by Zero, Overflow, or Invalid Operation
+occurs.  In tandem with a pair of wrapper macros that are inserted into
+the C code comprising your python system, `SIGFPE' is trapped and
+converted into the Python `FloatingPointError' exception.
+
+The `fpectl' module defines the following functions and may raise the
+given exception:
+
+`turnon_sigfpe()'
+     Turn on the generation of `SIGFPE', and set up an appropriate
+     signal handler.
+
+`turnoff_sigfpe()'
+     Reset default handling of floating point exceptions.
+
+`FloatingPointError'
+     After `turnon_sigfpe()' has been executed, a floating point
+     operation that raises one of the IEEE-754 exceptions Division by
+     Zero, Overflow, or Invalid operation will in turn raise this
+     standard Python exception.
+
+* Menu:
+
+* Example 2::
+* Limitations and other considerations::
+
+
+File: python-lib.info,  Node: Example 2,  Next: Limitations and other considerations,  Prev: fpectl,  Up: fpectl
+
+Example
+-------
+
+The following example demonstrates how to start up and test operation of
+the `fpectl' module.
+
+     >>> import fpectl
+     >>> import fpetest
+     >>> fpectl.turnon_sigfpe()
+     >>> fpetest.test()
+     overflow        PASS
+     FloatingPointError: Overflow
+     
+     div by 0        PASS
+     FloatingPointError: Division by zero
+       [ more output from test elided ]
+     >>> import math
+     >>> math.exp(1000)
+     Traceback (most recent call last):
+       File "<stdin>", line 1, in ?
+     FloatingPointError: in math_1
+
+
+File: python-lib.info,  Node: Limitations and other considerations,  Prev: Example 2,  Up: fpectl
+
+Limitations and other considerations
+------------------------------------
+
+Setting up a given processor to trap IEEE-754 floating point errors
+currently requires custom code on a per-architecture basis.  You may
+have to modify `fpectl' to control your particular hardware.
+
+Conversion of an IEEE-754 exception to a Python exception requires that
+the wrapper macros `PyFPE_START_PROTECT' and `PyFPE_END_PROTECT' be
+inserted into your code in an appropriate fashion.  Python itself has
+been modified to support the `fpectl' module, but many other codes of
+interest to numerical analysts have not.
+
+The `fpectl' module is not thread-safe.
+
+See also:
+     Some files in the source distribution may be interesting in
+     learning more about how this module operates. The include file
+     `Include/pyfpe.h' discusses the implementation of this module at
+     some length. `Modules/fpetestmodule.c' gives several examples of
+     use. Many additional examples can be found in
+     `Objects/floatobject.c'.
+
+
+File: python-lib.info,  Node: atexit,  Next: types,  Prev: fpectl,  Up: Python Runtime Services
+
+Exit handlers
+=============
+
+Register and execute cleanup functions.
+
+_Added in Python version 2.0_
+
+The `atexit' module defines a single function to register cleanup
+functions.  Functions thus registered are automatically executed upon
+normal interpreter termination.
+
+Note: the functions registered via this module are not called when the
+program is killed by a signal, when a Python fatal internal error is
+detected, or when `os._exit()' is called.
+
+This is an alternate interface to the functionality provided by the
+`sys.exitfunc' variable.
+
+Note: This module is unlikely to work correctly when used with other
+code that sets `sys.exitfunc'.  In particular, other core Python
+modules are free to use `atexit' without the programmer's knowledge.
+Authors who use `sys.exitfunc' should convert their code to use
+`atexit' instead.  The simplest way to convert code that sets
+`sys.exitfunc' is to import `atexit' and register the function that had
+been bound to `sys.exitfunc'.
+
+`register(func[, *args[, **kargs]])'
+     Register FUNC as a function to be executed at termination.  Any
+     optional arguments that are to be passed to FUNC must be passed as
+     arguments to `register()'.
+
+     At normal program termination (for instance, if `sys.exit()' is
+     called or the main module's execution completes), all functions
+     registered are called in last in, first out order.  The assumption
+     is that lower level modules will normally be imported before
+     higher level modules and thus must be cleaned up later.
+
+See also:
+     *Note readline:: Useful example of `atexit' to read and write
+     `readline' history files.
+
+* Menu:
+
+* atexit Example::
+
+
+File: python-lib.info,  Node: atexit Example,  Prev: atexit,  Up: atexit
+
+`atexit' Example
+----------------
+
+The following simple example demonstrates how a module can initialize a
+counter from a file when it is imported and save the counter's updated
+value automatically when the program terminates without relying on the
+application making an explicit call into this module at termination.
+
+     try:
+         _count = int(open("/tmp/counter").read())
+     except IOError:
+         _count = 0
+     
+     def incrcounter(n):
+         global _count
+         _count = _count + n
+     
+     def savecounter():
+         open("/tmp/counter", "w").write("%d" % _count)
+     
+     import atexit
+     atexit.register(savecounter)
+
+Positional and keyword arguments may also be passed to `register()' to
+be passed along to the registered function when it is called:
+
+     def goodbye(name, adjective):
+         print 'Goodbye, %s, it was %s to meet you.' % (name, adjective)
+     
+     import atexit
+     atexit.register(goodbye, 'Donny', 'nice')
+     
+     # or:
+     atexit.register(goodbye, adjective='nice', name='Donny')
+

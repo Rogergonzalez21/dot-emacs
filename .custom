@@ -1,0 +1,77 @@
+(custom-set-variables
+  ;; custom-set-variables was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ '(Man-notify-method (quote newframe))
+ '(comint-input-ignoredups t)
+ '(cvs-auto-remove-handled (quote delayed))
+ '(delete-old-versions t)
+ '(dired-dnd-protocol-alist nil)
+ '(dired-dwim-target nil)
+ '(dired-kept-versions 3)
+ '(dired-listing-switches "-alh")
+ '(dired-omit-size-limit 100000)
+ '(dired-recursive-copies (quote always))
+ '(dired-recursive-deletes (quote top))
+ '(find-grep-options "-q -i")
+ '(focus-follows-mouse nil)
+ '(font-lock-verbose nil)
+ '(glasses-face (quote bold))
+ '(glasses-separate-parentheses-p nil)
+ '(glasses-separator "")
+ '(gnus-play-startup-jingle t)
+ '(history-delete-duplicates t)
+ '(history-length 500)
+ '(ido-max-dir-file-cache 20)
+ '(indent-tabs-mode nil)
+ '(inhibit-startup-screen t)
+ '(initial-scratch-message "news: 
+----
+
+* globally C-x g s/r is bound to `leo-search-my-emacsfiles'/`run-ruby' (22-01-2012)
+* note: C-q can be reached via C-S-q (useful on mac!)
+* in locate buffer: C-x-4 c is bound to locate-find-directory-other-window (13-12-2010)
+* in isearch: C-S-w is bound to `leo-isearch-yank-whole-word' (9-03-2010)
+* in isearch: C-v is bound to `leo-isearch-yank-symbol' (9-03-2010)
+* globally C-x g t/c/d is bound to `twit'/`calculator'/`ediff-buffers' (27-01-2010)
+* in dired `dired-kill-tree' is bound to E-k (23-12-2009)
+
+")
+ '(jde-key-bindings (list (cons "[? ?]" (quote leo-jde-save-compile-run)) (cons "[? ? ?]" (quote jde-run-menu-run-applet)) (cons "[? ? ?]" (quote jde-build)) (cons "[? ? ?]" (quote jde-compile)) (cons "[? ? ?]" (quote jde-debug)) (cons "[? ? ?]" (quote jde-find)) (cons "[? ? ?]" (quote jde-open-class-at-point)) (cons "[? ? ?]" (quote jde-bsh-run)) (cons "[? ? ?]" (quote jde-gen-println)) (cons "[? ? ?]" (quote jde-help-browse-jdk-doc)) (cons "[? ? ?]" (quote jde-save-project)) (cons "[? ? ?]" (quote jde-wiz-update-class-list)) (cons "[? ? ?]" (quote jde-run)) (cons "[? ? ?]" (quote speedbar-frame-mode)) (cons "[? ? ?]" (quote jde-jdb-menu-debug-applet)) (cons "[? ? ?]" (quote jde-help-symbol)) (cons "[? ? ?]" (quote jde-show-superclass-source)) (cons "[? ? ?]" (quote jde-open-class-at-point)) (cons "[? ? ?]" (quote jde-import-find-and-import)) (cons "[? ? ?e]" (quote jde-wiz-extend-abstract-class)) (cons "[? ? ?f]" (quote jde-gen-try-finally-wrapper)) (cons "[? ? ?i]" (quote jde-wiz-implement-interface)) (cons "[? ? ?j]" (quote jde-javadoc-autodoc-at-line)) (cons "[? ? ?o]" (quote jde-wiz-override-method)) (cons "[? ? ?t]" (quote jde-gen-try-catch-wrapper)) (cons "[? ? ?z]" (quote jde-import-all)) (cons "[? ? ?]" (quote jde-run-etrace-prev)) (cons "[? ? ?]" (quote jde-run-etrace-next)) (cons "[(control c) (control v) (control ?.)]" (quote jde-complete)) (cons "[(control c) (control v) ?.]" (quote jde-complete-in-line))))
+ '(kept-new-versions 3)
+ '(kill-read-only-ok t)
+ '(leo-locate-basename-only t)
+ '(ls-lisp-verbosity (quote (links)))
+ '(recentf-initialize-file-name-history nil)
+ '(recentf-keep-non-readable-files-flag t)
+ '(safe-local-variable-values (quote ((dired-actual-switches . "-alhR") (dired-actual-switches . "-laht") (leo-dired-dont-omit . t) (dired-omit-mode . t) (dired-actual-switches . "-alR"))))
+ '(savehist-autosave-interval 60)
+ '(uniquify-buffer-name-style (quote post-forward) nil (uniquify))
+ '(version-control t)
+ '(visible-bell t))
+(custom-set-faces
+  ;; custom-set-faces was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ '(comint-highlight-input ((t (:foreground "dark green" :weight bold))))
+ '(comint-highlight-prompt ((t (:foreground "dark green" :weight bold))))
+ '(dired-flagged ((t (:foreground "firebrick" :weight bold))))
+ '(dired-header ((t (:foreground "ForestGreen" :weight bold))))
+ '(dired-marked ((t (:foreground "black" :weight bold))))
+ '(dired-symlink ((t (:inherit default))))
+ '(font-lock-string-face ((((class color) (background light)) (:foreground "black"))))
+ '(isearch ((((class color) (background light)) (:background "yellow"))))
+ '(lazy-highlight ((((class color) (background light)) (:background "khaki"))))
+ '(locate-header ((t (:foreground "black" :slant italic))))
+ '(region ((((class color) (background light)) (:background "DarkGrey")))))
+
+;;
+;; emacs itself's defs go here
+;;
+(put 'dired-find-alternate-file 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+

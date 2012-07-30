@@ -1,0 +1,465 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: Class-Exception-Object Index,  Next: Function-Method-Variable Index,  Prev: Module Index,  Up: Top
+
+Class, Exception, and Object Index
+**********************************
+
+* Menu:
+
+* AbstractBasicAuthHandler:              urllib2.
+* AbstractDigestAuthHandler:             urllib2.
+* AbstractFormatter:                     Formatter Implementations.
+* AbstractWriter:                        Writer Implementations.
+* AddressList:                           rfc822.
+* ArithmeticError:                       Built-in Exceptions.
+* AssertionError:                        Built-in Exceptions.
+* ASTVisitor:                            Using Visitors to Walk ASTs.
+* async_chat:                            asynchat.
+* AttributeError:                        Built-in Exceptions.
+* AttributesImpl:                        xmlsaxxmlreader.
+* AttributesNSImpl:                      xmlsaxxmlreader.
+* BabylMailbox:                          mailbox.
+* BadStatusLine:                         httplib.
+* Balloon:                               Basic Widgets.
+* BaseCookie:                            Cookie.
+* BaseHandler:                           urllib2.
+* BaseHTTPRequestHandler:                BaseHTTPServer.
+* BastionClass:                          Bastion.
+* Boolean:                               Numeric Types.
+* BoundaryError:                         Exception classes.
+* BsdDbShelf:                            Restrictions.
+* buffer:                                Sequence Types.
+* BufferingHandler:                      MemoryHandler.
+* ButtonBox:                             Basic Widgets.
+* BZ2Compressor:                         Sequential decompression.
+* BZ2Decompressor:                       Sequential decompression.
+* BZ2File:                               Decompression of files.
+* CacheFTPHandler:                       urllib2.
+* CannotSendHeader:                      httplib.
+* CannotSendRequest:                     httplib.
+* CGIHTTPRequestHandler:                 CGIHTTPServer.
+* CGIXMLRPCRequestHandler:               SimpleXMLRPCServer.
+* Charset:                               Representing character sets.
+* CheckList:                             Hierachical ListBox.
+* Chunk:                                 chunk.
+* Cmd:                                   cmd.
+* code <1>:                              marshal.
+* code <2>:                              Code Objects.
+* code:                                  Functions.
+* ComboBox:                              Basic Widgets.
+* CommandCompiler:                       codeop.
+* Compile:                               codeop.
+* complex number:                        Numeric Types.
+* CompressionError:                      tarfile.
+* Condition:                             Condition Objects.
+* ConfigParser:                          ConfigParser.
+* ContentHandler:                        xmlsaxhandler.
+* Control:                               Basic Widgets.
+* ConversionError:                       Exceptions.
+* CookieError:                           Cookie.
+* DatagramHandler:                       DatagramHandler.
+* date <1>:                              date Objects.
+* date:                                  Available Types.
+* datetime <1>:                          datetime Objects.
+* datetime:                              Available Types.
+* DbfilenameShelf:                       Restrictions.
+* DecodedGenerator:                      Generating MIME documents.
+* DeprecationWarning:                    Built-in Exceptions.
+* Dialect:                               Module Contents 3.
+* dictionary:                            Mapping Types.
+* DictMixin:                             UserDict.
+* DictReader:                            Module Contents 3.
+* DictWriter:                            Module Contents 3.
+* Differ <1>:                            Differ Objects.
+* Differ:                                difflib.
+* dircmp:                                dircmp class.
+* DirList:                               File Selectors.
+* DirSelectBox:                          File Selectors.
+* DirSelectDialog:                       File Selectors.
+* DirTree:                               File Selectors.
+* dispatcher:                            asyncore.
+* DocCGIXMLRPCRequestHandler:            DocXMLRPCServer.
+* DocXMLRPCRequestHandler:               DocXMLRPCServer.
+* DocXMLRPCServer:                       DocXMLRPCServer.
+* DOMEventStream:                        xmldompulldom.
+* DOMException:                          Exceptions 2.
+* DomstringSizeErr:                      Exceptions 2.
+* DTDHandler:                            xmlsaxhandler.
+* DumbWriter:                            Writer Implementations.
+* DuplicateSectionError:                 ConfigParser.
+* Empty:                                 Queue.
+* EntityResolver:                        xmlsaxhandler.
+* EnvironmentError:                      Built-in Exceptions.
+* EOFError:                              Built-in Exceptions.
+* error <1>:                             sunaudiodev.
+* error <2>:                             jpeg.
+* error <3>:                             imgfile.
+* error:                                 cd.
+* Error:                                 turtle.
+* error:                                 rgbimg.
+* Error <1>:                             wave.
+* Error:                                 sunau.
+* error <1>:                             imageop.
+* error <2>:                             audioop.
+* error:                                 xmlparsersexpat.
+* Error <1>:                             Module Contents 3.
+* Error <2>:                             Exceptions.
+* Error <3>:                             uu.
+* Error <4>:                             binhex.
+* Error <5>:                             binascii.
+* Error:                                 webbrowser.
+* error <1>:                             nis.
+* error <2>:                             resource.
+* error <3>:                             gdbm.
+* error <4>:                             dbm.
+* error <5>:                             dl.
+* error <6>:                             zipfile.
+* error <7>:                             zlib.
+* error <8>:                             dumbdbm.
+* error <9>:                             dbhash.
+* error <10>:                            anydbm.
+* error <11>:                            thread.
+* error <12>:                            select.
+* error:                                 socket.
+* Error <1>:                             locale.
+* Error:                                 shutil.
+* error <1>:                             getopt.
+* error <2>:                             Functions 2.
+* error <3>:                             os.
+* error <4>:                             struct.
+* error:                                 Contents of Module re.
+* error_perm:                            ftplib.
+* error_proto <1>:                       poplib.
+* error_proto:                           ftplib.
+* error_reply:                           ftplib.
+* error_temp:                            ftplib.
+* ErrorHandler:                          xmlsaxhandler.
+* Event:                                 Event Objects.
+* Exception:                             Built-in Exceptions.
+* ExFileSelectBox:                       File Selectors.
+* ExpatError:                            xmlparsersexpat.
+* ExtractError:                          tarfile.
+* FancyURLopener:                        urllib.
+* fifo:                                  asynchat - Auxiliary Classes and Functions.
+* file:                                  File Objects.
+* FileEntry:                             File Selectors.
+* FileHandler <1>:                       urllib2.
+* FileHandler:                           FileHandler.
+* FileInput:                             fileinput.
+* FileSelectBox:                         File Selectors.
+* Filter:                                Filter Objects.
+* floating point:                        Numeric Types.
+* FloatingPointError <1>:                fpectl.
+* FloatingPointError:                    Built-in Exceptions.
+* Folder:                                mhlib.
+* Form:                                  Form Geometry Manager.
+* Formatter:                             Formatter Objects.
+* frame:                                 signal.
+* FTP:                                   ftplib.
+* FTPHandler:                            urllib2.
+* Full:                                  Queue.
+* FunctionTestCase:                      Classes and functions 2.
+* FutureWarning:                         Built-in Exceptions.
+* gaierror:                              socket.
+* Generator:                             Generating MIME documents.
+* GetoptError:                           getopt.
+* GopherError:                           urllib2.
+* GopherHandler:                         urllib2.
+* GzipFile:                              gzip.
+* Header:                                Internationalized headers.
+* HeaderParseError:                      Exception classes.
+* herror:                                socket.
+* HierarchyRequestErr:                   Exceptions 2.
+* HList:                                 Hierachical ListBox.
+* HTMLParser <1>:                        htmllib.
+* HTMLParser:                            HTMLParser.
+* HTTPBasicAuthHandler:                  urllib2.
+* HTTPConnection:                        httplib.
+* HTTPDefaultErrorHandler:               urllib2.
+* HTTPDigestAuthHandler:                 urllib2.
+* HTTPError:                             urllib2.
+* HTTPException:                         httplib.
+* HTTPHandler <1>:                       urllib2.
+* HTTPHandler:                           HTTPHandler.
+* HTTPPasswordMgr:                       urllib2.
+* HTTPPasswordMgrWithDefaultRealm:       urllib2.
+* HTTPRedirectHandler:                   urllib2.
+* HTTPResponse:                          httplib.
+* HTTPSConnection:                       httplib.
+* HTTPServer:                            BaseHTTPServer.
+* HTTPSHandler:                          urllib2.
+* IMAP4:                                 imaplib.
+* IMAP4.abort:                           imaplib.
+* IMAP4.error:                           imaplib.
+* IMAP4.readonly:                        imaplib.
+* IMAP4_SSL:                             imaplib.
+* IMAP4_stream:                          imaplib.
+* ImmutableSet:                          sets.
+* ImportError:                           Built-in Exceptions.
+* ImproperConnectionState:               httplib.
+* Incomplete:                            binascii.
+* IncompleteRead:                        httplib.
+* IncrementalParser:                     xmlsaxxmlreader.
+* IndexError:                            Built-in Exceptions.
+* IndexSizeErr:                          Exceptions 2.
+* InputOnly:                             Miscellaneous Widgets.
+* InputSource:                           xmlsaxxmlreader.
+* integer:                               Numeric Types.
+* InteractiveConsole:                    code.
+* InteractiveInterpreter:                code.
+* InterpolationDepthError:               ConfigParser.
+* InterpolationError:                    ConfigParser.
+* InterpolationMissingOptionError:       ConfigParser.
+* InterpolationSyntaxError:              ConfigParser.
+* InuseAttributeErr:                     Exceptions 2.
+* InvalidAccessErr:                      Exceptions 2.
+* InvalidCharacterErr:                   Exceptions 2.
+* InvalidModificationErr:                Exceptions 2.
+* InvalidStateErr:                       Exceptions 2.
+* InvalidURL:                            httplib.
+* IOError:                               Built-in Exceptions.
+* KeyboardInterrupt:                     Built-in Exceptions.
+* KeyError:                              Built-in Exceptions.
+* LabelEntry:                            Basic Widgets.
+* LabelFrame:                            Basic Widgets.
+* list <1>:                              Mutable Sequence Types.
+* list:                                  Sequence Types.
+* ListNoteBook:                          Manager Widgets.
+* Locator:                               xmlsaxxmlreader.
+* LogRecord:                             LogRecord Objects.
+* long integer:                          Numeric Types.
+* LookupError:                           Built-in Exceptions.
+* Maildir:                               mailbox.
+* mapping:                               Mapping Types.
+* MemoryError:                           Built-in Exceptions.
+* MemoryHandler:                         MemoryHandler.
+* Message <1>:                           rfc822.
+* Message <2>:                           mimetools.
+* Message <3>:                           mhlib.
+* Message:                               Representing an email message.
+* MessageError:                          Exception classes.
+* MessageParseError:                     Exception classes.
+* Meter:                                 Basic Widgets.
+* method:                                Methods.
+* MH:                                    mhlib.
+* MHMailbox:                             mailbox.
+* MIMEAudio:                             Creating email and MIME objects from scratch.
+* MIMEBase:                              Creating email and MIME objects from scratch.
+* MIMEImage:                             Creating email and MIME objects from scratch.
+* MIMEMessage:                           Creating email and MIME objects from scratch.
+* MIMEMultipart:                         Creating email and MIME objects from scratch.
+* MIMENonMultipart:                      Creating email and MIME objects from scratch.
+* MIMEText:                              Creating email and MIME objects from scratch.
+* MimeTypes:                             mimetypes.
+* MimeWriter:                            MimeWriter.
+* MissingSectionHeaderError:             ConfigParser.
+* MmdfMailbox:                           mailbox.
+* Morsel:                                Morsel Objects.
+* MultiFile:                             multifile.
+* MultipartConversionError:              Exception classes.
+* MutableString:                         UserString.
+* mutex:                                 mutex.
+* NameError:                             Built-in Exceptions.
+* NamespaceErr:                          Exceptions 2.
+* NannyNag:                              tabnanny.
+* netrc:                                 netrc.
+* NetrcParseError:                       netrc.
+* NNTP:                                  nntplib.
+* NNTPDataError:                         nntplib.
+* NNTPError:                             nntplib.
+* NNTPPermanentError:                    nntplib.
+* NNTPProtocolError:                     nntplib.
+* NNTPReplyError:                        nntplib.
+* NNTPTemporaryError:                    nntplib.
+* NoDataAllowedErr:                      Exceptions 2.
+* Node:                                  AST Nodes.
+* NoModificationAllowedErr:              Exceptions 2.
+* NoOptionError:                         ConfigParser.
+* NoSectionError:                        ConfigParser.
+* NotANumber:                            fpformat.
+* NotConnected:                          httplib.
+* NoteBook:                              Manager Widgets.
+* NotFoundErr:                           Exceptions 2.
+* NotImplementedError:                   Built-in Exceptions.
+* NotSupportedErr:                       Exceptions 2.
+* NTEventLogHandler:                     NTEventLogHandler.
+* NullFormatter:                         Formatter Implementations.
+* NullWriter:                            Writer Implementations.
+* numeric:                               Numeric Types.
+* OpenerDirector:                        urllib2.
+* OptionMenu:                            Basic Widgets.
+* OSError:                               Built-in Exceptions.
+* OSSAudioError:                         ossaudiodev.
+* OverflowError:                         Built-in Exceptions.
+* Packer:                                xdrlib.
+* PanedWindow:                           Manager Widgets.
+* Parser:                                Parser class API.
+* ParserError:                           Exceptions and Error Handling.
+* ParsingError:                          ConfigParser.
+* Pen:                                   turtle.
+* PendingDeprecationWarning:             Built-in Exceptions.
+* PickleError:                           Usage.
+* Pickler:                               Usage.
+* PicklingError:                         Usage.
+* POP3:                                  poplib.
+* Popen3:                                popen2.
+* Popen4:                                popen2.
+* PopupMenu:                             Basic Widgets.
+* PortableUnixMailbox:                   mailbox.
+* PrettyPrinter:                         pprint.
+* Profile:                               hotshot.
+* ProxyBasicAuthHandler:                 urllib2.
+* ProxyDigestAuthHandler:                urllib2.
+* ProxyHandler:                          urllib2.
+* PullDOM:                               xmldompulldom.
+* PyCompileError:                        py_compile.
+* PyZipFile:                             zipfile.
+* Queue:                                 Queue.
+* RawConfigParser:                       ConfigParser.
+* RawPen:                                turtle.
+* ReadError:                             tarfile.
+* ReferenceError <1>:                    weakref.
+* ReferenceError:                        Built-in Exceptions.
+* Repr:                                  repr.
+* Request:                               urllib2.
+* ResourceDenied:                        testtest_support.
+* ResponseNotReady:                      httplib.
+* RExec:                                 rexec.
+* RobotFileParser:                       robotparser.
+* RotatingFileHandler:                   RotatingFileHandler.
+* RuntimeError:                          Built-in Exceptions.
+* RuntimeWarning:                        Built-in Exceptions.
+* SafeConfigParser:                      ConfigParser.
+* SAX2DOM:                               xmldompulldom.
+* SAXException:                          xmlsax.
+* SAXNotRecognizedException:             xmlsax.
+* SAXNotSupportedException:              xmlsax.
+* SAXParseException:                     xmlsax.
+* scheduler:                             sched.
+* Select:                                Basic Widgets.
+* Semaphore:                             Semaphore Objects.
+* sequence:                              Sequence Types.
+* SequenceMatcher <1>:                   SequenceMatcher Objects.
+* SequenceMatcher:                       difflib.
+* SerialCookie:                          Cookie.
+* ServerProxy:                           xmlrpclib.
+* Set:                                   sets.
+* SGMLParser:                            sgmllib.
+* Shelf:                                 Restrictions.
+* shlex:                                 Module Contents.
+* simple_producer:                       asynchat - Auxiliary Classes and Functions.
+* SimpleCookie:                          Cookie.
+* SimpleHTTPRequestHandler:              SimpleHTTPServer.
+* SimpleXMLRPCRequestHandler:            SimpleXMLRPCServer.
+* SimpleXMLRPCServer:                    SimpleXMLRPCServer.
+* SmartCookie:                           Cookie.
+* SMTP:                                  smtplib.
+* SMTPConnectError:                      smtplib.
+* SMTPDataError:                         smtplib.
+* SMTPException:                         smtplib.
+* SMTPHandler:                           SMTPHandler.
+* SMTPHeloError:                         smtplib.
+* SMTPRecipientsRefused:                 smtplib.
+* SMTPResponseException:                 smtplib.
+* SMTPSenderRefused:                     smtplib.
+* SMTPServerDisconnected:                smtplib.
+* Sniffer:                               Module Contents 3.
+* socket:                                socket.
+* SocketHandler:                         SocketHandler.
+* StandardError:                         Built-in Exceptions.
+* Stats:                                 Reference Manual.
+* StdButtonBox:                          Basic Widgets.
+* StopIteration:                         Built-in Exceptions.
+* StreamError:                           tarfile.
+* StreamHandler:                         StreamHandler.
+* StreamReader:                          StreamReader Objects.
+* StreamReaderWriter:                    StreamReaderWriter Objects.
+* StreamRecoder:                         StreamRecoder Objects.
+* StreamWriter:                          StreamWriter Objects.
+* string:                                Sequence Types.
+* StringIO:                              StringIO.
+* SyntaxErr:                             Exceptions 2.
+* SyntaxError:                           Built-in Exceptions.
+* SyntaxWarning:                         Built-in Exceptions.
+* SysLogHandler:                         SysLogHandler.
+* SystemError:                           Built-in Exceptions.
+* SystemExit:                            Built-in Exceptions.
+* TarError:                              tarfile.
+* TarFile <1>:                           TarFile Objects.
+* TarFile:                               tarfile.
+* TarFileCompat:                         tarfile.
+* TarInfo:                               TarInfo Objects.
+* Telnet:                                telnetlib.
+* Template:                              pipes.
+* TestCase:                              Classes and functions 2.
+* TestFailed:                            testtest_support.
+* TestLoader:                            Classes and functions 2.
+* TestSkipped:                           testtest_support.
+* TestSuite:                             Classes and functions 2.
+* Textbox:                               Textbox objects.
+* TextTestRunner:                        Classes and functions 2.
+* TextWrapper:                           textwrap.
+* Thread <1>:                            Thread Objects.
+* Thread:                                threading.
+* time <1>:                              time Objects.
+* time:                                  Available Types.
+* timedelta <1>:                         timedelta Objects.
+* timedelta:                             Available Types.
+* timeout:                               socket.
+* Timer <1>:                             timeit.
+* Timer <2>:                             Timer Objects.
+* Timer:                                 threading.
+* Tix:                                   Using Tix.
+* tixCommand:                            Tix Commands.
+* Tk:                                    Tkinter Modules.
+* TList:                                 Tabular ListBox.
+* traceback <1>:                         traceback.
+* traceback:                             sys.
+* Tree:                                  Hierachical ListBox.
+* tuple:                                 Sequence Types.
+* type:                                  Built-in Functions.
+* TypeError:                             Built-in Exceptions.
+* tzinfo:                                Available Types.
+* UnboundLocalError:                     Built-in Exceptions.
+* Unicode:                               Sequence Types.
+* UnicodeDecodeError:                    Built-in Exceptions.
+* UnicodeEncodeError:                    Built-in Exceptions.
+* UnicodeError:                          Built-in Exceptions.
+* UnicodeTranslateError:                 Built-in Exceptions.
+* UnimplementedFileMode:                 httplib.
+* UnixMailbox:                           mailbox.
+* UnknownHandler:                        urllib2.
+* UnknownProtocol:                       httplib.
+* UnknownTransferEncoding:               httplib.
+* Unpacker:                              xdrlib.
+* Unpickler:                             Usage.
+* UnpicklingError:                       Usage.
+* URLError:                              urllib2.
+* URLopener:                             urllib.
+* UserDict:                              UserDict.
+* UserList:                              UserList.
+* UserString:                            UserString.
+* UserWarning:                           Built-in Exceptions.
+* ValueError:                            Built-in Exceptions.
+* Warning:                               Built-in Exceptions.
+* WeakKeyDictionary:                     weakref.
+* WeakValueDictionary:                   weakref.
+* WichmannHill:                          random.
+* WindowsError:                          Built-in Exceptions.
+* WrongDocumentErr:                      Exceptions 2.
+* XMLFilterBase:                         xmlsaxsaxutils.
+* XMLGenerator:                          xmlsaxsaxutils.
+* XMLParser:                             xmllib.
+* XMLReader:                             xmlsaxxmlreader.
+* xrange <1>:                            XRange Type.
+* xrange:                                Sequence Types.
+* ZeroDivisionError:                     Built-in Exceptions.
+* ZipFile <1>:                           ZipFile Objects.
+* ZipFile:                               zipfile.
+* ZipInfo:                               zipfile.
+

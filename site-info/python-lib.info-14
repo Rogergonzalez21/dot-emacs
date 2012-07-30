@@ -1,0 +1,1162 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: Example 5,  Next: Protocol for automatic conversion to immutable,  Prev: Set Objects,  Up: sets
+
+Example
+-------
+
+     >>> from sets import Set
+     >>> engineers = Set(['John', 'Jane', 'Jack', 'Janice'])
+     >>> programmers = Set(['Jack', 'Sam', 'Susan', 'Janice'])
+     >>> managers = Set(['Jane', 'Jack', 'Susan', 'Zack'])
+     >>> employees = engineers | programmers | managers           # union
+     >>> engineering_management = engineers & managers            # intersection
+     >>> fulltime_management = managers - engineers - programmers # difference
+     >>> engineers.add('Marvin')                                  # add element
+     >>> print engineers
+     Set(['Jane', 'Marvin', 'Janice', 'John', 'Jack'])
+     >>> employees.issuperset(engineers)           # superset test
+     False
+     >>> employees.union_update(engineers)         # update from another set
+     >>> employees.issuperset(engineers)
+     True
+     >>> for group in [engineers, programmers, management, employees]:
+     ...     group.discard('Susan')                # unconditionally remove element
+     ...     print group
+     ...
+     Set(['Jane', 'Marvin', 'Janice', 'John', 'Jack'])
+     Set(['Janice', 'Jack', 'Sam'])
+     Set(['Jane', 'Zack', 'Jack'])
+     Set(['Jack', 'Sam', 'Jane', 'Marvin', 'Janice', 'John', 'Zack'])
+
+
+File: python-lib.info,  Node: Protocol for automatic conversion to immutable,  Prev: Example 5,  Up: sets
+
+Protocol for automatic conversion to immutable
+----------------------------------------------
+
+Sets can only contain immutable elements.  For convenience, mutable
+`Set' objects are automatically copied to an `ImmutableSet' before
+being added as a set element.
+
+The mechanism is to always add a hashable element, or if it is not
+hashable, the element is checked to see if it has an
+`__as_immutable__()' method which returns an immutable equivalent.
+
+Since `Set' objects have a `__as_immutable__()' method returning an
+instance of `ImmutableSet', it is possible to construct sets of sets.
+
+A similar mechanism is needed by the `__contains__()' and `remove()'
+methods which need to hash an element to check for membership in a set.
+Those methods check an element for hashability and, if not, check for
+a `__as_temporarily_immutable__()' method which returns the element
+wrapped by a class that provides temporary methods for `__hash__()',
+`__eq__()', and `__ne__()'.
+
+The alternate mechanism spares the need to build a separate copy of the
+original mutable object.
+
+`Set' objects implement the `__as_temporarily_immutable__()' method
+which returns the `Set' object wrapped by a new class
+`_TemporarilyImmutableSet'.
+
+The two mechanisms for adding hashability are normally invisible to the
+user; however, a conflict can arise in a multi-threaded environment
+where one thread is updating a set while another has temporarily
+wrapped it in `_TemporarilyImmutableSet'.  In other words, sets of
+mutable sets are not thread-safe.
+
+
+File: python-lib.info,  Node: itertools,  Next: ConfigParser,  Prev: sets,  Up: Miscellaneous Services
+
+Functions creating iterators for efficient looping
+==================================================
+
+Functions creating iterators for efficient looping.
+
+_Added in Python version 2.3_
+
+This module implements a number of iterator building blocks inspired by
+constructs from the Haskell and SML programming languages.  Each has
+been recast in a form suitable for Python.
+
+The module standardizes a core set of fast, memory efficient tools that
+are useful by themselves or in combination.  Standardization helps
+avoid the readability and reliability problems which arise when many
+different individuals create their own slightly varying implementations,
+each with their own quirks and naming conventions.
+
+The tools are designed to combine readily with one another.  This makes
+it easy to construct more specialized tools succinctly and efficiently
+in pure Python.
+
+For instance, SML provides a tabulation tool: `tabulate(f)' which
+produces a sequence `f(0), f(1), ...'.  This toolbox provides `imap()'
+and `count()' which can be combined to form `imap(f, count())' and
+produce an equivalent result.
+
+Likewise, the functional tools are designed to work well with the
+high-speed functions provided by the `operator' module.
+
+The module author welcomes suggestions for other basic building blocks
+to be added to future versions of the module.
+
+Whether cast in pure python form or C code, tools that use iterators
+are more memory efficient (and faster) than their list based
+counterparts.  Adopting the principles of just-in-time manufacturing,
+they create data when and where needed instead of consuming memory with
+the computer equivalent of "inventory".
+
+The performance advantage of iterators becomes more acute as the number
+of elements increases - at some point, lists grow large enough to
+severely impact memory cache performance and start running slowly.
+
+See also:
+     The Standard ML Basis Library, .
+
+     Haskell, A Purely Functional Language, .
+
+* Menu:
+
+* Itertool functions::
+* Examples 3::
+
+
+File: python-lib.info,  Node: Itertool functions,  Next: Examples 3,  Prev: itertools,  Up: itertools
+
+Itertool functions
+------------------
+
+The following module functions all construct and return iterators.
+Some provide streams of infinite length, so they should only be accessed
+by functions or loops that truncate the stream.
+
+`chain(*iterables)'
+     Make an iterator that returns elements from the first iterable
+     until it is exhausted, then proceeds to the next iterable, until
+     all of the iterables are exhausted.  Used for treating consecutive
+     sequences as a single sequence.  Equivalent to:
+
+               def chain(*iterables):
+                   for it in iterables:
+                       for element in it:
+                           yield element
+
+`count([n])'
+     Make an iterator that returns consecutive integers starting with N.
+     Does not currently support python long integers.  Often used as an
+     argument to `imap()' to generate consecutive data points.  Also,
+     used with `izip()' to add sequence numbers.  Equivalent to:
+
+               def count(n=0):
+                   while True:
+                       yield n
+                       n += 1
+
+     Note, `count()' does not check for overflow and will return
+     negative numbers after exceeding `sys.maxint'.  This behavior may
+     change in the future.
+
+`cycle(iterable)'
+     Make an iterator returning elements from the iterable and saving a
+     copy of each.  When the iterable is exhausted, return elements from
+     the saved copy.  Repeats indefinitely.  Equivalent to:
+
+               def cycle(iterable):
+                   saved = []
+                   for element in iterable:
+                       yield element
+                       saved.append(element)
+                   while saved:
+                       for element in saved:
+                             yield element
+
+     Note, this is the only member of the toolkit that may require
+     significant auxiliary storage (depending on the length of the
+     iterable).
+
+`dropwhile(predicate, iterable)'
+     Make an iterator that drops elements from the iterable as long as
+     the predicate is true; afterwards, returns every element.  Note,
+     the iterator does not produce _any_ output until the predicate is
+     true, so it may have a lengthy start-up time.  Equivalent to:
+
+               def dropwhile(predicate, iterable):
+                   iterable = iter(iterable)
+                   for x in iterable:
+                       if not predicate(x):
+                           yield x
+                           break
+                   for x in iterable:
+                       yield x
+
+`ifilter(predicate, iterable)'
+     Make an iterator that filters elements from iterable returning only
+     those for which the predicate is `True'.  If PREDICATE is `None',
+     return the items that are true.  Equivalent to:
+
+               def ifilter(predicate, iterable):
+                   if predicate is None:
+                       def predicate(x):
+                           return x
+                   for x in iterable:
+                       if predicate(x):
+                           yield x
+
+`ifilterfalse(predicate, iterable)'
+     Make an iterator that filters elements from iterable returning only
+     those for which the predicate is `False'.  If PREDICATE is `None',
+     return the items that are false.  Equivalent to:
+
+               def ifilterfalse(predicate, iterable):
+                   if predicate is None:
+                       def predicate(x):
+                           return x
+                   for x in iterable:
+                       if not predicate(x):
+                           yield x
+
+`imap(function, *iterables)'
+     Make an iterator that computes the function using arguments from
+     each of the iterables.  If FUNCTION is set to `None', then
+     `imap()' returns the arguments as a tuple.  Like `map()' but stops
+     when the shortest iterable is exhausted instead of filling in
+     `None' for shorter iterables.  The reason for the difference is
+     that infinite iterator arguments are typically an error for
+     `map()' (because the output is fully evaluated) but represent a
+     common and useful way of supplying arguments to `imap()'.
+     Equivalent to:
+
+               def imap(function, *iterables):
+                   iterables = map(iter, iterables)
+                   while True:
+                       args = [i.next() for i in iterables]
+                       if function is None:
+                           yield tuple(args)
+                       else:
+                           yield function(*args)
+
+`islice(iterable, [start,] stop [, step])'
+     Make an iterator that returns selected elements from the iterable.
+     If START is non-zero, then elements from the iterable are skipped
+     until start is reached.  Afterward, elements are returned
+     consecutively unless STEP is set higher than one which results in
+     items being skipped.  If STOP is `None', then iteration continues
+     until the iterator is exhausted, if at all; otherwise, it stops at
+     the specified position.  Unlike regular slicing, `islice()' does
+     not support negative values for START, STOP, or STEP.  Can be used
+     to extract related fields from data where the internal structure
+     has been flattened (for example, a multi-line report may list a
+     name field on every third line).  Equivalent to:
+
+               def islice(iterable, *args):
+                   s = slice(*args)
+                   next, stop, step = s.start or 0, s.stop, s.step or 1
+                   for cnt, element in enumerate(iterable):
+                       if cnt < next:
+                           continue
+                       if stop is not None and cnt >= stop:
+                           break
+                       yield element
+                       next += step
+
+`izip(*iterables)'
+     Make an iterator that aggregates elements from each of the
+     iterables.  Like `zip()' except that it returns an iterator
+     instead of a list.  Used for lock-step iteration over several
+     iterables at a time.  Equivalent to:
+
+               def izip(*iterables):
+                   iterables = map(iter, iterables)
+                   while iterables:
+                       result = [i.next() for i in iterables]
+                       yield tuple(result)
+
+     _Changed in Python version 2.3.1_
+
+`repeat(object[, times])'
+     Make an iterator that returns OBJECT over and over again.  Runs
+     indefinitely unless the TIMES argument is specified.  Used as
+     argument to `imap()' for invariant parameters to the called
+     function.  Also used with `izip()' to create an invariant part of
+     a tuple record.  Equivalent to:
+
+               def repeat(object, times=None):
+                   if times is None:
+                       while True:
+                           yield object
+                   else:
+                       for i in xrange(times):
+                           yield object
+
+`starmap(function, iterable)'
+     Make an iterator that computes the function using arguments tuples
+     obtained from the iterable.  Used instead of `imap()' when
+     argument parameters are already grouped in tuples from a single
+     iterable (the data has been "pre-zipped").  The difference between
+     `imap()' and `starmap()' parallels the distinction between
+     `function(a,b)' and `function(*c)'.  Equivalent to:
+
+               def starmap(function, iterable):
+                   iterable = iter(iterable)
+                   while True:
+                       yield function(*iterable.next())
+
+`takewhile(predicate, iterable)'
+     Make an iterator that returns elements from the iterable as long as
+     the predicate is true.  Equivalent to:
+
+               def takewhile(predicate, iterable):
+                   for x in iterable:
+                       if predicate(x):
+                           yield x
+                       else:
+                           break
+
+
+File: python-lib.info,  Node: Examples 3,  Prev: Itertool functions,  Up: itertools
+
+Examples
+--------
+
+The following examples show common uses for each tool and demonstrate
+ways they can be combined.
+
+
+     >>> amounts = [120.15, 764.05, 823.14]
+     >>> for checknum, amount in izip(count(1200), amounts):
+     ...     print 'Check %d is for $%.2f' % (checknum, amount)
+     ...
+     Check 1200 is for $120.15
+     Check 1201 is for $764.05
+     Check 1202 is for $823.14
+     
+     >>> import operator
+     >>> for cube in imap(operator.pow, xrange(1,4), repeat(3)):
+     ...    print cube
+     ...
+     1
+     8
+     27
+     
+     >>> reportlines = ['EuroPython', 'Roster', '', 'alex', '', 'laura',
+                       '', 'martin', '', 'walter', '', 'samuele']
+     >>> for name in islice(reportlines, 3, None, 2):
+     ...    print name.title()
+     ...
+     Alex
+     Laura
+     Martin
+     Walter
+     Samuele
+
+This section shows how itertools can be combined to create other more
+powerful itertools.  Note that `enumerate()' and `iteritems()' already
+have efficient implementations in Python.  They are only included here
+to illustrate how higher level tools can be created from building
+blocks.
+
+     def take(n, seq):
+         return list(islice(seq, n))
+     
+     def enumerate(iterable):
+         return izip(count(), iterable)
+     
+     def tabulate(function):
+         "Return function(0), function(1), ..."
+         return imap(function, count())
+     
+     def iteritems(mapping):
+         return izip(mapping.iterkeys(), mapping.itervalues())
+     
+     def nth(iterable, n):
+         "Returns the nth item"
+         return list(islice(iterable, n, n+1))
+     
+     def all(pred, seq):
+         "Returns True if pred(x) is True for every element in the iterable"
+         return False not in imap(pred, seq)
+     
+     def some(pred, seq):
+         "Returns True if pred(x) is True at least one element in the iterable"
+         return True in imap(pred, seq)
+     
+     def no(pred, seq):
+         "Returns True if pred(x) is False for every element in the iterable"
+         return True not in imap(pred, seq)
+     
+     def quantify(pred, seq):
+         "Count how many times the predicate is True in the sequence"
+         return sum(imap(pred, seq))
+     
+     def padnone(seq):
+         "Returns the sequence elements and then returns None indefinitely"
+         return chain(seq, repeat(None))
+     
+     def ncycles(seq, n):
+         "Returns the sequence elements n times"
+         return chain(*repeat(seq, n))
+     
+     def dotproduct(vec1, vec2):
+         return sum(imap(operator.mul, vec1, vec2))
+     
+     def window(seq, n=2):
+         "Returns a sliding window (of width n) over data from the iterable"
+         "   s -> (s0,s1,...s[n-1]), (s1,s2,...,sn), ...                   "
+         it = iter(seq)
+         result = tuple(islice(it, n))
+         if len(result) == n:
+             yield result
+         for elem in it:
+             result = result[1:] + (elem,)
+             yield result
+     
+     def tee(iterable):
+         "Return two independent iterators from a single iterable"
+         def gen(next, data={}, cnt=[0]):
+             dpop = data.pop
+             for i in count():
+                 if i == cnt[0]:
+                     item = data[i] = next()
+                     cnt[0] += 1
+                 else:
+                     item = dpop(i)
+                 yield item
+         next = iter(iterable).next
+         return (gen(next), gen(next))
+
+
+File: python-lib.info,  Node: ConfigParser,  Next: fileinput,  Prev: itertools,  Up: Miscellaneous Services
+
+Configuration file parser
+=========================
+
+Configuration file parser.
+
+This module defines the class `ConfigParser'.  The `ConfigParser' class
+implements a basic configuration file parser language which provides a
+structure similar to what you would find on Microsoft Windows INI
+files.  You can use this to write Python programs which can be
+customized by end users easily.
+
+_Notice:_ [warning] This library does _not_ interpret or write the
+value-type prefixes used in the Windows Registry extended version of
+INI syntax.
+
+The configuration file consists of sections, led by a `[section]'
+header and followed by `name: value' entries, with continuations in the
+style of RFC 822 ; `name=value' is also accepted.  Note that leading
+whitespace is removed from values.  The optional values can contain
+format strings which refer to other values in the same section, or
+values in a special `DEFAULT' section.  Additional defaults can be
+provided on initialization and retrieval.  Lines beginning with `#' or
+`;' are ignored and may be used to provide comments.
+
+For example:
+
+     [My Section]
+     foodir: %(dir)s/whatever
+     dir=frob
+
+would resolve the `%(dir)s' to the value of `dir' (`frob' in this
+case).  All reference expansions are done on demand.
+
+Default values can be specified by passing them into the `ConfigParser'
+constructor as a dictionary.  Additional defaults may be passed into
+the `get()' method which will override all others.
+
+`RawConfigParser([defaults])'
+     The basic configuration object.  When DEFAULTS is given, it is
+     initialized into the dictionary of intrinsic defaults.  This class
+     does not support the magical interpolation behavior.  _Added in
+     Python version 2.3_
+
+`ConfigParser([defaults])'
+     Derived class of `RawConfigParser' that implements the magical
+     interpolation feature and adds optional arguments the `get()' and
+     `items()' methods.  The values in DEFAULTS must be appropriate for
+     the `%()s' string interpolation.  Note that __NAME__ is an
+     intrinsic default; its value is the section name, and will
+     override any value provided in DEFAULTS.
+
+`SafeConfigParser([defaults])'
+     Derived class of `ConfigParser' that implements a more-sane
+     variant of the magical interpolation feature.  This implementation
+     is more predictable as well.  New applications should prefer this
+     version if they don't need to be compatible with older versions of
+     Python.  _Added in Python version 2.3_
+
+`NoSectionError'
+     Exception raised when a specified section is not found.
+
+`DuplicateSectionError'
+     Exception raised when multiple sections with the same name are
+     found, or if `add_section()' is called with the name of a section
+     that is already present.
+
+`NoOptionError'
+     Exception raised when a specified option is not found in the
+     specified section.
+
+`InterpolationError'
+     Base class for exceptions raised when problems occur performing
+     string interpolation.
+
+`InterpolationDepthError'
+     Exception raised when string interpolation cannot be completed
+     because the number of iterations exceeds `MAX_INTERPOLATION_DEPTH'.
+     Subclass of `InterpolationError'.
+
+`InterpolationMissingOptionError'
+     Exception raised when an option referenced from a value does not
+     exist.  Subclass of `InterpolationError'.  _Added in Python
+     version 2.3_
+
+`InterpolationSyntaxError'
+     Exception raised when the source text into which substitutions are
+     made does not conform to the required syntax.  Subclass of
+     `InterpolationError'.  _Added in Python version 2.3_
+
+`MissingSectionHeaderError'
+     Exception raised when attempting to parse a file which has no
+     section headers.
+
+`ParsingError'
+     Exception raised when errors occur attempting to parse a file.
+
+`MAX_INTERPOLATION_DEPTH'
+     The maximum depth for recursive interpolation for `get()' when the
+     RAW parameter is false.  This is relevant only for the
+     `ConfigParser' class.
+
+See also:
+     *Note shlex:: Support for a creating UNIX shell-like
+     mini-languages which can be used as an alternate format for
+     application configuration files.
+
+* Menu:
+
+* RawConfigParser Objects::
+* ConfigParser Objects::
+
+
+File: python-lib.info,  Node: RawConfigParser Objects,  Next: ConfigParser Objects,  Prev: ConfigParser,  Up: ConfigParser
+
+RawConfigParser Objects
+-----------------------
+
+`RawConfigParser' instances have the following methods:
+
+`defaults()'
+     Return a dictionary containing the instance-wide defaults.
+
+`sections()'
+     Return a list of the sections available; `DEFAULT' is not included
+     in the list.
+
+`add_section(section)'
+     Add a section named SECTION to the instance.  If a section by the
+     given name already exists, `DuplicateSectionError' is raised.
+
+`has_section(section)'
+     Indicates whether the named section is present in the
+     configuration. The `DEFAULT' section is not acknowledged.
+
+`options(section)'
+     Returns a list of options available in the specified SECTION.
+
+`has_option(section, option)'
+     If the given section exists, and contains the given option. return
+     1; otherwise return 0.  _Added in Python version 1.6_
+
+`read(filenames)'
+     Read and parse a list of filenames.  If FILENAMES is a string or
+     Unicode string, it is treated as a single filename.  If a file
+     named in FILENAMES cannot be opened, that file will be ignored.
+     This is designed so that you can specify a list of potential
+     configuration file locations (for example, the current directory,
+     the user's home directory, and some system-wide directory), and all
+     existing configuration files in the list will be read.  If none of
+     the named files exist, the `ConfigParser' instance will contain an
+     empty dataset.  An application which requires initial values to be
+     loaded from a file should load the required file or files using
+     `readfp()' before calling `read()' for any optional files:
+
+          import ConfigParser, os
+          
+          config = ConfigParser.ConfigParser()
+          config.readfp(open('defaults.cfg'))
+          config.read(['site.cfg', os.path.expanduser('~/.myapp.cfg')])
+
+`readfp(fp[, filename])'
+     Read and parse configuration data from the file or file-like
+     object in FP (only the `readline()' method is used).  If FILENAME
+     is omitted and FP has a `name' attribute, that is used for
+     FILENAME; the default is `<???>'.
+
+`get(section, option)'
+     Get an OPTION value for the named SECTION.
+
+`getint(section, option)'
+     A convenience method which coerces the OPTION in the specified
+     SECTION to an integer.
+
+`getfloat(section, option)'
+     A convenience method which coerces the OPTION in the specified
+     SECTION to a floating point number.
+
+`getboolean(section, option)'
+     A convenience method which coerces the OPTION in the specified
+     SECTION to a Boolean value.  Note that the accepted values for the
+     option are `"1"', `"yes"', `"true"', and `"on"', which cause this
+     method to return `True', and `"0"', `"no"', `"false"', and
+     `"off"', which cause it to return `False'.  These string values
+     are checked in a case-insensitive manner.  Any other value will
+     cause it to raise `ValueError'.
+
+`items(section)'
+     Return a list of `(NAME, VALUE)' pairs for each option in the
+     given SECTION.
+
+`set(section, option, value)'
+     If the given section exists, set the given option to the specified
+     value; otherwise raise `NoSectionError'.  _Added in Python version
+     1.6_
+
+`write(fileobject)'
+     Write a representation of the configuration to the specified file
+     object.  This representation can be parsed by a future `read()'
+     call.  _Added in Python version 1.6_
+
+`remove_option(section, option)'
+     Remove the specified OPTION from the specified SECTION.  If the
+     section does not exist, raise `NoSectionError'.  If the option
+     existed to be removed, return 1; otherwise return 0.  _Added in
+     Python version 1.6_
+
+`remove_section(section)'
+     Remove the specified SECTION from the configuration.  If the
+     section in fact existed, return `True'.  Otherwise return `False'.
+
+`optionxform(option)'
+     Transforms the option name OPTION as found in an input file or as
+     passed in by  client code to the form that should be used in the
+     internal structures.  The default implementation returns a
+     lower-case version of OPTION; subclasses may override this or
+     client code can set an attribute of this name on instances to
+     affect this behavior.  Setting this to `str()', for example, would
+     make option names case sensitive.
+
+
+File: python-lib.info,  Node: ConfigParser Objects,  Prev: RawConfigParser Objects,  Up: ConfigParser
+
+ConfigParser Objects
+--------------------
+
+The `ConfigParser' class extends some methods of the `RawConfigParser'
+interface, adding some optional arguments.
+
+`get(section, option[, raw[, vars]])'
+     Get an OPTION value for the named SECTION.  All the `%'
+     interpolations are expanded in the return values, based on the
+     defaults passed into the constructor, as well as the options VARS
+     provided, unless the RAW argument is true.
+
+`items(section[, raw[, vars]])'
+     Create a generator which will return a tuple `(name, value)' for
+     each option in the given SECTION. Optional arguments have the same
+     meaning as for the `get()' method.  _Added in Python version 2.3_
+
+
+File: python-lib.info,  Node: fileinput,  Next: xreadlines,  Prev: ConfigParser,  Up: Miscellaneous Services
+
+Iterate over lines from multiple input streams
+==============================================
+
+Perl-like iteration over lines from multiple input streams, with "save
+in place" capability.
+
+This module implements a helper class and functions to quickly write a
+loop over standard input or a list of files.
+
+The typical use is:
+
+     import fileinput
+     for line in fileinput.input():
+         process(line)
+
+This iterates over the lines of all files listed in `sys.argv[1:]',
+defaulting to `sys.stdin' if the list is empty.  If a filename is
+`'-'', it is also replaced by `sys.stdin'.  To specify an alternative
+list of filenames, pass it as the first argument to `input()'.  A
+single file name is also allowed.
+
+All files are opened in text mode.  If an I/O error occurs during
+opening or reading a file, `IOError' is raised.
+
+If `sys.stdin' is used more than once, the second and further use will
+return no lines, except perhaps for interactive use, or if it has been
+explicitly reset (e.g. using `sys.stdin.seek(0)').
+
+Empty files are opened and immediately closed; the only time their
+presence in the list of filenames is noticeable at all is when the last
+file opened is empty.
+
+It is possible that the last line of a file does not end in a newline
+character; lines are returned including the trailing newline when it is
+present.
+
+The following function is the primary interface of this module:
+
+`input([files[, inplace[, backup]]])'
+     Create an instance of the `FileInput' class.  The instance will be
+     used as global state for the functions of this module, and is also
+     returned to use during iteration.  The parameters to this function
+     will be passed along to the constructor of the `FileInput' class.
+
+The following functions use the global state created by `input()'; if
+there is no active state, `RuntimeError' is raised.
+
+`filename()'
+     Return the name of the file currently being read.  Before the first
+     line has been read, returns `None'.
+
+`lineno()'
+     Return the cumulative line number of the line that has just been
+     read.  Before the first line has been read, returns `0'.  After
+     the last line of the last file has been read, returns the line
+     number of that line.
+
+`filelineno()'
+     Return the line number in the current file.  Before the first line
+     has been read, returns `0'.  After the last line of the last file
+     has been read, returns the line number of that line within the
+     file.
+
+`isfirstline()'
+     Returns true the line just read is the first line of its file,
+     otherwise returns false.
+
+`isstdin()'
+     Returns true if the last line was read from `sys.stdin', otherwise
+     returns false.
+
+`nextfile()'
+     Close the current file so that the next iteration will read the
+     first line from the next file (if any); lines not read from the
+     file will not count towards the cumulative line count.  The
+     filename is not changed until after the first line of the next
+     file has been read.  Before the first line has been read, this
+     function has no effect; it cannot be used to skip the first file.
+     After the last line of the last file has been read, this function
+     has no effect.
+
+`close()'
+     Close the sequence.
+
+The class which implements the sequence behavior provided by the module
+is available for subclassing as well:
+
+`FileInput([files[, inplace[, backup]]])'
+     Class `FileInput' is the implementation; its methods `filename()',
+     `lineno()', `fileline()', `isfirstline()', `isstdin()',
+     `nextfile()' and `close()' correspond to the functions of the same
+     name in the module.  In addition it has a `readline()' method which
+     returns the next input line, and a `__getitem__()' method which
+     implements the sequence behavior.  The sequence must be accessed
+     in strictly sequential order; random access and `readline()'
+     cannot be mixed.
+
+*Optional in-place filtering:* if the keyword argument `INPLACE=1' is
+passed to `input()' or to the `FileInput' constructor, the file is
+moved to a backup file and standard output is directed to the input
+file (if a file of the same name as the backup file already exists, it
+will be replaced silently).  This makes it possible to write a filter
+that rewrites its input file in place.  If the keyword argument
+`BACKUP='.<some extension>'' is also given, it specifies the extension
+for the backup file, and the backup file remains around; by default,
+the extension is `'.bak'' and it is deleted when the output file is
+closed.  In-place filtering is disabled when standard input is read.
+
+*Caveat:* The current implementation does not work for MS-DOS 8+3
+filesystems.
+
+
+File: python-lib.info,  Node: xreadlines,  Next: calendar,  Prev: fileinput,  Up: Miscellaneous Services
+
+Efficient iteration over a file
+===============================
+
+Efficient iteration over the lines of a file.
+
+_Added in Python version 2.1_
+
+_This is deprecated in Python 2.3.  Use `for line in file' instead._
+
+This module defines a new object type which can efficiently iterate
+over the lines of a file.  An xreadlines object is a sequence type
+which implements simple in-order indexing beginning at `0', as required
+by `for' statement or the `filter()' function.
+
+Thus, the code
+
+     import xreadlines, sys
+     
+     for line in xreadlines.xreadlines(sys.stdin):
+         pass
+
+has approximately the same speed and memory consumption as
+
+     while 1:
+         lines = sys.stdin.readlines(8*1024)
+         if not lines: break
+         for line in lines:
+             pass
+
+except the clarity of the `for' statement is retained in the former
+case.
+
+`xreadlines(fileobj)'
+     Return a new xreadlines object which will iterate over the contents
+     of FILEOBJ.  FILEOBJ must have a `readlines()' method that
+     supports the SIZEHINT parameter.  _Note:_ Because the
+     `readlines()' method buffers data, this effectively ignores the
+     effects of setting the file object as unbuffered.
+
+An xreadlines object S supports the following sequence operation:
+
+Operation                            Result
+------                               -----
+S[I]                                 I'th line of S
+
+If successive values of I are not sequential starting from `0', this
+code will raise `RuntimeError'.
+
+After the last line of the file is read, this code will raise an
+`IndexError'.
+
+
+File: python-lib.info,  Node: calendar,  Next: cmd,  Prev: xreadlines,  Up: Miscellaneous Services
+
+General calendar-related functions
+==================================
+
+Functions for working with calendars, including some emulation of the
+UNIX `cal' program.
+
+This module allows you to output calendars like the UNIX `cal' program,
+and provides additional useful functions related to the calendar. By
+default, these calendars have Monday as the first day of the week, and
+Sunday as the last (the European convention). Use `setfirstweekday()'
+to set the first day of the week to Sunday (6) or to any other weekday.
+Parameters that specify dates are given as integers.
+
+Most of these functions rely on the `datetime' module which uses an
+idealized calendar, the current Gregorian calendar indefinitely
+extended in both directions.  This matches the definition of the
+"proleptic Gregorian" calendar in Dershowitz and Reingold's book
+"Calendrical Calculations", where it's the base calendar for all
+computations.
+
+`setfirstweekday(weekday)'
+     Sets the weekday (`0' is Monday, `6' is Sunday) to start each
+     week. The values `MONDAY', `TUESDAY', `WEDNESDAY', `THURSDAY',
+     `FRIDAY', `SATURDAY', and `SUNDAY' are provided for convenience.
+     For example, to set the first weekday to Sunday:
+
+          import calendar
+          calendar.setfirstweekday(calendar.SUNDAY)
+
+     _Added in Python version 2.0_
+
+`firstweekday()'
+     Returns the current setting for the weekday to start each week.
+     _Added in Python version 2.0_
+
+`isleap(year)'
+     Returns `1' if YEAR is a leap year, otherwise `0'.
+
+`leapdays(y1, y2)'
+     Returns the number of leap years in the range [Y1...Y2), where Y1
+     and Y2 are years.  _Changed in Python version 2.0_
+
+`weekday(year, month, day)'
+     Returns the day of the week (`0' is Monday) for YEAR (`1970'-...),
+     MONTH (`1'-`12'), DAY (`1'-`31').
+
+`monthrange(year, month)'
+     Returns weekday of first day of the month and number of days in
+     month, for the specified YEAR and MONTH.
+
+`monthcalendar(year, month)'
+     Returns a matrix representing a month's calendar.  Each row
+     represents a week; days outside of the month a represented by
+     zeros.  Each week begins with Monday unless set by
+     `setfirstweekday()'.
+
+`prmonth(theyear, themonth[, w[, l]])'
+     Prints a month's calendar as returned by `month()'.
+
+`month(theyear, themonth[, w[, l]])'
+     Returns a month's calendar in a multi-line string. If W is
+     provided, it specifies the width of the date columns, which are
+     centered. If L is given, it specifies the number of lines that
+     each week will use. Depends on the first weekday as set by
+     `setfirstweekday()'.  _Added in Python version 2.0_
+
+`prcal(year[, w[, l[c]]])'
+     Prints the calendar for an entire year as returned by `calendar()'.
+
+`calendar(year[, w[, l[c]]])'
+     Returns a 3-column calendar for an entire year as a multi-line
+     string.  Optional parameters W, L, and C are for date column
+     width, lines per week, and number of spaces between month columns,
+     respectively. Depends on the first weekday as set by
+     `setfirstweekday()'.  The earliest year for which a calendar can
+     be generated is platform-dependent.  _Added in Python version 2.0_
+
+`timegm(tuple)'
+     An unrelated but handy function that takes a time tuple such as
+     returned by the `gmtime()' function in the `time' module, and
+     returns the corresponding UNIX timestamp value, assuming an epoch
+     of 1970, and the POSIX encoding.  In fact, `time.gmtime()' and
+     `timegm()' are each others' inverse.  _Added in Python version 2.0_
+
+See also:
+     *Note time:: Low-level time related functions.
+
+
+File: python-lib.info,  Node: cmd,  Next: shlex,  Prev: calendar,  Up: Miscellaneous Services
+
+Support for line-oriented command interpreters
+==============================================
+
+Build line-oriented command interpreters.
+
+The `Cmd' class provides a simple framework for writing line-oriented
+command interpreters.  These are often useful for test harnesses,
+administrative tools, and prototypes that will later be wrapped in a
+more sophisticated interface.
+
+`Cmd([completekey],[stdin],[stdout])'
+     A `Cmd' instance or subclass instance is a line-oriented
+     interpreter framework.  There is no good reason to instantiate
+     `Cmd' itself; rather, it's useful as a superclass of an
+     interpreter class you define yourself in order to inherit `Cmd''s
+     methods and encapsulate action methods.
+
+     The optional argument COMPLETEKEY is the `readline' name of a
+     completion key; it defaults to <Tab>. If COMPLETEKEY is not `None'
+     and `readline' is available, command completion is done
+     automatically.
+
+     The optional arguments STDIN and STDOUT specify the input and
+     output file objects that the Cmd instance or subclass instance
+     will use for input and output. If not specified, they will default
+     to SYS.STDIN and SYS.STDOUT.
+
+     _Changed in Python version 2.3_
+
+* Menu:
+
+* Cmd Objects::
+
+
+File: python-lib.info,  Node: Cmd Objects,  Prev: cmd,  Up: cmd
+
+Cmd Objects
+-----------
+
+A `Cmd' instance has the following methods:
+
+`cmdloop([intro])'
+     Repeatedly issue a prompt, accept input, parse an initial prefix
+     off the received input, and dispatch to action methods, passing
+     them the remainder of the line as argument.
+
+     The optional argument is a banner or intro string to be issued
+     before the first prompt (this overrides the `intro' class member).
+
+     If the `readline' module is loaded, input will automatically
+     inherit `bash'-like history-list editing (e.g. <Control-P> scrolls
+     back to the last command, <Control-N> forward to the next one,
+     <Control-F> moves the cursor to the right non-destructively,
+     <Control-B> moves the cursor to the left non-destructively, etc.).
+
+     An end-of-file on input is passed back as the string `'EOF''.
+
+     An interpreter instance will recognize a command name `foo' if and
+     only if it has a method `do_foo()'.  As a special case, a line
+     beginning with the character `?' is dispatched to the method
+     `do_help()'.  As another special case, a line beginning with the
+     character `!' is dispatched to the method `do_shell()' (if such a
+     method is defined).
+
+     If completion is enabled, completing commands will be done
+     automatically, and completing of commands args is done by calling
+     `complete_foo()' with arguments TEXT, LINE, BEGIDX, and ENDIDX.
+     TEXT is the string prefix we are attempting to match: all returned
+     matches must begin with it.  LINE is the current input line with
+     leading whitespace removed, BEGIDX and ENDIDX are the beginning
+     and ending indexes of the prefix text, which could be used to
+     provide different completion depending upon which position the
+     argument is in.
+
+     All subclasses of `Cmd' inherit a predefined `do_help()'.  This
+     method, called with an argument `'bar'', invokes the corresponding
+     method `help_bar()'.  With no argument, `do_help()' lists all
+     available help topics (that is, all commands with corresponding
+     `help_*()' methods), and also lists any undocumented commands.
+
+`onecmd(str)'
+     Interpret the argument as though it had been typed in response to
+     the prompt.  This may be overridden, but should not normally need
+     to be; see the `precmd()' and `postcmd()' methods for useful
+     execution hooks.  The return value is a flag indicating whether
+     interpretation of commands by the interpreter should stop.
+
+`emptyline()'
+     Method called when an empty line is entered in response to the
+     prompt.  If this method is not overridden, it repeats the last
+     nonempty command entered.
+
+`default(line)'
+     Method called on an input line when the command prefix is not
+     recognized. If this method is not overridden, it prints an error
+     message and returns.
+
+`completedefault(text, line, begidx, endidx)'
+     Method called to complete an input line when no command-specific
+     `complete_*()' method is available.  By default, it returns an
+     empty list.
+
+`precmd(line)'
+     Hook method executed just before the command line LINE is
+     interpreted, but after the input prompt is generated and issued.
+     This method is a stub in `Cmd'; it exists to be overridden by
+     subclasses.  The return value is used as the command which will be
+     executed by the `onecmd()' method; the `precmd()' implementation
+     may re-write the command or simply return LINE unchanged.
+
+`postcmd(stop, line)'
+     Hook method executed just after a command dispatch is finished.
+     This method is a stub in `Cmd'; it exists to be overridden by
+     subclasses.  LINE is the command line which was executed, and STOP
+     is a flag which indicates whether execution will be terminated
+     after the call to `postcmd()'; this will be the return value of
+     the `onecmd()' method.  The return value of this method will be
+     used as the new value for the internal flag which corresponds to
+     STOP; returning false will cause interpretation to continue.
+
+`preloop()'
+     Hook method executed once when `cmdloop()' is called.  This method
+     is a stub in `Cmd'; it exists to be overridden by subclasses.
+
+`postloop()'
+     Hook method executed once when `cmdloop()' is about to return.
+     This method is a stub in `Cmd'; it exists to be overridden by
+     subclasses.
+
+Instances of `Cmd' subclasses have some public instance variables:
+
+`prompt'
+     The prompt issued to solicit input.
+
+`identchars'
+     The string of characters accepted for the command prefix.
+
+`lastcmd'
+     The last nonempty command prefix seen.
+
+`intro'
+     A string to issue as an intro or banner.  May be overridden by
+     giving the `cmdloop()' method an argument.
+
+`doc_header'
+     The header to issue if the help output has a section for documented
+     commands.
+
+`misc_header'
+     The header to issue if the help output has a section for
+     miscellaneous help topics (that is, there are `help_*()' methods
+     without corresponding `do_*()' methods).
+
+`undoc_header'
+     The header to issue if the help output has a section for
+     undocumented commands (that is, there are `do_*()' methods without
+     corresponding `help_*()' methods).
+
+`ruler'
+     The character used to draw separator lines under the help-message
+     headers.  If empty, no ruler line is drawn.  It defaults to `='.
+
+`use_rawinput'
+     A flag, defaulting to true.  If true, `cmdloop()' uses
+     `raw_input()' to display a prompt and read the next command; if
+     false, `sys.stdout.write()' and `sys.stdin.readline()' are used.
+     (This means that by importing `readline', on systems that support
+     it, the interpreter will automatically support Emacs-like line
+     editing and command-history keystrokes.)
+
+
+File: python-lib.info,  Node: shlex,  Prev: cmd,  Up: Miscellaneous Services
+
+Simple lexical analysis
+=======================
+
+Simple lexical analysis for UNIX shell-like languages.
+
+_Added in Python version 1.5.2_
+
+The `shlex' class makes it easy to write lexical analyzers for simple
+syntaxes resembling that of the UNIX shell.  This will often be useful
+for writing minilanguages, (e.g. in run control files for Python
+applications) or for parsing quoted strings.
+
+See also:
+     *Note ConfigParser:: Parser for configuration files similar to the
+     Windows `.ini' files.
+
+* Menu:
+
+* Module Contents::
+* shlex Objects::
+* Parsing Rules::
+
+
+File: python-lib.info,  Node: Module Contents,  Next: shlex Objects,  Prev: shlex,  Up: shlex
+
+Module Contents
+---------------
+
+The `shlex' module defines the following functions:
+
+`split(s[, comments=`False'])'
+     Split the string S using shell-like syntax. If COMMENTS is
+     `False', the parsing of comments in the given string will be
+     disabled (setting the `commenters' member of the `shlex' instance
+     to the empty string). This function operates in POSIX mode.
+     _Added in Python version 2.3_
+
+The `shlex' module defines the following classes:
+
+`shlex([instream=`sys.stdin'[, infile=`None'[, posix=`False']]])'
+     A `shlex' instance or subclass instance is a lexical analyzer
+     object.  The initialization argument, if present, specifies where
+     to read characters from. It must be a file-/stream-like object with
+     `read()' and `readline()' methods, or a string (strings are
+     accepted since Python 2.3). If no argument is given, input will be
+     taken from `sys.stdin'.  The second optional argument is a filename
+     string, which sets the initial value of the `infile' member.  If
+     the INSTREAM argument is omitted or equal to `sys.stdin', this
+     second argument defaults to "stdin".  The POSIX argument was
+     introduced in Python 2.3, and defines the operational mode.  When
+     POSIX is not true (default), the `shlex' instance will operate in
+     compatibility mode.  When operating in POSIX mode, `shlex' will
+     try to be as close as possible to the POSIX shell parsing rules.
+     See~*Note shlex Objects::.
+

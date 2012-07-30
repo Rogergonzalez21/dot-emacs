@@ -1,0 +1,1136 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: Higher Level Interface,  Next: Old classes,  Prev: Using the cgi module,  Up: cgi
+
+Higher Level Interface
+----------------------
+
+_Added in Python version 2.2_ The previous section explains how to read
+CGI form data using the `FieldStorage' class.  This section describes a
+higher level interface which was added to this class to allow one to do
+it in a more readable and intuitive way.  The interface doesn't make the
+techniques described in previous sections obsolete -- they are still
+useful to process file uploads efficiently, for example.
+
+The interface consists of two simple methods. Using the methods you can
+process form data in a generic way, without the need to worry whether
+only one or more values were posted under one name.
+
+In the previous section, you learned to write following code anytime
+you expected a user to post more than one value under one name:
+
+     item = form.getvalue("item")
+     if isinstance(item, list):
+         # The user is requesting more than one item.
+     else:
+         # The user is requesting only one item.
+
+This situation is common for example when a form contains a group of
+multiple checkboxes with the same name:
+
+     <input type="checkbox" name="item" value="1" />
+     <input type="checkbox" name="item" value="2" />
+
+In most situations, however, there's only one form control with a
+particular name in a form and then you expect and need only one value
+associated with this name.  So you write a script containing for
+example this code:
+
+     user = form.getvalue("user").toupper()
+
+The problem with the code is that you should never expect that a client
+will provide valid input to your scripts.  For example, if a curious
+user appends another `user=foo' pair to the query string, then the
+script would crash, because in this situation the `getvalue("user")'
+method call returns a list instead of a string.  Calling the
+`toupper()' method on a list is not valid (since lists do not have a
+method of this name) and results in an `AttributeError' exception.
+
+Therefore, the appropriate way to read form data values was to always
+use the code which checks whether the obtained value is a single value
+or a list of values.  That's annoying and leads to less readable
+scripts.
+
+A more convenient approach is to use the methods `getfirst()' and
+`getlist()' provided by this higher level interface.
+
+`getfirst(name[, default])'
+     Thin method always returns only one value associated with form
+     field NAME.  The method returns only the first value in case that
+     more values were posted under such name.  Please note that the
+     order in which the values are received may vary from browser to
+     browser and should not be counted on.(1)  If no such form field or
+     value exists then the method returns the value specified by the
+     optional parameter DEFAULT.  This parameter defaults to `None' if
+     not specified.
+
+`getlist(name)'
+     This method always returns a list of values associated with form
+     field NAME.  The method returns an empty list if no such form
+     field or value exists for NAME.  It returns a list consisting of
+     one item if only one such value exists.
+
+Using these methods you can write nice compact code:
+
+     import cgi
+     form = cgi.FieldStorage()
+     user = form.getfirst("user", "").toupper()    # This way it's safe.
+     for item in form.getlist("item"):
+         do_something(item)
+
+---------- Footnotes ----------
+
+(1) Note that some recent versions of the HTML specification do state
+what order the field values should be supplied in, but knowing whether
+a request was received from a conforming browser, or even from a
+browser at all, is tedious and error-prone.
+
+
+File: python-lib.info,  Node: Old classes,  Next: Functions in cgi module,  Prev: Higher Level Interface,  Up: cgi
+
+Old classes
+-----------
+
+These classes, present in earlier versions of the `cgi' module, are
+still supported for backward compatibility.  New applications should
+use the `FieldStorage' class.
+
+`SvFormContentDict' stores single value form content as dictionary; it
+assumes each field name occurs in the form only once.
+
+`FormContentDict' stores multiple value form content as a dictionary
+(the form items are lists of values).  Useful if your form contains
+multiple fields with the same name.
+
+Other classes (`FormContent', `InterpFormContentDict') are present for
+backwards compatibility with really old applications only.  If you
+still use these and would be inconvenienced when they disappeared from
+a next version of this module, drop me a note.
+
+
+File: python-lib.info,  Node: Functions in cgi module,  Next: Caring about security,  Prev: Old classes,  Up: cgi
+
+Functions
+---------
+
+These are useful if you want more control, or if you want to employ
+some of the algorithms implemented in this module in other
+circumstances.
+
+`parse(fp[, keep_blank_values[, strict_parsing]])'
+     Parse a query in the environment or from a file (the file defaults
+     to `sys.stdin').  The KEEP_BLANK_VALUES and STRICT_PARSING
+     parameters are passed to `parse_qs()' unchanged.
+
+`parse_qs(qs[, keep_blank_values[, strict_parsing]])'
+     Parse a query string given as a string argument (data of type
+     `application/x-www-form-urlencoded').  Data are returned as a
+     dictionary.  The dictionary keys are the unique query variable
+     names and the values are lists of values for each name.
+
+     The optional argument KEEP_BLANK_VALUES is a flag indicating
+     whether blank values in URL encoded queries should be treated as
+     blank strings.  A true value indicates that blanks should be
+     retained as blank strings.  The default false value indicates that
+     blank values are to be ignored and treated as if they were not
+     included.
+
+     The optional argument STRICT_PARSING is a flag indicating what to
+     do with parsing errors.  If false (the default), errors are
+     silently ignored.  If true, errors raise a ValueError exception.
+
+     Use the ``urllib'.urlencode()' function to convert such
+     dictionaries into query strings.
+
+`parse_qsl(qs[, keep_blank_values[, strict_parsing]])'
+     Parse a query string given as a string argument (data of type
+     `application/x-www-form-urlencoded').  Data are returned as a list
+     of name, value pairs.
+
+     The optional argument KEEP_BLANK_VALUES is a flag indicating
+     whether blank values in URL encoded queries should be treated as
+     blank strings.  A true value indicates that blanks should be
+     retained as blank strings.  The default false value indicates that
+     blank values are to be ignored and treated as if they were not
+     included.
+
+     The optional argument STRICT_PARSING is a flag indicating what to
+     do with parsing errors.  If false (the default), errors are
+     silently ignored.  If true, errors raise a ValueError exception.
+
+     Use the ``urllib'.urlencode()' function to convert such lists of
+     pairs into query strings.
+
+`parse_multipart(fp, pdict)'
+     Parse input of type `multipart/form-data' (for file uploads).
+     Arguments are FP for the input file and PDICT for a dictionary
+     containing other parameters in the `Content-Type' header.
+
+     Returns a dictionary just like `parse_qs()' keys are the field
+     names, each value is a list of values for that field.  This is
+     easy to use but not much good if you are expecting megabytes to be
+     uploaded -- in that case, use the `FieldStorage' class instead
+     which is much more flexible.
+
+     Note that this does not parse nested multipart parts -- use
+     `FieldStorage' for that.
+
+`parse_header(string)'
+     Parse a MIME header (such as `Content-Type') into a main value and
+     a dictionary of parameters.
+
+`test()'
+     Robust test CGI script, usable as main program.  Writes minimal
+     HTTP headers and formats all information provided to the script in
+     HTML form.
+
+`print_environ()'
+     Format the shell environment in HTML.
+
+`print_form(form)'
+     Format a form in HTML.
+
+`print_directory()'
+     Format the current directory in HTML.
+
+`print_environ_usage()'
+     Print a list of useful (used by CGI) environment variables in HTML.
+
+`escape(s[, quote])'
+     Convert the characters `&', `<' and `>' in string S to HTML-safe
+     sequences.  Use this if you need to display text that might
+     contain such characters in HTML.  If the optional flag QUOTE is
+     true, the double-quote character (`"') is also translated; this
+     helps for inclusion in an HTML attribute value, as in `<A
+     HREF="...">'.  If the value to be quoted might include single- or
+     double-quote characters, or both, consider using the `quoteattr()'
+     function in the `xml.sax.saxutils' module instead.
+
+
+File: python-lib.info,  Node: Caring about security,  Next: Installing your CGI script on a UNIX system,  Prev: Functions in cgi module,  Up: cgi
+
+Caring about security
+---------------------
+
+There's one important rule: if you invoke an external program (via the
+`os.system()' or `os.popen()' functions. or others with similar
+functionality), make very sure you don't pass arbitrary strings
+received from the client to the shell.  This is a well-known security
+hole whereby clever hackers anywhere on the Web can exploit a gullible
+CGI script to invoke arbitrary shell commands.  Even parts of the URL
+or field names cannot be trusted, since the request doesn't have to
+come from your form!
+
+To be on the safe side, if you must pass a string gotten from a form to
+a shell command, you should make sure the string contains only
+alphanumeric characters, dashes, underscores, and periods.
+
+
+File: python-lib.info,  Node: Installing your CGI script on a UNIX system,  Next: Testing your CGI script,  Prev: Caring about security,  Up: cgi
+
+Installing your CGI script on a UNIX system
+-------------------------------------------
+
+Read the documentation for your HTTP server and check with your local
+system administrator to find the directory where CGI scripts should be
+installed; usually this is in a directory `cgi-bin' in the server tree.
+
+Make sure that your script is readable and executable by "others"; the
+UNIX file mode should be `0755' octal (use `chmod 0755 FILENAME').
+Make sure that the first line of the script contains `#!' starting in
+column 1 followed by the pathname of the Python interpreter, for
+instance:
+
+     #!/usr/local/bin/python
+
+Make sure the Python interpreter exists and is executable by "others".
+
+Make sure that any files your script needs to read or write are
+readable or writable, respectively, by "others" -- their mode should be
+`0644' for readable and `0666' for writable.  This is because, for
+security reasons, the HTTP server executes your script as user
+"nobody", without any special privileges.  It can only read (write,
+execute) files that everybody can read (write, execute).  The current
+directory at execution time is also different (it is usually the
+server's cgi-bin directory) and the set of environment variables is
+also different from what you get when you log in.  In particular, don't
+count on the shell's search path for executables (`PATH') or the Python
+module search path (`PYTHONPATH') to be set to anything interesting.
+
+If you need to load modules from a directory which is not on Python's
+default module search path, you can change the path in your script,
+before importing other modules.  For example:
+
+     import sys
+     sys.path.insert(0, "/usr/home/joe/lib/python")
+     sys.path.insert(0, "/usr/local/lib/python")
+
+(This way, the directory inserted last will be searched first!)
+
+Instructions for non-UNIX systems will vary; check your HTTP server's
+documentation (it will usually have a section on CGI scripts).
+
+
+File: python-lib.info,  Node: Testing your CGI script,  Next: Debugging CGI scripts,  Prev: Installing your CGI script on a UNIX system,  Up: cgi
+
+Testing your CGI script
+-----------------------
+
+Unfortunately, a CGI script will generally not run when you try it from
+the command line, and a script that works perfectly from the command
+line may fail mysteriously when run from the server.  There's one
+reason why you should still test your script from the command line: if
+it contains a syntax error, the Python interpreter won't execute it at
+all, and the HTTP server will most likely send a cryptic error to the
+client.
+
+Assuming your script has no syntax errors, yet it does not work, you
+have no choice but to read the next section.
+
+
+File: python-lib.info,  Node: Debugging CGI scripts,  Next: Common problems and solutions,  Prev: Testing your CGI script,  Up: cgi
+
+Debugging CGI scripts
+---------------------
+
+First of all, check for trivial installation errors -- reading the
+section above on installing your CGI script carefully can save you a
+lot of time.  If you wonder whether you have understood the
+installation procedure correctly, try installing a copy of this module
+file (`cgi.py') as a CGI script.  When invoked as a script, the file
+will dump its environment and the contents of the form in HTML form.
+Give it the right mode etc, and send it a request.  If it's installed
+in the standard `cgi-bin' directory, it should be possible to send it a
+request by entering a URL into your browser of the form:
+
+     http://yourhostname/cgi-bin/cgi.py?name=Joe+Blow&addr=At+Home
+
+If this gives an error of type 404, the server cannot find the script -
+perhaps you need to install it in a different directory.  If it gives
+another error, there's an installation problem that you should fix
+before trying to go any further.  If you get a nicely formatted listing
+of the environment and form content (in this example, the fields should
+be listed as "addr" with value "At Home" and "name" with value "Joe
+Blow"), the `cgi.py' script has been installed correctly.  If you
+follow the same procedure for your own script, you should now be able
+to debug it.
+
+The next step could be to call the `cgi' module's `test()' function
+from your script: replace its main code with the single statement
+
+     cgi.test()
+
+This should produce the same results as those gotten from installing
+the `cgi.py' file itself.
+
+When an ordinary Python script raises an unhandled exception (for
+whatever reason: of a typo in a module name, a file that can't be
+opened, etc.), the Python interpreter prints a nice traceback and
+exits.  While the Python interpreter will still do this when your CGI
+script raises an exception, most likely the traceback will end up in
+one of the HTTP server's log files, or be discarded altogether.
+
+Fortunately, once you have managed to get your script to execute _some_
+code, you can easily send tracebacks to the Web browser using the
+`cgitb' module.  If you haven't done so already, just add the line:
+
+     import cgitb; cgitb.enable()
+
+to the top of your script.  Then try running it again; when a problem
+occurs, you should see a detailed report that will likely make apparent
+the cause of the crash.
+
+If you suspect that there may be a problem in importing the `cgitb'
+module, you can use an even more robust approach (which only uses
+built-in modules):
+
+     import sys
+     sys.stderr = sys.stdout
+     print "Content-Type: text/plain"
+     print
+     ...your code here...
+
+This relies on the Python interpreter to print the traceback.  The
+content type of the output is set to plain text, which disables all
+HTML processing.  If your script works, the raw HTML will be displayed
+by your client.  If it raises an exception, most likely after the first
+two lines have been printed, a traceback will be displayed.  Because no
+HTML interpretation is going on, the traceback will be readable.
+
+
+File: python-lib.info,  Node: Common problems and solutions,  Prev: Debugging CGI scripts,  Up: cgi
+
+Common problems and solutions
+-----------------------------
+
+   * Most HTTP servers buffer the output from CGI scripts until the
+     script is completed.  This means that it is not possible to
+     display a progress report on the client's display while the script
+     is running.
+
+   * Check the installation instructions above.
+
+   * Check the HTTP server's log files.  (`tail -f logfile' in a
+     separate window may be useful!)
+
+   * Always check a script for syntax errors first, by doing something
+     like `python script.py'.
+
+   * If your script does not have any syntax errors, try adding `import
+     cgitb; cgitb.enable()' to the top of the script.
+
+   * When invoking external programs, make sure they can be found.
+     Usually, this means using absolute path names -- `PATH' is usually
+     not set to a very useful value in a CGI script.
+
+   * When reading or writing external files, make sure they can be read
+     or written by every user on the system.
+
+   * Don't try to give a CGI script a set-uid mode.  This doesn't work
+     on most systems, and is a security liability as well.
+
+
+File: python-lib.info,  Node: cgitb,  Next: urllib,  Prev: cgi,  Up: Internet Protocols and Support
+
+Traceback manager for CGI scripts
+=================================
+
+Configurable traceback handler for CGI scripts.
+
+_Added in Python version 2.2_
+
+The `cgitb' module provides a special exception handler for Python
+scripts.  (It's name is a bit misleading.  It was originally designed to
+display extensive traceback information in HTML for CGI scripts.  It was
+later generalized to also display this information in plain text.)
+After this module is activated, if an uncaught exception occurs, a
+detailed, formatted report will be displayed.  The report includes a
+traceback showing excerpts of the source code for each level, as well
+as the values of the arguments and local variables to currently running
+functions, to help you debug the problem.  Optionally, you can save
+this information to a file instead of sending it to the browser.
+
+To enable this feature, simply add one line to the top of your CGI
+script:
+
+     import cgitb; cgitb.enable()
+
+The options to the `enable()' function control whether the report is
+displayed in the browser and whether the report is logged to a file for
+later analysis.
+
+`enable([display[, logdir[, context[, format]]]])'
+     This function causes the `cgitb' module to take over the
+     interpreter's default handling for exceptions by setting the value
+     of ``sys'.excepthook'.
+
+     The optional argument DISPLAY defaults to `1' and can be set to
+     `0' to suppress sending the traceback to the browser.  If the
+     argument LOGDIR is present, the traceback reports are written to
+     files.  The value of LOGDIR should be a directory where these
+     files will be placed.  The optional argument CONTEXT is the number
+     of lines of context to display around the current line of source
+     code in the traceback; this defaults to `5'.  If the optional
+     argument FORMAT is `"html"', the output is formatted as HTML.  Any
+     other value forces plain text output.  The default value is
+     `"html"'.
+
+`handler([info])'
+     This function handles an exception using the default settings
+     (that is, show a report in the browser, but don't log to a file).
+     This can be used when you've caught an exception and want to
+     report it using `cgitb'.  The optional INFO argument should be a
+     3-tuple containing an exception type, exception value, and
+     traceback object, exactly like the tuple returned by
+     ``sys'.exc_info()'.  If the INFO argument is not supplied, the
+     current exception is obtained from ``sys'.exc_info()'.
+
+
+File: python-lib.info,  Node: urllib,  Next: urllib2,  Prev: cgitb,  Up: Internet Protocols and Support
+
+Open arbitrary resources by URL
+===============================
+
+Open an arbitrary network resource by URL (requires sockets).
+
+This module provides a high-level interface for fetching data across
+the World Wide Web.  In particular, the `urlopen()' function is similar
+to the built-in function `open()', but accepts Universal Resource
+Locators (URLs) instead of filenames.  Some restrictions apply -- it
+can only open URLs for reading, and no seek operations are available.
+
+It defines the following public functions:
+
+`urlopen(url[, data[, proxies]])'
+     Open a network object denoted by a URL for reading.  If the URL
+     does not have a scheme identifier, or if it has `file:' as its
+     scheme identifier, this opens a local file (without universal
+     newlines); otherwise it opens a socket to a server somewhere on
+     the network.  If the connection cannot be made, or if the server
+     returns an error code, the `IOError' exception is raised.  If all
+     went well, a file-like object is returned.  This supports the
+     following methods: `read()', `readline()', `readlines()',
+     `fileno()', `close()', `info()' and `geturl()'.  It also has
+     proper support for the iterator protocol.
+
+     Except for the `info()' and `geturl()' methods, these methods have
+     the same interface as for file objects -- see section *Note File
+     Objects:: in this manual.  (It is not a built-in file object,
+     however, so it can't be used at those few places where a true
+     built-in file object is required.)
+
+     The `info()' method returns an instance of the class
+     `mimetools.Message' containing meta-information associated with
+     the URL.  When the method is HTTP, these headers are those
+     returned by the server at the head of the retrieved HTML page
+     (including Content-Length and Content-Type).  When the method is
+     FTP, a Content-Length header will be present if (as is now usual)
+     the server passed back a file length in response to the FTP
+     retrieval request. A Content-Type header will be present if the
+     MIME type can be guessed.  When the method is local-file, returned
+     headers will include a Date representing the file's last-modified
+     time, a Content-Length giving file size, and a Content-Type
+     containing a guess at the file's type. See also the description of
+     the `mimetools'  module.
+
+     The `geturl()' method returns the real URL of the page.  In some
+     cases, the HTTP server redirects a client to another URL.  The
+     `urlopen()' function handles this transparently, but in some cases
+     the caller needs to know which URL the client was redirected to.
+     The `geturl()' method can be used to get at this redirected URL.
+
+     If the URL uses the `http:' scheme identifier, the optional DATA
+     argument may be given to specify a `POST' request (normally the
+     request type is `GET').  The DATA argument must be in standard
+     `application/x-www-form-urlencoded' format; see the `urlencode()'
+     function below.
+
+     The `urlopen()' function works transparently with proxies which do
+     not require authentication.  In a UNIX or Windows environment, set
+     the `http_proxy', `ftp_proxy' or `gopher_proxy' environment
+     variables to a URL that identifies the proxy server before
+     starting the Python interpreter.  For example (the `%' is the
+     command prompt):
+
+          % http_proxy="http://www.someproxy.com:3128"
+          % export http_proxy
+          % python
+          ...
+
+     In a Windows environment, if no proxy environment variables are
+     set, proxy settings are obtained from the registry's Internet
+     Settings section.
+
+     In a Macintosh environment, `urlopen()' will retrieve proxy
+     information from Internet  Config.
+
+     Alternatively, the optional PROXIES argument may be used to
+     explicitly specify proxies.  It must be a dictionary mapping scheme
+     names to proxy URLs, where an empty dictionary causes no proxies
+     to be used, and `None' (the default value) causes environmental
+     proxy settings to be used as discussed above.  For example:
+
+          # Use http://www.someproxy.com:3128 for http proxying
+          proxies = proxies={'http': 'http://www.someproxy.com:3128'}
+          filehandle = urllib.urlopen(some_url, proxies=proxies)
+          # Don't use any proxies
+          filehandle = urllib.urlopen(some_url, proxies={})
+          # Use proxies from environment - both versions are equivalent
+          filehandle = urllib.urlopen(some_url, proxies=None)
+          filehandle = urllib.urlopen(some_url)
+
+     The `urlopen()' function does not support explicit proxy
+     specification.  If you need to override environmental proxy
+     settings, use `URLopener', or a subclass such as `FancyURLopener'.
+
+     Proxies which require authentication for use are not currently
+     supported; this is considered an implementation limitation.
+
+     _Changed in Python version 2.3_
+
+`urlretrieve(url[, filename[, reporthook[, data]]])'
+     Copy a network object denoted by a URL to a local file, if
+     necessary.  If the URL points to a local file, or a valid cached
+     copy of the object exists, the object is not copied.  Return a
+     tuple `(FILENAME, HEADERS)' where FILENAME is the local file name
+     under which the object can be found, and HEADERS is whatever the
+     `info()' method of the object returned by `urlopen()' returned
+     (for a remote object, possibly cached).  Exceptions are the same
+     as for `urlopen()'.
+
+     The second argument, if present, specifies the file location to
+     copy to (if absent, the location will be a tempfile with a
+     generated name).  The third argument, if present, is a hook
+     function that will be called once on establishment of the network
+     connection and once after each block read thereafter.  The hook
+     will be passed three arguments; a count of blocks transferred so
+     far, a block size in bytes, and the total size of the file.  The
+     third argument may be `-1' on older FTP servers which do not
+     return a file size in response to a retrieval request.
+
+     If the URL uses the `http:' scheme identifier, the optional DATA
+     argument may be given to specify a `POST' request (normally the
+     request type is `GET').  The DATA argument must in standard
+     `application/x-www-form-urlencoded' format; see the `urlencode()'
+     function below.
+
+`_urlopener'
+     The public functions `urlopen()' and `urlretrieve()' create an
+     instance of the `FancyURLopener' class and use it to perform their
+     requested actions.  To override this functionality, programmers
+     can create a subclass of `URLopener' or `FancyURLopener', then
+     assign an instance of that class to the `urllib._urlopener'
+     variable before calling the desired function.  For example,
+     applications may want to specify a different `User-Agent' header
+     than `URLopener' defines.  This can be accomplished with the
+     following code:
+
+          import urllib
+          
+          class AppURLopener(urllib.FancyURLopener):
+              def __init__(self, *args):
+                  self.version = "App/1.7"
+                  urllib.FancyURLopener.__init__(self, *args)
+          
+          urllib._urlopener = AppURLopener()
+
+`urlcleanup()'
+     Clear the cache that may have been built up by previous calls to
+     `urlretrieve()'.
+
+`quote(string[, safe])'
+     Replace special characters in STRING using the `%xx' escape.
+     Letters, digits, and the characters `_.-' are never quoted.  The
+     optional SAFE parameter specifies additional characters that
+     should not be quoted -- its default value is `'/''.
+
+     Example: `quote('/~{}connolly/')' yields `'/%7econnolly/''.
+
+`quote_plus(string[, safe])'
+     Like `quote()', but also replaces spaces by plus signs, as
+     required for quoting HTML form values.  Plus signs in the original
+     string are escaped unless they are included in SAFE.  It also does
+     not have SAFE default to `'/''.
+
+`unquote(string)'
+     Replace `%xx' escapes by their single-character equivalent.
+
+     Example: `unquote('/%7Econnolly/')' yields `'/~{}connolly/''.
+
+`unquote_plus(string)'
+     Like `unquote()', but also replaces plus signs by spaces, as
+     required for unquoting HTML form values.
+
+`urlencode(query[, doseq])'
+     Convert a mapping object or a sequence of two-element tuples  to a
+     "url-encoded" string, suitable to pass to `urlopen()' above as the
+     optional DATA argument.  This is useful to pass a dictionary of
+     form fields to a `POST' request.  The resulting string is a series
+     of `KEY=VALUE' pairs separated by `&' characters, where both KEY
+     and VALUE are quoted using `quote_plus()' above.  If the optional
+     parameter DOSEQ is present and evaluates to true, individual
+     `KEY=VALUE' pairs are generated for each element of the sequence.
+     When a sequence of two-element tuples is used as the QUERY
+     argument, the first element of each tuple is a key and the second
+     is a value.  The order of parameters in the encoded string will
+     match the order of parameter tuples in the sequence.  The `cgi'
+     module provides the functions `parse_qs()' and `parse_qsl()' which
+     are used to parse query strings into Python data structures.
+
+`pathname2url(path)'
+     Convert the pathname PATH from the local syntax for a path to the
+     form used in the path component of a URL.  This does not produce a
+     complete URL.  The return value will already be quoted using the
+     `quote()' function.
+
+`url2pathname(path)'
+     Convert the path component PATH from an encoded URL to the local
+     syntax for a path.  This does not accept a complete URL.  This
+     function uses `unquote()' to decode PATH.
+
+`URLopener([proxies[, **x509]])'
+     Base class for opening and reading URLs.  Unless you need to
+     support opening objects using schemes other than `http:', `ftp:',
+     `gopher:' or `file:', you probably want to use `FancyURLopener'.
+
+     By default, the `URLopener' class sends a `User-Agent' header of
+     `urllib/VVV', where VVV is the `urllib' version number.
+     Applications can define their own `User-Agent' header by
+     subclassing `URLopener' or `FancyURLopener' and setting the
+     instance attribute `version' to an appropriate string value before
+     the `open()' method is called.
+
+     The optional PROXIES parameter should be a dictionary mapping
+     scheme names to proxy URLs, where an empty dictionary turns proxies
+     off completely.  Its default value is `None', in which case
+     environmental proxy settings will be used if present, as discussed
+     in the definition of `urlopen()', above.
+
+     Additional keyword parameters, collected in X509, are used for
+     authentication with the `https:' scheme.  The keywords KEY_FILE
+     and CERT_FILE are supported; both are needed to actually retrieve
+     a resource at an `https:' URL.
+
+`FancyURLopener(...)'
+     `FancyURLopener' subclasses `URLopener' providing default handling
+     for the following HTTP response codes: 301, 302, 303, 307 and 401.
+     For the 30x response codes listed above, the `Location' header is
+     used to fetch the actual URL.  For 401 response codes
+     (authentication required), basic HTTP authentication is performed.
+     For the 30x response codes, recursion is bounded by the value of
+     the MAXTRIES attribute, which defaults to 10.
+
+     _Note:_ According to the letter of RFC 2616 , 301 and 302
+     responses to POST requests must not be automatically redirected
+     without confirmation by the user.  In reality, browsers do allow
+     automatic redirection of these responses, changing the POST to a
+     GET, and `urllib' reproduces this behaviour.
+
+     The parameters to the constructor are the same as those for
+     `URLopener'.
+
+     _Note:_ When performing basic authentication, a `FancyURLopener'
+     instance calls its `prompt_user_passwd()' method.  The default
+     implementation asks the users for the required information on the
+     controlling terminal.  A subclass may override this method to
+     support more appropriate behavior if needed.
+
+Restrictions:
+
+   * Currently, only the following protocols are supported: HTTP,
+     (versions 0.9 and 1.0), Gopher (but not Gopher-+), FTP, and local
+     files.
+
+   * The caching feature of `urlretrieve()' has been disabled until I
+     find the time to hack proper processing of Expiration time headers.
+
+   * There should be a function to query whether a particular URL is in
+     the cache.
+
+   * For backward compatibility, if a URL appears to point to a local
+     file but the file can't be opened, the URL is re-interpreted using
+     the FTP protocol.  This can sometimes cause confusing error
+     messages.
+
+   * The `urlopen()' and `urlretrieve()' functions can cause
+     arbitrarily long delays while waiting for a network connection to
+     be set up.  This means that it is difficult to build an interactive
+     Web client using these functions without using threads.
+
+   * The data returned by `urlopen()' or `urlretrieve()' is the raw
+     data returned by the server.  This may be binary data (e.g. an
+     image), plain text or (for example) HTML .  The HTTP  protocol
+     provides type information in the reply header, which can be
+     inspected by looking at the `Content-Type' header.  For the Gopher
+     protocol, type information is encoded in the URL; there is
+     currently no easy way to extract it.  If the returned data is
+     HTML, you can use the module `htmllib'  to parse it.
+
+   * This module does not support the use of proxies which require
+     authentication.  This may be implemented in the future.
+
+   * Although the `urllib' module contains (undocumented) routines to
+     parse and unparse URL strings, the recommended interface for URL
+     manipulation is in module `urlparse' .
+
+
+* Menu:
+
+* URLopener Objects::
+* Urllib Examples::
+
+
+File: python-lib.info,  Node: URLopener Objects,  Next: Urllib Examples,  Prev: urllib,  Up: urllib
+
+URLopener Objects
+-----------------
+
+`URLopener' and `FancyURLopener' objects have the following attributes.
+
+`open(fullurl[, data])'
+     Open FULLURL using the appropriate protocol.  This method sets up
+     cache and proxy information, then calls the appropriate open
+     method with its input arguments.  If the scheme is not recognized,
+     `open_unknown()' is called.  The DATA argument has the same
+     meaning as the DATA argument of `urlopen()'.
+
+`open_unknown(fullurl[, data])'
+     Overridable interface to open unknown URL types.
+
+`retrieve(url[, filename[, reporthook[, data]]])'
+     Retrieves the contents of URL and places it in FILENAME.  The
+     return value is a tuple consisting of a local filename and either a
+     `mimetools.Message' object containing the response headers (for
+     remote URLs) or `None' (for local URLs).  The caller must then
+     open and read the contents of FILENAME.  If FILENAME is not given
+     and the URL refers to a local file, the input filename is
+     returned.  If the URL is non-local and FILENAME is not given, the
+     filename is the output of `tempfile.mktemp()' with a suffix that
+     matches the suffix of the last path component of the input URL.
+     If REPORTHOOK is given, it must be a function accepting three
+     numeric parameters.  It will be called after each chunk of data is
+     read from the network.  REPORTHOOK is ignored for local URLs.
+
+     If the URL uses the `http:' scheme identifier, the optional DATA
+     argument may be given to specify a `POST' request (normally the
+     request type is `GET').  The DATA argument must in standard
+     `application/x-www-form-urlencoded' format; see the `urlencode()'
+     function below.
+
+`version'
+     Variable that specifies the user agent of the opener object.  To
+     get `urllib' to tell servers that it is a particular user agent,
+     set this in a subclass as a class variable or in the constructor
+     before calling the base constructor.
+
+The `FancyURLopener' class offers one additional method that should be
+overloaded to provide the appropriate behavior:
+
+`prompt_user_passwd(host, realm)'
+     Return information needed to authenticate the user at the given
+     host in the specified security realm.  The return value should be
+     a tuple, `(USER, PASSWORD)', which can be used for basic
+     authentication.
+
+     The implementation prompts for this information on the terminal; an
+     application should override this method to use an appropriate
+     interaction model in the local environment.
+
+
+File: python-lib.info,  Node: Urllib Examples,  Prev: URLopener Objects,  Up: urllib
+
+Examples
+--------
+
+Here is an example session that uses the `GET' method to retrieve a URL
+containing parameters:
+
+     >>> import urllib
+     >>> params = urllib.urlencode({'spam': 1, 'eggs': 2, 'bacon': 0})
+     >>> f = urllib.urlopen("http://www.musi-cal.com/cgi-bin/query?%s" % params)
+     >>> print f.read()
+
+The following example uses the `POST' method instead:
+
+     >>> import urllib
+     >>> params = urllib.urlencode({'spam': 1, 'eggs': 2, 'bacon': 0})
+     >>> f = urllib.urlopen("http://www.musi-cal.com/cgi-bin/query", params)
+     >>> print f.read()
+
+The following example uses an explicitly specified HTTP proxy,
+overriding environment settings:
+
+     >>> import urllib
+     >>> proxies = {'http': 'http://proxy.example.com:8080/'}
+     >>> opener = urllib.FancyURLopener(proxies)
+     >>> f = opener.open("http://www.python.org")
+     >>> f.read()
+
+The following example uses no proxies at all, overriding environment
+settings:
+
+     >>> import urllib
+     >>> opener = urllib.FancyURLopener({})
+     >>> f = opener.open("http://www.python.org/")
+     >>> f.read()
+
+
+File: python-lib.info,  Node: urllib2,  Next: httplib,  Prev: urllib,  Up: Internet Protocols and Support
+
+extensible library for opening URLs
+===================================
+
+An extensible library for opening URLs using a variety of  protocols
+
+The `urllib2' module defines functions and classes which help in
+opening URLs (mostly HTTP) in a complex world -- basic and digest
+authentication, redirections and more.
+
+The `urllib2' module defines the following functions:
+
+`urlopen(url[, data])'
+     Open the URL URL, which can be either a string or a `Request'
+     object (currently the code checks that it really is a `Request'
+     instance, or an instance of a subclass of `Request').
+
+     DATA should be a string, which specifies additional data to send
+     to the server. In HTTP requests, which are the only ones that
+     support DATA, it should be a buffer in the format of
+     `application/x-www-form-urlencoded', for example one returned from
+     `urllib.urlencode()'.
+
+     This function returns a file-like object with two additional
+     methods:
+
+        * `geturl()' -- return the URL of the resource retrieved
+
+        * `info()' -- return the meta-information of the page, as a
+          dictionary-like object
+
+     Raises `URLError' on errors.
+
+`install_opener(opener)'
+     Install an `OpenerDirector' instance as the default opener.  The
+     code does not check for a real `OpenerDirector', and any class
+     with the appropriate interface will work.
+
+`build_opener([handler, ...])'
+     Return an `OpenerDirector' instance, which chains the handlers in
+     the order given. HANDLERs can be either instances of
+     `BaseHandler', or subclasses of `BaseHandler' (in which case it
+     must be possible to call the constructor without any parameters).
+     Instances of the following classes will be in front of the
+     HANDLERs, unless the HANDLERs contain them, instances of them or
+     subclasses of them: `ProxyHandler', `UnknownHandler',
+     `HTTPHandler', `HTTPDefaultErrorHandler', `HTTPRedirectHandler',
+     `FTPHandler', `FileHandler'
+
+     If the Python installation has SSL support (`socket.ssl()'
+     exists), `HTTPSHandler' will also be added.
+
+     Beginning in Python 2.3, a `BaseHandler' subclass may also change
+     its `handler_order' member variable to modify its position in the
+     handlers list. Besides `ProxyHandler', which has `handler_order'
+     of `100', all handlers currently have it set to `500'.
+
+The following exceptions are raised as appropriate:
+
+`URLError'
+     The handlers raise this exception (or derived exceptions) when they
+     run into a problem.  It is a subclass of `IOError'.
+
+`HTTPError'
+     A subclass of `URLError', it can also function as a
+     non-exceptional file-like return value (the same thing that
+     `urlopen()' returns).  This is useful when handling exotic HTTP
+     errors, such as requests for authentication.
+
+`GopherError'
+     A subclass of `URLError', this is the error raised by the Gopher
+     handler.
+
+The following classes are provided:
+
+`Request(url[, data[, headers]])'
+     This class is an abstraction of a URL request.
+
+     URL should be a string which is a valid URL.  For a description of
+     DATA see the `add_data()' description.  HEADERS should be a
+     dictionary, and will be treated as if `add_header()' was called
+     with each key and value as arguments.
+
+`OpenerDirector()'
+     The `OpenerDirector' class opens URLs via `BaseHandler's chained
+     together. It manages the chaining of handlers, and recovery from
+     errors.
+
+`BaseHandler()'
+     This is the base class for all registered handlers -- and handles
+     only the simple mechanics of registration.
+
+`HTTPDefaultErrorHandler()'
+     A class which defines a default handler for HTTP error responses;
+     all responses are turned into `HTTPError' exceptions.
+
+`HTTPRedirectHandler()'
+     A class to handle redirections.
+
+`ProxyHandler([proxies])'
+     Cause requests to go through a proxy.  If PROXIES is given, it
+     must be a dictionary mapping protocol names to URLs of proxies.
+     The default is to read the list of proxies from the environment
+     variables PROTOCOL_proxy.
+
+`HTTPPasswordMgr()'
+     Keep a database of `(REALM, URI) -> (USER, PASSWORD)' mappings.
+
+`HTTPPasswordMgrWithDefaultRealm()'
+     Keep a database of `(REALM, URI) -> (USER, PASSWORD)' mappings.  A
+     realm of `None' is considered a catch-all realm, which is searched
+     if no other realm fits.
+
+`AbstractBasicAuthHandler([password_mgr])'
+     This is a mixin class that helps with HTTP authentication, both to
+     the remote host and to a proxy.  PASSWORD_MGR, if given, should be
+     something that is compatible with `HTTPPasswordMgr'; refer to
+     section~*Note HTTPPasswordMgr Objects:: for information on the
+     interface that must be supported.
+
+`HTTPBasicAuthHandler([password_mgr])'
+     Handle authentication with the remote host.  PASSWORD_MGR, if
+     given, should be something that is compatible with
+     `HTTPPasswordMgr'; refer to section~*Note HTTPPasswordMgr Objects::
+     for information on the interface that must be supported.
+
+`ProxyBasicAuthHandler([password_mgr])'
+     Handle authentication with the proxy.  PASSWORD_MGR, if given,
+     should be something that is compatible with `HTTPPasswordMgr';
+     refer to section~*Note HTTPPasswordMgr Objects:: for information
+     on the interface that must be supported.
+
+`AbstractDigestAuthHandler([password_mgr])'
+     This is a mixin class that helps with HTTP authentication, both to
+     the remote host and to a proxy.  PASSWORD_MGR, if given, should be
+     something that is compatible with `HTTPPasswordMgr'; refer to
+     section~*Note HTTPPasswordMgr Objects:: for information on the
+     interface that must be supported.
+
+`HTTPDigestAuthHandler([password_mgr])'
+     Handle authentication with the remote host.  PASSWORD_MGR, if
+     given, should be something that is compatible with
+     `HTTPPasswordMgr'; refer to section~*Note HTTPPasswordMgr Objects::
+     for information on the interface that must be supported.
+
+`ProxyDigestAuthHandler([password_mgr])'
+     Handle authentication with the proxy.  PASSWORD_MGR, if given,
+     should be something that is compatible with `HTTPPasswordMgr';
+     refer to section~*Note HTTPPasswordMgr Objects:: for information
+     on the interface that must be supported.
+
+`HTTPHandler()'
+     A class to handle opening of HTTP URLs.
+
+`HTTPSHandler()'
+     A class to handle opening of HTTPS URLs.
+
+`FileHandler()'
+     Open local files.
+
+`FTPHandler()'
+     Open FTP URLs.
+
+`CacheFTPHandler()'
+     Open FTP URLs, keeping a cache of open FTP connections to minimize
+     delays.
+
+`GopherHandler()'
+     Open gopher URLs.
+
+`UnknownHandler()'
+     A catch-all class to handle unknown URLs.
+
+* Menu:
+
+* Request Objects::
+* OpenerDirector Objects::
+* BaseHandler Objects::
+* HTTPRedirectHandler Objects::
+* ProxyHandler Objects::
+* HTTPPasswordMgr Objects::
+* AbstractBasicAuthHandler Objects::
+* HTTPBasicAuthHandler Objects::
+* ProxyBasicAuthHandler Objects::
+* AbstractDigestAuthHandler Objects::
+* HTTPDigestAuthHandler Objects::
+* ProxyDigestAuthHandler Objects::
+* HTTPHandler Objects::
+* HTTPSHandler Objects::
+* FileHandler Objects::
+* FTPHandler Objects::
+* CacheFTPHandler Objects::
+* GopherHandler Objects::
+* UnknownHandler Objects::
+* Examples 8::
+
+
+File: python-lib.info,  Node: Request Objects,  Next: OpenerDirector Objects,  Prev: urllib2,  Up: urllib2
+
+Request Objects
+---------------
+
+The following methods describe all of `Request''s public interface, and
+so all must be overridden in subclasses.
+
+`add_data(data)'
+     Set the `Request' data to DATA.  This is ignored by all handlers
+     except HTTP handlers -- and there it should be an
+     `application/x-www-form-encoded' buffer, and will change the
+     request to be `POST' rather than `GET'.
+
+`get_method()'
+     Return a string indicating the HTTP request method.  This is only
+     meaningful for HTTP requests, and currently always takes one of the
+     values ("GET", "POST").
+
+`has_data()'
+     Return whether the instance has a non-`None' data.
+
+`get_data()'
+     Return the instance's data.
+
+`add_header(key, val)'
+     Add another header to the request.  Headers are currently ignored
+     by all handlers except HTTP handlers, where they are added to the
+     list of headers sent to the server.  Note that there cannot be
+     more than one header with the same name, and later calls will
+     overwrite previous calls in case the KEY collides.  Currently,
+     this is no loss of HTTP functionality, since all headers which
+     have meaning when used more than once have a (header-specific) way
+     of gaining the same functionality using only one header.
+
+`get_full_url()'
+     Return the URL given in the constructor.
+
+`get_type()'
+     Return the type of the URL -- also known as the scheme.
+
+`get_host()'
+     Return the host to which a connection will be made.
+
+`get_selector()'
+     Return the selector -- the part of the URL that is sent to the
+     server.
+
+`set_proxy(host, type)'
+     Prepare the request by connecting to a proxy server. The HOST and
+     TYPE will replace those of the instance, and the instance's
+     selector will be the original URL given in the constructor.
+
+
+File: python-lib.info,  Node: OpenerDirector Objects,  Next: BaseHandler Objects,  Prev: Request Objects,  Up: urllib2
+
+OpenerDirector Objects
+----------------------
+
+`OpenerDirector' instances have the following methods:
+
+`add_handler(handler)'
+     HANDLER should be an instance of `BaseHandler'.  The following
+     methods are searched, and added to the possible chains.
+
+        * `PROTOCOL_open()' -- signal that the handler knows how to
+          open PROTOCOL URLs.
+
+        * `PROTOCOL_error_TYPE()' -- signal that the handler knows how
+          to handle TYPE errors from PROTOCOL.
+
+`close()'
+     Explicitly break cycles, and delete all the handlers.  Because the
+     `OpenerDirector' needs to know the registered handlers, and a
+     handler needs to know who the `OpenerDirector' who called it is,
+     there is a reference cycle.  Even though recent versions of Python
+     have cycle-collection, it is sometimes preferable to explicitly
+     break the cycles.
+
+`open(url[, data])'
+     Open the given URL (which can be a request object or a string),
+     optionally passing the given DATA.  Arguments, return values and
+     exceptions raised are the same as those of `urlopen()' (which
+     simply calls the `open()' method on the default installed
+     `OpenerDirector').
+
+`error(proto[, arg[, ...]])'
+     Handle an error in a given protocol.  This will call the registered
+     error handlers for the given protocol with the given arguments
+     (which are protocol specific).  The HTTP protocol is a special
+     case which uses the HTTP response code to determine the specific
+     error handler; refer to the `http_error_*()' methods of the
+     handler classes.
+
+     Return values and exceptions raised are the same as those of
+     `urlopen()'.
+

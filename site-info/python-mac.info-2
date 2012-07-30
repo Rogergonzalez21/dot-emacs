@@ -1,0 +1,1308 @@
+This is python-mac.info, produced by makeinfo version 4.3 from
+python-mac.texi.
+
+October 3, 2003
+
+
+File: python-mac.info,  Node: EasyDialogs,  Next: FrameWork,  Prev: findertools,  Up: MacPython Modules
+
+Basic Macintosh dialogs
+=======================
+
+Basic Macintosh dialogs.
+
+The `EasyDialogs' module contains some simple dialogs for the
+Macintosh. All routines take an optional resource ID parameter ID with
+which one can override the `DLOG' resource used for the dialog,
+provided that the dialog items correspond (both type and item number)
+to those in the default `DLOG' resource. See source code for details.
+
+The `EasyDialogs' module defines the following functions:
+
+`Message(str[, id[, ok=None]])'
+     Displays a modal dialog with the message text STR, which should be
+     at most 255 characters long. The button text defaults to "OK", but
+     is set to the string argument OK if the latter is supplied. Control
+     is returned when the user clicks the "OK" button.
+
+`AskString(prompt[, default[, id[, ok[, cancel]]]])'
+     Asks the user to input a string value via a modal dialog. PROMPT
+     is the prompt message, and the optional DEFAULT supplies the
+     initial value for the string (otherwise `""' is used). The text of
+     the "OK" and "Cancel" buttons can be changed with the OK and
+     CANCEL arguments. All strings can be at most 255 bytes long.
+     `AskString()' returns the string entered or `None' in case the
+     user cancelled.
+
+`AskPassword(prompt[, default[, id[, ok[, cancel]]]])'
+     Asks the user to input a string value via a modal dialog. Like
+     `AskString()', but with the text shown as bullets. The arguments
+     have the same meaning as for `AskString()'.
+
+`AskYesNoCancel(question[, default[, yes[, no[, cancel[, id]]]]])'
+     Presents a dialog with prompt QUESTION and three buttons labelled
+     "Yes", "No", and "Cancel". Returns `1' for "Yes", `0' for "No" and
+     `-1' for "Cancel". The value of DEFAULT (or `0' if DEFAULT is not
+     supplied) is returned when the <RETURN> key is pressed. The text
+     of the buttons can be changed with the YES, NO, and CANCEL
+     arguments; to prevent a button from appearing, supply `""' for the
+     corresponding argument.
+
+`ProgressBar([title[, maxval[, label[, id]]]])'
+     Displays a modeless progress-bar dialog. This is the constructor
+     for the `ProgressBar' class described below. TITLE is the text
+     string displayed (default "Working..."), MAXVAL is the value at
+     which progress is complete (default `0', indicating that an
+     indeterminate amount of work remains to be done), and LABEL is the
+     text that is displayed above the progress bar itself.
+
+`GetArgv([optionlist[ commandlist[, addoldfile[, addnewfile[, addfolder[, id]]]]]])'
+     Displays a dialog which aids the user in constructing a
+     command-line argument list.  Returns the list in `sys.argv'
+     format, suitable for passing as an argument to `getopt.getopt()'.
+     ADDOLDFILE, ADDNEWFILE, and ADDFOLDER are boolean arguments.  When
+     nonzero, they enable the user to insert into the command line
+     paths to an existing file, a (possibly) not-yet-existent file, and
+     a folder, respectively.  (Note: Option arguments must appear in
+     the command line before file and folder arguments in order to be
+     recognized by `getopt.getopt()'.)  Arguments containing spaces can
+     be specified by enclosing them within single or double quotes.  A
+     `SystemExit' exception is raised if the user presses the "Cancel"
+     button.
+
+     OPTIONLIST is a list that determines a popup menu from which the
+     allowed options are selected.  Its items can take one of two forms:
+     OPTSTR or `(OPTSTR, DESCR)'.  When present, DESCR is a short
+     descriptive string that is displayed in the dialog while this
+     option is selected in the popup menu.  The correspondence between
+     OPTSTRs and command-line arguments is:
+
+     OPTSTR format                      Command-line format
+     ------                             -----
+     `x'                                `-x' (short option)
+     `x:' or `x='                       `-x' (short option with value)
+     `xyz'                              `--xyz' (long option)
+     `xyz:' or `xyz='                   `--xyz' (long option with value)
+
+     COMMANDLIST is a list of items of the form CMDSTR or `(CMDSTR,
+     DESCR)', where DESCR is as above.  The CMDSTRs will appear in a
+     popup menu.  When chosen, the text of CMDSTR will be appended to
+     the command line as is, except that a trailing `:' or `=' (if
+     present) will be trimmed off.
+
+     _Added in Python version 2.0_
+
+`AskFileForOpen( [message] [, typeList] [, defaultLocation] [, defaultOptionFlags] [, location] [, clientName] [, windowTitle] [, actionButtonLabel] [, cancelButtonLabel] [, preferenceKey] [, popupExtension] [, eventProc] [, previewProc] [, filterProc] [, wanted] )'
+     Post a dialog asking the user for a file to open, and return the
+     file selected or NONE if the user cancelled.  MESSAGE is a text
+     message to display, TYPELIST is a list of 4-char filetypes
+     allowable, DEFAULTLOCATION is the pathname, FSSpec or FSRef of the
+     folder to show initially, LOCATION is the `(x, y)' position on the
+     screen where the dialog is shown, ACTIONBUTTONLABEL is a string to
+     show in stead of "Open" in the OK button, CANCELBUTTONLABEL is a
+     string to show in stead of "Cancel" in the cancel button, WANTED
+     is the type of value wanted as a return: `string', `unicode',
+     `FSSpec', `FSRef' and subtypes thereof are acceptable.
+
+     For a description of the other arguments please see the Apple
+     Navigation Services documentation and the EasyDialogs sourcecode.
+
+`AskFileForSave( [message] [, savedFileName] [, defaultLocation] [, defaultOptionFlags] [, location] [, clientName] [, windowTitle] [, actionButtonLabel] [, cancelButtonLabel] [, preferenceKey] [, popupExtension] [, fileType] [, fileCreator] [, eventProc] [, wanted] )'
+     Post a dialog asking the user for a file to save to, and return
+     the file selected or NONE if the user cancelled. SAVEDFILENAME is
+     the default for the file name to save to (the return value). See
+     AskFileForOpen for a description of the other arguments.
+
+`AskFolder( [message] [, defaultLocation] [, defaultOptionFlags] [, location] [, clientName] [, windowTitle] [, actionButtonLabel] [, cancelButtonLabel] [, preferenceKey] [, popupExtension] [, eventProc] [, filterProc] [, wanted] )'
+     Post a dialog asking the user to select a folder, and return the
+     folder selected or NONE if the user cancelled. See AskFileForOpen
+     for a description of the arguments.
+
+* Menu:
+
+* ProgressBar Objects::
+
+
+File: python-mac.info,  Node: ProgressBar Objects,  Prev: EasyDialogs,  Up: EasyDialogs
+
+ProgressBar Objects
+-------------------
+
+`ProgressBar' objects provide support for modeless progress-bar
+dialogs.  Both determinate (thermometer style) and indeterminate
+(barber-pole style) progress bars are supported.  The bar will be
+determinate if its maximum value is greater than zero; otherwise it
+will be indeterminate.  _Changed in Python version 2.2_
+
+The dialog is displayed immediately after creation. If the dialog's
+"Cancel" button is pressed, or if <Cmd-.> or <ESC> is typed, the dialog
+window is hidden and `KeyboardInterrupt' is raised (but note that this
+response does not occur until the progress bar is next updated,
+typically via a call to `inc()' or `set()').  Otherwise, the bar
+remains visible until the `ProgressBar' object is discarded.
+
+`ProgressBar' objects possess the following attributes and methods:
+
+`curval'
+     The current value (of type integer or long integer) of the progress
+     bar.  The normal access methods coerce `curval' between `0' and
+     `maxval'.  This attribute should not be altered directly.
+
+`maxval'
+     The maximum value (of type integer or long integer) of the progress
+     bar; the progress bar (thermometer style) is full when `curval'
+     equals `maxval'.  If `maxval' is `0', the bar will be
+     indeterminate (barber-pole).  This attribute should not be altered
+     directly.
+
+`title([newstr])'
+     Sets the text in the title bar of the progress dialog to NEWSTR.
+
+`label([newstr])'
+     Sets the text in the progress box of the progress dialog to NEWSTR.
+
+`set(value[, max])'
+     Sets the progress bar's `curval' to VALUE, and also `maxval' to
+     MAX if the latter is provided.  VALUE is first coerced between 0
+     and `maxval'.  The thermometer bar is updated to reflect the
+     changes, including a change from indeterminate to determinate or
+     vice versa.
+
+`inc([n])'
+     Increments the progress bar's `curval' by N, or by `1' if N is not
+     provided.  (Note that N may be negative, in which case the effect
+     is a decrement.)  The progress bar is updated to reflect the
+     change.  If the bar is indeterminate, this causes one "spin" of
+     the barber pole.  The resulting `curval' is coerced between 0 and
+     `maxval' if incrementing causes it to fall outside this range.
+
+
+File: python-mac.info,  Node: FrameWork,  Next: autoGIL,  Prev: EasyDialogs,  Up: MacPython Modules
+
+Interactive application framework
+=================================
+
+Interactive application framework.
+
+The `FrameWork' module contains classes that together provide a
+framework for an interactive Macintosh application. The programmer
+builds an application by creating subclasses that override various
+methods of the bases classes, thereby implementing the functionality
+wanted. Overriding functionality can often be done on various different
+levels, i.e. to handle clicks in a single dialog window in a
+non-standard way it is not necessary to override the complete event
+handling.
+
+The `FrameWork' is still very much work-in-progress, and the
+documentation describes only the most important functionality, and not
+in the most logical manner at that. Examine the source or the examples
+for more details.  The following are some comments posted on the
+MacPython newsgroup about the strengths and limitations of `FrameWork':
+
+     The strong point of `FrameWork' is that it allows you to break
+     into the control-flow at many different places. `W', for instance,
+     uses a different way to enable/disable menus and that plugs right
+     in leaving the rest intact.  The weak points of `FrameWork' are
+     that it has no abstract command interface (but that shouldn't be
+     difficult), that it's dialog support is minimal and that it's
+     control/toolbar support is non-existent.
+
+The `FrameWork' module defines the following functions:
+
+`Application()'
+     An object representing the complete application. See below for a
+     description of the methods. The default `__init__()' routine
+     creates an empty window dictionary and a menu bar with an apple
+     menu.
+
+`MenuBar()'
+     An object representing the menubar. This object is usually not
+     created by the user.
+
+`Menu(bar, title[, after])'
+     An object representing a menu. Upon creation you pass the
+     `MenuBar' the menu appears in, the TITLE string and a position
+     (1-based) AFTER where the menu should appear (default: at the end).
+
+`MenuItem(menu, title[, shortcut, callback])'
+     Create a menu item object. The arguments are the menu to create,
+     the item title string and optionally the keyboard shortcut and a
+     callback routine. The callback is called with the arguments
+     menu-id, item number within menu (1-based), current front window
+     and the event record.
+
+     Instead of a callable object the callback can also be a string. In
+     this case menu selection causes the lookup of a method in the
+     topmost window and the application. The method name is the
+     callback string with `'domenu_'' prepended.
+
+     Calling the `MenuBar' `fixmenudimstate()' method sets the correct
+     dimming for all menu items based on the current front window.
+
+`Separator(menu)'
+     Add a separator to the end of a menu.
+
+`SubMenu(menu, label)'
+     Create a submenu named LABEL under menu MENU. The menu object is
+     returned.
+
+`Window(parent)'
+     Creates a (modeless) window. PARENT is the application object to
+     which the window belongs. The window is not displayed until later.
+
+`DialogWindow(parent)'
+     Creates a modeless dialog window.
+
+`windowbounds(width, height)'
+     Return a `(LEFT, TOP, RIGHT, BOTTOM)' tuple suitable for creation
+     of a window of given width and height. The window will be
+     staggered with respect to previous windows, and an attempt is made
+     to keep the whole window on-screen. However, the window will
+     however always be the exact size given, so parts may be offscreen.
+
+`setwatchcursor()'
+     Set the mouse cursor to a watch.
+
+`setarrowcursor()'
+     Set the mouse cursor to an arrow.
+
+* Menu:
+
+* Application Objects::
+* Window Objects::
+* ControlsWindow Object::
+* ScrolledWindow Object::
+* DialogWindow Objects::
+
+
+File: python-mac.info,  Node: Application Objects,  Next: Window Objects,  Prev: FrameWork,  Up: FrameWork
+
+Application Objects
+-------------------
+
+Application objects have the following methods, among others:
+
+`makeusermenus()'
+     Override this method if you need menus in your application. Append
+     the menus to the attribute `menubar'.
+
+`getabouttext()'
+     Override this method to return a text string describing your
+     application.  Alternatively, override the `do_about()' method for
+     more elaborate "about" messages.
+
+`mainloop([mask[, wait]])'
+     This routine is the main event loop, call it to set your
+     application rolling. MASK is the mask of events you want to handle,
+     WAIT is the number of ticks you want to leave to other concurrent
+     application (default 0, which is probably not a good idea). While
+     raising SELF to exit the mainloop is still supported it is not
+     recommended: call `self._quit()' instead.
+
+     The event loop is split into many small parts, each of which can be
+     overridden. The default methods take care of dispatching events to
+     windows and dialogs, handling drags and resizes, Apple Events,
+     events for non-FrameWork windows, etc.
+
+     In general, all event handlers should return `1' if the event is
+     fully handled and `0' otherwise (because the front window was not
+     a FrameWork window, for instance). This is needed so that update
+     events and such can be passed on to other windows like the Sioux
+     console window.  Calling `MacOS.HandleEvent()' is not allowed
+     within OUR_DISPATCH or its callees, since this may result in an
+     infinite loop if the code is called through the Python inner-loop
+     event handler.
+
+`asyncevents(onoff)'
+     Call this method with a nonzero parameter to enable asynchronous
+     event handling. This will tell the inner interpreter loop to call
+     the application event handler ASYNC_DISPATCH whenever events are
+     available. This will cause FrameWork window updates and the user
+     interface to remain working during long computations, but will
+     slow the interpreter down and may cause surprising results in
+     non-reentrant code (such as FrameWork itself). By default
+     ASYNC_DISPATCH will immedeately call OUR_DISPATCH but you may
+     override this to handle only certain events asynchronously. Events
+     you do not handle will be passed to Sioux and such.
+
+     The old on/off value is returned.
+
+`_quit()'
+     Terminate the running `mainloop()' call at the next convenient
+     moment.
+
+`do_char(c, event)'
+     The user typed character C. The complete details of the event can
+     be found in the EVENT structure. This method can also be provided
+     in a `Window' object, which overrides the application-wide handler
+     if the window is frontmost.
+
+`do_dialogevent(event)'
+     Called early in the event loop to handle modeless dialog events.
+     The default method simply dispatches the event to the relevant
+     dialog (not through the `DialogWindow' object involved). Override
+     if you need special handling of dialog events (keyboard shortcuts,
+     etc).
+
+`idle(event)'
+     Called by the main event loop when no events are available. The
+     null-event is passed (so you can look at mouse position, etc).
+
+
+File: python-mac.info,  Node: Window Objects,  Next: ControlsWindow Object,  Prev: Application Objects,  Up: FrameWork
+
+Window Objects
+--------------
+
+Window objects have the following methods, among others:
+
+`open()'
+     Override this method to open a window. Store the MacOS window-id in
+     `self.wid' and call the `do_postopen()' method to register the
+     window with the parent application.
+
+`close()'
+     Override this method to do any special processing on window close.
+     Call the `do_postclose()' method to cleanup the parent state.
+
+`do_postresize(width, height, macoswindowid)'
+     Called after the window is resized. Override if more needs to be
+     done than calling `InvalRect'.
+
+`do_contentclick(local, modifiers, event)'
+     The user clicked in the content part of a window. The arguments are
+     the coordinates (window-relative), the key modifiers and the raw
+     event.
+
+`do_update(macoswindowid, event)'
+     An update event for the window was received. Redraw the window.
+
+`do_activate(activate, event)'
+     The window was activated (`ACTIVATE == 1') or deactivated
+     (`ACTIVATE == 0'). Handle things like focus highlighting, etc.
+
+
+File: python-mac.info,  Node: ControlsWindow Object,  Next: ScrolledWindow Object,  Prev: Window Objects,  Up: FrameWork
+
+ControlsWindow Object
+---------------------
+
+ControlsWindow objects have the following methods besides those of
+`Window' objects:
+
+`do_controlhit(window, control, pcode, event)'
+     Part PCODE of control CONTROL was hit by the user. Tracking and
+     such has already been taken care of.
+
+
+File: python-mac.info,  Node: ScrolledWindow Object,  Next: DialogWindow Objects,  Prev: ControlsWindow Object,  Up: FrameWork
+
+ScrolledWindow Object
+---------------------
+
+ScrolledWindow objects are ControlsWindow objects with the following
+extra methods:
+
+`scrollbars([wantx[, wanty]])'
+     Create (or destroy) horizontal and vertical scrollbars. The
+     arguments specify which you want (default: both). The scrollbars
+     always have minimum `0' and maximum `32767'.
+
+`getscrollbarvalues()'
+     You must supply this method. It should return a tuple `(X, Y)'
+     giving the current position of the scrollbars (between `0' and
+     `32767'). You can return `None' for either to indicate the whole
+     document is visible in that direction.
+
+`updatescrollbars()'
+     Call this method when the document has changed. It will call
+     `getscrollbarvalues()' and update the scrollbars.
+
+`scrollbar_callback(which, what, value)'
+     Supplied by you and called after user interaction. WHICH will be
+     `'x'' or `'y'', WHAT will be `'-'', `'--'', `'set'', `'++'' or
+     `'+''. For `'set'', VALUE will contain the new scrollbar position.
+
+`scalebarvalues(absmin, absmax, curmin, curmax)'
+     Auxiliary method to help you calculate values to return from
+     `getscrollbarvalues()'. You pass document minimum and maximum value
+     and topmost (leftmost) and bottommost (rightmost) visible values
+     and it returns the correct number or `None'.
+
+`do_activate(onoff, event)'
+     Takes care of dimming/highlighting scrollbars when a window becomes
+     frontmost. If you override this method, call this one at the end of
+     your method.
+
+`do_postresize(width, height, window)'
+     Moves scrollbars to the correct position. Call this method
+     initially if you override it.
+
+`do_controlhit(window, control, pcode, event)'
+     Handles scrollbar interaction. If you override it call this method
+     first, a nonzero return value indicates the hit was in the
+     scrollbars and has been handled.
+
+
+File: python-mac.info,  Node: DialogWindow Objects,  Prev: ScrolledWindow Object,  Up: FrameWork
+
+DialogWindow Objects
+--------------------
+
+DialogWindow objects have the following methods besides those of
+`Window' objects:
+
+`open(resid)'
+     Create the dialog window, from the DLOG resource with id RESID.
+     The dialog object is stored in `self.wid'.
+
+`do_itemhit(item, event)'
+     Item number ITEM was hit. You are responsible for redrawing toggle
+     buttons, etc.
+
+
+File: python-mac.info,  Node: autoGIL,  Prev: FrameWork,  Up: MacPython Modules
+
+Global Interpreter Lock handling in event loops
+===============================================
+
+Global Interpreter Lock handling in event loops.
+
+The `autoGIL' module provides a function `installAutoGIL' that
+automatically locks and unlocks Python's Global Interpreter Lock when
+running an event loop.
+
+`AutoGILError'
+     Raised if the observer callback cannot be installed, for example
+     because the current thread does not have a run loop.
+
+`installAutoGIL()'
+     Install an observer callback in the event loop (CFRunLoop) for the
+     current thread, that will lock and unlock the Global Interpreter
+     Lock (GIL) at appropriate times, allowing other Python threads to
+     run while the event loop is idle.
+
+     Availability: OSX 10.1 or later.
+
+
+File: python-mac.info,  Node: MacPython OSA Modules,  Next: MacOS Toolbox Modules,  Prev: MacPython Modules,  Up: Top
+
+MacPython OSA Modules
+*********************
+
+Python has a fairly complete implementation of the Open Scripting
+Architecure (OSA, also commonly referred to as AppleScript), allowing
+you to control scriptable applications from your Python program, and
+with a fairly pythonic interface.
+
+For a description of the various components of AppleScript and OSA, and
+to get an understanding of the architecture and terminology, you should
+read Apple's documentation. The "Applescript Language Guide" explains
+the conceptual model and the terminology, and documents the standard
+suite. The "Open Scripting Architecture" document explains how to use
+OSA from an application programmers point of view. In the Apple Help
+Viewer these book sare located in the Developer Documentation, Core
+Technologies section.
+
+As an example of scripting an application, the following piece of
+AppleScript will get the name of the frontmost `Finder' window and
+print it:
+
+     tell application "Finder"
+         get name of window 1
+     end tell
+
+In Python, the following code fragment will do the same:
+
+     import Finder
+     
+     f = Finder.Finder()
+     print f.get(f.window(1).name)
+
+As distributed the Python library includes packages that implement the
+standard suites, plus packages that interface to a small number of
+common applications.
+
+To send AppleEvents to an application you must first create the Python
+package interfacing to the terminology of the application (what `Script
+Editor' calls the "Dictionary"). This can be done from within the
+`PythonIDE' or by running the `gensuitemodule.py' module as a
+standalone program from the command line.
+
+The generated output is a package with a number of modules, one for
+every suite used in the program plus an `__init__' module to glue it
+all together. The Python inheritance graph follows the AppleScript
+inheritance graph, so if a programs dictionary specifies that it
+includes support for the Standard Suite, but extends one or two verbs
+with extra arguments then the output suite will contain a module
+`Standard_Suite' that imports and re-exports everything from
+`StdSuites.Standard_Suite' but overrides the methods that have extra
+functionality. The output of `gensuitemodule' is pretty readable, and
+contains the documentation that was in the original AppleScript
+dictionary in Python docstrings, so reading it is a good source of
+documentation.
+
+The output package implements a main class with the same name as the
+package which contains all the AppleScript verbs as methods, with the
+direct object as the first argument and all optional parameters as
+keyword arguments. AppleScript classes are also implemented as Python
+classes, as are comparisons and all the other thingies.
+
+The main Python class implementing the verbs also allows access to the
+properties and elements declared in the AppleScript class
+"application". In the current release that is as far as the object
+orientation goes, so in the example above we need to use
+`f.get(f.window(1).name)' in stead of the more Pythonic
+`f.window(1).name.get()'.
+
+If an AppleScript identifier is not a Python identifier the name is
+mangled according to a small number of rules:
+   * spaces are replaced with underscores
+
+   * other non-alphanumeric characters are replaced with `_xx_' where
+     `xx' is the hexadecimal character value
+
+   * any Python reserved word gets an underscore appended
+
+Python also has support for creating scriptable applications in Python,
+but The following modules are relevant to MacPython AppleScript support:
+
+In addition, support modules have been pre-generated for `Finder',
+`Terminal', `Explorer', `Netscape', `CodeWarrior', `SystemEvents' and
+`StdSuites'.
+
+* Menu:
+
+* gensuitemodule::
+* aetools::
+* aepack::
+* aetypes::
+* MiniAEFrame::
+
+
+File: python-mac.info,  Node: gensuitemodule,  Next: aetools,  Prev: MacPython OSA Modules,  Up: MacPython OSA Modules
+
+Generate OSA stub packages
+==========================
+
+Create a stub package from an OSA dictionary
+
+The `gensuitemodule' module creates a Python package implementing stub
+code for the AppleScript suites that are implemented by a specific
+application, according to its AppleScript dictionary.
+
+It is usually invoked by the user through the `PythonIDE', but it can
+also be run as a script from the command line (pass `--help' for help
+on the options) or imported from Python code. For an example of its use
+see `Mac/scripts/genallsuites.py' in a source distribution, which
+generates the stub packages that are included in the standard library.
+
+It defines the following public functions:
+
+`is_scriptable(application)'
+     Returns true if `application', which should be passed as a
+     pathname, appears to be scriptable. Take the return value with a
+     grain of salt: `Internet Explorer' appears not to be scriptable
+     but definitely is.
+
+`processfile(application[, output, basepkgname,  edit_modnames, creatorsignature, dump, verbose])'
+     Create a stub package for `application', which should be passed as
+     a full pathname. For a `.app' bundle this is the pathname to the
+     bundle, not to the executable inside the bundle; for an unbundled
+     CFM application you pass the filename of the application binary.
+
+     This function asks the application for its OSA terminology
+     resources, decodes these resources and uses the resultant data to
+     create the Python code for the package implementing the client
+     stubs.
+
+     `output' is the pathname where the resulting package is stored, if
+     not specified a standard "save file as" dialog is presented to the
+     user. `basepkgname' is the base package on which this package will
+     build, and defaults to `StdSuites'. Only when generating
+     `StdSuites' itself do you need to specify this.  `edit_modnames'
+     is a dictionary that can be used to change modulenames that are
+     too ugly after name mangling.  `creator_signature' can be used to
+     override the 4-char creator code, which is normally obtained from
+     the `PkgInfo' file in the package or from the CFM file creator
+     signature. When `dump' is given it should refer to a file object,
+     and `processfile' will stop after decoding the resources and dump
+     the Python representation of the terminology resources to this
+     file. `verbose' should also be a file object, and specifying it
+     will cause `processfile' to tell you what it is doing.
+
+`processfile_fromresource(application[, output,  basepkgname, edit_modnames, creatorsignature, dump, verbose])'
+     This function does the same as `processfile', except that it uses a
+     different method to get the terminology resources. It opens
+     `application' as a resource file and reads all `"aete"' and
+     `"aeut"' resources from this file.
+
+
+File: python-mac.info,  Node: aetools,  Next: aepack,  Prev: gensuitemodule,  Up: MacPython OSA Modules
+
+OSA client support
+==================
+
+Basic support for sending Apple Events
+
+The `aetools' module contains the basic functionality on which Python
+AppleScript client support is built. It also imports and re-exports the
+core functionality of the `aetypes' and `aepack' modules. The stub
+packages generated by `gensuitemodule' import the relevant portions of
+`aetools', so usually you do not need to import it yourself. The
+exception to this is when you cannot use a generated suite package and
+need lower-level access to scripting.
+
+The `aetools' module itself uses the AppleEvent support provided by the
+`Carbon.AE' module. This has one drawback: you need access to the
+window manager, see section *Note configuration:: for details. This
+restriction may be lifted in future releases.
+
+The `aetools' module defines the following functions:
+
+`packevent(ae, parameters, attributes)'
+     Stores parameters and attributes in a pre-created
+     `Carbon.AE.AEDesc' object. `parameters' and `attributes' are
+     dictionaries mapping 4-character OSA parameter keys to Python
+     objects. The objects are packed using `aepack.pack()'.
+
+`unpackevent(ae[, formodulename])'
+     Recursively unpacks a `Carbon.AE.AEDesc' event to Python objects.
+     The function returns the parameter dictionary and the attribute
+     dictionary.  The `formodulename' argument is used by generated
+     stub packages to control where AppleScript classes are looked up.
+
+`keysubst(arguments, keydict)'
+     Converts a Python keyword argument dictionary `arguments' to the
+     format required by `packevent' by replacing the keys, which are
+     Python identifiers, by the four-character OSA keys according to
+     the mapping specified in `keydict'. Used by the generated suite
+     packages.
+
+`enumsubst(arguments, key, edict)'
+     If the `arguments' dictionary contains an entry for `key' convert
+     the value for that entry according to dictionary `edict'.  This
+     converts human-readable Python enumeration names to the OSA
+     4-character codes.  Used by the generated suite packages.
+
+The `aetools' module defines the following class:
+
+`TalkTo([signature=None, start=0, timeout=0])'
+     Base class for the proxy used to talk to an application.
+     `signature' overrides the class attribute `_signature' (which is
+     usually set by subclasses) and is the 4-char creator code defining
+     the application to talk to.  `start' can be set to true to enable
+     running the application on class instantiation. `timeout' can be
+     specified to change the default timeout used while waiting for an
+     AppleEvent reply.
+
+`_start()'
+     Test whether the application is running, and attempt to start it
+     if not.
+
+`send(code, subcode[, parameters, attributes])'
+     Create the AppleEvent `Carbon.AE.AEDesc' for the verb with the OSA
+     designation `code, subcode' (which are the usual 4-character
+     strings), pack the `parameters' and `attributes' into it, send it
+     to the target application, wait for the reply, unpack the reply
+     with `unpackevent' and return the reply appleevent, the unpacked
+     return values as a dictionary and the return attributes.
+
+
+File: python-mac.info,  Node: aepack,  Next: aetypes,  Prev: aetools,  Up: MacPython OSA Modules
+
+Conversion between Python variables and AppleEvent data containers
+==================================================================
+
+Conversion between Python variables and AppleEvent data containers.
+
+The `aepack' module defines functions for converting (packing) Python
+variables to AppleEvent descriptors and back (unpacking).  Within
+Python the AppleEvent descriptor is handled by Python objects of
+built-in type `AEDesc', defined in module `Carbon.AE'.
+
+The `aepack' module defines the following functions:
+
+`pack(x[, forcetype])'
+     Returns an `AEDesc' object  containing a conversion of Python
+     value x. If FORCETYPE is provided it specifies the descriptor type
+     of the result. Otherwise, a default mapping of Python types to
+     Apple Event descriptor types is used, as follows:
+
+     Python type                        descriptor type
+     ------                             -----
+     `FSSpec'                           typeFSS
+     `FSRef'                            typeFSRef
+     `Alias'                            typeAlias
+     integer                            typeLong (32 bit integer)
+     float                              typeFloat (64 bit floating point)
+     string                             typeText
+     unicode                            typeUnicodeText
+     list                               typeAEList
+     dictionary                         typeAERecord
+     instance                           _see below_
+
+     If X is a Python instance then this function attempts to call an
+     `__aepack__()' method.  This method should return an `AEDesc'
+     object.
+
+     If the conversion X is not defined above, this function returns
+     the Python string representation of a value (the repr() function)
+     encoded as a text descriptor.
+
+`unpack(x[, formodulename])'
+     X must be an object of type `AEDesc'. This function returns a
+     Python object representation of the data in the Apple Event
+     descriptor X. Simple AppleEvent data types (integer, text, float)
+     are returned as their obvious Python counterparts.  Apple Event
+     lists are returned as Python lists, and the list elements are
+     recursively unpacked.  Object references (ex. `line 3 of document
+     1') are returned as instances of `aetypes.ObjectSpecifier', unless
+     `formodulename' is specified.  AppleEvent descriptors with
+     descriptor type typeFSS are returned as `FSSpec' objects.
+     AppleEvent record descriptors are returned as Python dictionaries,
+     with 4-character string keys and elements recursively unpacked.
+
+     The optional `formodulename' argument is used by the stub packages
+     generated by `gensuitemodule', and ensures that the OSA classes
+     for object specifiers are looked up in the correct module. This
+     ensures that if, say, the Finder returns an object specifier for a
+     window you get an instance of `Finder.Window' and not a generic
+     `aetypes.Window'. The former knows about all the properties and
+     elements a window has in the Finder, while the latter knows no
+     such things.
+
+See also:
+     *Note CarbonAE:: Built-in access to Apple Event Manager routines.
+     *Note aetypes:: Python definitions of codes for Apple Event
+     descriptor types.  ` Inside Macintosh: Interapplication
+     Communication'{Information about inter-process communications on
+     the Macintosh.}
+
+
+File: python-mac.info,  Node: aetypes,  Next: MiniAEFrame,  Prev: aepack,  Up: MacPython OSA Modules
+
+AppleEvent objects
+==================
+
+Python representation of the Apple Event Object Model.
+
+The `aetypes' defines classes used to represent Apple Event data
+descriptors and Apple Event object specifiers.
+
+Apple Event data is contained in descriptors, and these descriptors are
+typed. For many descriptors the Python representation is simply the
+corresponding Python type: `typeText' in OSA is a Python string,
+`typeFloat' is a float, etc. For OSA types that have no direct Python
+counterpart this module declares classes. Packing and unpacking
+instances of these classes is handled automatically by `aepack'.
+
+An object specifier is essentially an address of an object implemented
+in a Apple Event server. An Apple Event specifier is used as the direct
+object for an Apple Event or as the argument of an optional parameter.
+The `aetypes' module contains the base classes for OSA classes and
+properties, which are used by the packages generated by
+`gensuitemodule' to populate the classes and properties in a given
+suite.
+
+For reasons of backward compatibility, and for cases where you need to
+script an application for which you have not generated the stub package
+this module also contains object specifiers for a number of common OSA
+classes such as `Document', `Window', `Character', etc.
+
+The `AEObjects' module defines the following classes to represent Apple
+Event descriptor data:
+
+`Unknown(type, data)'
+     The representation of OSA descriptor data for which the `aepack'
+     and `aetypes' modules have no support, i.e. anything that is not
+     represented by the other classes here and that is not equivalent
+     to a simple Python value.
+
+`Enum(enum)'
+     An enumeration value with the given 4-character string value.
+
+`InsertionLoc(of, pos)'
+     Position `pos' in object `of'.
+
+`Boolean(bool)'
+     A boolean.
+
+`StyledText(style, text)'
+     Text with style information (font, face, etc) included.
+
+`AEText(script, style, text)'
+     Text with script system and style information included.
+
+`IntlText(script, language, text)'
+     Text with script system and language information included.
+
+`IntlWritingCode(script, language)'
+     Script system and language information.
+
+`QDPoint(v, h)'
+     A quickdraw point.
+
+`QDRectangle(v0, h0, v1, h1)'
+     A quickdraw rectangle.
+
+`RGBColor(r, g, b)'
+     A color.
+
+`Type(type)'
+     An OSA type value with the given 4-character name.
+
+`Keyword(name)'
+     An OSA keyword with the given 4-character name.
+
+`Range(start, stop)'
+     A range.
+
+`Ordinal(abso)'
+     Non-numeric absolute positions, such as `"firs"', first, or
+     `"midd"', middle.
+
+`Logical(logc, term)'
+     The logical expression of applying operator `logc' to `term'.
+
+`Comparison(obj1, relo, obj2)'
+     The comparison `relo' of `obj1' to `obj2'.
+
+The following classes are used as base classes by the generated stub
+packages to represent AppleScript classes and properties in Python:
+
+`ComponentItem(which[, fr])'
+     Abstract baseclass for an OSA class. The subclass should set the
+     class attribute `want' to the 4-character OSA class code.
+     Instances of subclasses of this class are equivalent to
+     AppleScript Object Specifiers. Upon instantiation you should pass
+     a selector in `which', and optionally a parent object in `fr'.
+
+`NProperty(fr)'
+     Abstract basclass for an OSA property. The subclass should set the
+     class attributes `want' and `which' to designate which property we
+     are talking about. Instances of subclasses of this class are Object
+     Specifiers.
+
+`ObjectSpecifier(want, form, seld[, fr])'
+     Base class of `ComponentItem' and `NProperty', a general OSA
+     Object Specifier. See the Apple Open Scripting Architecture
+     documentation for the parameters. Note that this class is not
+     abstract.
+
+
+File: python-mac.info,  Node: MiniAEFrame,  Prev: aetypes,  Up: MacPython OSA Modules
+
+Open Scripting Architecture server support
+==========================================
+
+Support to act as an Open Scripting Architecture (OSA) server ("Apple
+Events").
+
+The module `MiniAEFrame' provides a framework for an application that
+can function as an Open Scripting Architecture (OSA) server, i.e.
+receive and process AppleEvents . It can be used in conjunction with
+`FrameWork'  or standalone. As an example, it is used in
+`PythonCGISlave'.
+
+The `MiniAEFrame' module defines the following classes:
+
+`AEServer()'
+     A class that handles AppleEvent dispatch. Your application should
+     subclass this class together with either `MiniApplication' or
+     `FrameWork.Application'. Your `__init__()' method should call the
+     `__init__()' method for both classes.
+
+`MiniApplication()'
+     A class that is more or less compatible with
+     `FrameWork.Application' but with less functionality. Its event
+     loop supports the apple menu, command-dot and AppleEvents; other
+     events are passed on to the Python interpreter and/or Sioux.
+     Useful if your application wants to use `AEServer' but does not
+     provide its own windows, etc.
+
+* Menu:
+
+* AEServer Objects::
+
+
+File: python-mac.info,  Node: AEServer Objects,  Prev: MiniAEFrame,  Up: MiniAEFrame
+
+AEServer Objects
+----------------
+
+`installaehandler(classe, type, callback)'
+     Installs an AppleEvent handler. CLASSE and TYPE are the
+     four-character OSA Class and Type designators, `'****'' wildcards
+     are allowed. When a matching AppleEvent is received the parameters
+     are decoded and your callback is invoked.
+
+`callback(_object, **kwargs)'
+     Your callback is called with the OSA Direct Object as first
+     positional parameter. The other parameters are passed as keyword
+     arguments, with the 4-character designator as name. Three extra
+     keyword parameters are passed: `_class' and `_type' are the Class
+     and Type designators and `_attributes' is a dictionary with the
+     AppleEvent attributes.
+
+     The return value of your method is packed with
+     `aetools.packevent()' and sent as reply.
+
+Note that there are some serious problems with the current design.
+AppleEvents which have non-identifier 4-character designators for
+arguments are not implementable, and it is not possible to return an
+error to the originator. This will be addressed in a future release.
+
+
+File: python-mac.info,  Node: MacOS Toolbox Modules,  Next: Undocumented Modules,  Prev: MacPython OSA Modules,  Up: Top
+
+MacOS Toolbox Modules
+*********************
+
+There are a set of modules that provide interfaces to various MacOS
+toolboxes.  If applicable the module will define a number of Python
+objects for the various structures declared by the toolbox, and
+operations will be implemented as methods of the object.  Other
+operations will be implemented as functions in the module.  Not all
+operations possible in C will also be possible in Python (callbacks are
+often a problem), and parameters will occasionally be different in
+Python (input and output buffers, especially).  All methods and
+functions have a `__doc__' string describing their arguments and return
+values, and for additional description you are referred to  or similar
+works.
+
+These modules all live in a package called `Carbon'. Despite that name
+they are not all part of the Carbon framework: CF is really in the
+CoreFoundation framework and Qt is in the QuickTime framework.  The
+normal use pattern is
+
+     from Carbon import AE
+
+*Warning!*  These modules are not yet documented.  If you wish to
+contribute documentation of any of these modules, please get in touch
+with <docs@python.org>.
+
+* Menu:
+
+* CarbonAE::
+* CarbonAH::
+* CarbonApp::
+* CarbonCF::
+* CarbonCG::
+* CarbonCarbonEvt::
+* CarbonCm::
+* CarbonCtl::
+* CarbonDlg::
+* CarbonEvt::
+* CarbonFm::
+* CarbonFolder::
+* CarbonHelp::
+* CarbonList::
+* CarbonMenu::
+* CarbonMlte::
+* CarbonQd::
+* CarbonQdoffs::
+* CarbonQt::
+* CarbonRes::
+* CarbonScrap::
+* CarbonSnd::
+* CarbonTE::
+* CarbonWin::
+* ColorPicker::
+
+
+File: python-mac.info,  Node: CarbonAE,  Next: CarbonAH,  Prev: MacOS Toolbox Modules,  Up: MacOS Toolbox Modules
+
+Apple Events
+============
+
+Interface to the Apple Events toolbox.
+
+
+File: python-mac.info,  Node: CarbonAH,  Next: CarbonApp,  Prev: CarbonAE,  Up: MacOS Toolbox Modules
+
+Apple Help
+==========
+
+Interface to the Apple Help manager.
+
+
+File: python-mac.info,  Node: CarbonApp,  Next: CarbonCF,  Prev: CarbonAH,  Up: MacOS Toolbox Modules
+
+Appearance Manager
+==================
+
+Interface to the Appearance Manager.
+
+
+File: python-mac.info,  Node: CarbonCF,  Next: CarbonCG,  Prev: CarbonApp,  Up: MacOS Toolbox Modules
+
+Core Foundation
+===============
+
+Interface to the Core Foundation.
+
+The `CFBase', `CFArray', `CFData', `CFDictionary', `CFString' and
+`CFURL' objects are supported, some only partially.
+
+
+File: python-mac.info,  Node: CarbonCG,  Next: CarbonCarbonEvt,  Prev: CarbonCF,  Up: MacOS Toolbox Modules
+
+Core Graphics
+=============
+
+Interface to the Component Manager.
+
+
+File: python-mac.info,  Node: CarbonCarbonEvt,  Next: CarbonCm,  Prev: CarbonCG,  Up: MacOS Toolbox Modules
+
+Carbon Event Manager
+====================
+
+Interface to the Carbon Event Manager.
+
+
+File: python-mac.info,  Node: CarbonCm,  Next: CarbonCtl,  Prev: CarbonCarbonEvt,  Up: MacOS Toolbox Modules
+
+Component Manager
+=================
+
+Interface to the Component Manager.
+
+
+File: python-mac.info,  Node: CarbonCtl,  Next: CarbonDlg,  Prev: CarbonCm,  Up: MacOS Toolbox Modules
+
+Control Manager
+===============
+
+Interface to the Control Manager.
+
+
+File: python-mac.info,  Node: CarbonDlg,  Next: CarbonEvt,  Prev: CarbonCtl,  Up: MacOS Toolbox Modules
+
+Dialog Manager
+==============
+
+Interface to the Dialog Manager.
+
+
+File: python-mac.info,  Node: CarbonEvt,  Next: CarbonFm,  Prev: CarbonDlg,  Up: MacOS Toolbox Modules
+
+Event Manager
+=============
+
+Interface to the classic Event Manager.
+
+
+File: python-mac.info,  Node: CarbonFm,  Next: CarbonFolder,  Prev: CarbonEvt,  Up: MacOS Toolbox Modules
+
+Font Manager
+============
+
+Interface to the Font Manager.
+
+
+File: python-mac.info,  Node: CarbonFolder,  Next: CarbonHelp,  Prev: CarbonFm,  Up: MacOS Toolbox Modules
+
+Folder Manager
+==============
+
+Interface to the Folder Manager.
+
+
+File: python-mac.info,  Node: CarbonHelp,  Next: CarbonList,  Prev: CarbonFolder,  Up: MacOS Toolbox Modules
+
+Help Manager
+============
+
+Interface to the Carbon Help Manager.
+
+
+File: python-mac.info,  Node: CarbonList,  Next: CarbonMenu,  Prev: CarbonHelp,  Up: MacOS Toolbox Modules
+
+List Manager
+============
+
+Interface to the List Manager.
+
+
+File: python-mac.info,  Node: CarbonMenu,  Next: CarbonMlte,  Prev: CarbonList,  Up: MacOS Toolbox Modules
+
+Menu Manager
+============
+
+Interface to the Menu Manager.
+
+
+File: python-mac.info,  Node: CarbonMlte,  Next: CarbonQd,  Prev: CarbonMenu,  Up: MacOS Toolbox Modules
+
+MultiLingual Text Editor
+========================
+
+Interface to the MultiLingual Text Editor.
+
+
+File: python-mac.info,  Node: CarbonQd,  Next: CarbonQdoffs,  Prev: CarbonMlte,  Up: MacOS Toolbox Modules
+
+QuickDraw
+=========
+
+Interface to the QuickDraw toolbox.
+
+
+File: python-mac.info,  Node: CarbonQdoffs,  Next: CarbonQt,  Prev: CarbonQd,  Up: MacOS Toolbox Modules
+
+QuickDraw Offscreen
+===================
+
+Interface to the QuickDraw Offscreen APIs.
+
+
+File: python-mac.info,  Node: CarbonQt,  Next: CarbonRes,  Prev: CarbonQdoffs,  Up: MacOS Toolbox Modules
+
+QuickTime
+=========
+
+Interface to the QuickTime toolbox.
+
+
+File: python-mac.info,  Node: CarbonRes,  Next: CarbonScrap,  Prev: CarbonQt,  Up: MacOS Toolbox Modules
+
+Resource Manager and Handles
+============================
+
+Interface to the Resource Manager and Handles.
+
+
+File: python-mac.info,  Node: CarbonScrap,  Next: CarbonSnd,  Prev: CarbonRes,  Up: MacOS Toolbox Modules
+
+Scrap Manager
+=============
+
+Interface to the Carbon Scrap Manager.
+
+
+File: python-mac.info,  Node: CarbonSnd,  Next: CarbonTE,  Prev: CarbonScrap,  Up: MacOS Toolbox Modules
+
+Sound Manager
+=============
+
+Interface to the Sound Manager.
+
+
+File: python-mac.info,  Node: CarbonTE,  Next: CarbonWin,  Prev: CarbonSnd,  Up: MacOS Toolbox Modules
+
+TextEdit
+========
+
+Interface to TextEdit.
+
+
+File: python-mac.info,  Node: CarbonWin,  Next: ColorPicker,  Prev: CarbonTE,  Up: MacOS Toolbox Modules
+
+Window Manager
+==============
+
+Interface to the Window Manager.
+
+
+File: python-mac.info,  Node: ColorPicker,  Prev: CarbonWin,  Up: MacOS Toolbox Modules
+
+Color selection dialog
+======================
+
+Interface to the standard color selection dialog.
+
+The `ColorPicker' module provides access to the standard color picker
+dialog.
+
+`GetColor(prompt, rgb)'
+     Show a standard color selection dialog and allow the user to select
+     a color.  The user is given instruction by the PROMPT string, and
+     the default color is set to RGB.  RGB must be a tuple giving the
+     red, green, and blue components of the color.  `GetColor()'
+     returns a tuple giving the user's selected color and a flag
+     indicating whether they accepted the selection of cancelled.
+
+
+File: python-mac.info,  Node: Undocumented Modules,  Next: History and License,  Prev: MacOS Toolbox Modules,  Up: Top
+
+Undocumented Modules
+********************
+
+The modules in this chapter are poorly documented (if at all).  If you
+wish to contribute documentation of any of these modules, please get in
+touch with <docs@python.org>.
+
+* Menu:
+
+* applesingle::
+* buildtools::
+* py_resource::
+* cfmfile::
+* icopen::
+* macerrors::
+* macresource::
+* Nav::
+* mkcwproject::
+* nsremote::
+* PixMapWrapper::
+* preferences::
+* pythonprefs::
+* quietconsole::
+* videoreader::
+* W::
+* waste::
+
+
+File: python-mac.info,  Node: applesingle,  Next: buildtools,  Prev: Undocumented Modules,  Up: Undocumented Modules
+
+AppleSingle decoder
+===================
+
+Rudimentary decoder for AppleSingle format files.
+
+
+File: python-mac.info,  Node: buildtools,  Next: py_resource,  Prev: applesingle,  Up: Undocumented Modules
+
+Helper module for BuildApplet and Friends
+=========================================
+
+Helper module for BuildApplet, BuildApplication and macfreeze.
+
+
+File: python-mac.info,  Node: py_resource,  Next: cfmfile,  Prev: buildtools,  Up: Undocumented Modules
+
+Resources from Python code
+==========================
+
+Helper to create `'PYC~'' resources for compiled applications.
+
+This module is primarily used as a help module for `BuildApplet' and
+`BuildApplication'.  It is able to store compiled Python code as
+`'PYC~'' resources in a file.
+
+
+File: python-mac.info,  Node: cfmfile,  Next: icopen,  Prev: py_resource,  Up: Undocumented Modules
+
+Code Fragment Resource module
+=============================
+
+Code Fragment Resource module.
+
+`cfmfile' is a module that understands Code Fragments and the
+accompanying "cfrg" resources. It can parse them and merge them, and is
+used by BuildApplication to combine all plugin modules to a single
+executable.
+
+
+File: python-mac.info,  Node: icopen,  Next: macerrors,  Prev: cfmfile,  Up: Undocumented Modules
+
+Internet Config replacement for `open()'
+========================================
+
+Internet Config replacement for `open()'.
+
+Importing `icopen' will replace the builtin `open()' with a version
+that uses Internet Config to set file type and creator for new files.
+

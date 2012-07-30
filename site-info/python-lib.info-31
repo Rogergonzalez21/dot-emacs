@@ -1,0 +1,1032 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: nntplib,  Next: smtplib,  Prev: imaplib,  Up: Internet Protocols and Support
+
+NNTP protocol client
+====================
+
+NNTP protocol client (requires sockets).
+
+This module defines the class `NNTP' which implements the client side
+of the NNTP protocol.  It can be used to implement a news reader or
+poster, or automated news processors.  For more information on NNTP
+(Network News Transfer Protocol), see Internet RFC 977 .
+
+Here are two small examples of how it can be used.  To list some
+statistics about a newsgroup and print the subjects of the last 10
+articles:
+
+     >>> s = NNTP('news.cwi.nl')
+     >>> resp, count, first, last, name = s.group('comp.lang.python')
+     >>> print 'Group', name, 'has', count, 'articles, range', first, 'to', last
+     Group comp.lang.python has 59 articles, range 3742 to 3803
+     >>> resp, subs = s.xhdr('subject', first + '-' + last)
+     >>> for id, sub in subs[-10:]: print id, sub
+     ...
+     3792 Re: Removing elements from a list while iterating...
+     3793 Re: Who likes Info files?
+     3794 Emacs and doc strings
+     3795 a few questions about the Mac implementation
+     3796 Re: executable python scripts
+     3797 Re: executable python scripts
+     3798 Re: a few questions about the Mac implementation
+     3799 Re: PROPOSAL: A Generic Python Object Interface for Python C Modules
+     3802 Re: executable python scripts
+     3803 Re: \POSIX{} wait and SIGCHLD
+     >>> s.quit()
+     '205 news.cwi.nl closing connection.  Goodbye.'
+
+To post an article from a file (this assumes that the article has valid
+headers):
+
+     >>> s = NNTP('news.cwi.nl')
+     >>> f = open('/tmp/article')
+     >>> s.post(f)
+     '240 Article posted successfully.'
+     >>> s.quit()
+     '205 news.cwi.nl closing connection.  Goodbye.'
+
+The module itself defines the following items:
+
+`NNTP(host[, port [, user[, password [, readermode]]]])'
+     Return a new instance of the `NNTP' class, representing a
+     connection to the NNTP server running on host HOST, listening at
+     port PORT.  The default PORT is 119.  If the optional USER and
+     PASSWORD are provided, or if suitable credentials are present in
+     `~/.netrc', the `AUTHINFO USER' and `AUTHINFO PASS' commands are
+     used to identify and authenticate the user to the server.  If the
+     optional flag READERMODE is true, then a `mode reader' command is
+     sent before authentication is performed.  Reader mode is sometimes
+     necessary if you are connecting to an NNTP server on the local
+     machine and intend to call reader-specific commands, such as
+     `group'.  If you get unexpected `NNTPPermanentError's, you might
+     need to set READERMODE.  READERMODE defaults to `None'.
+
+`NNTPError()'
+     Derived from the standard exception `Exception', this is the base
+     class for all exceptions raised by the `nntplib' module.
+
+`NNTPReplyError()'
+     Exception raised when an unexpected reply is received from the
+     server.  For backwards compatibility, the exception `error_reply'
+     is equivalent to this class.
+
+`NNTPTemporaryError()'
+     Exception raised when an error code in the range 400-499 is
+     received.  For backwards compatibility, the exception `error_temp'
+     is equivalent to this class.
+
+`NNTPPermanentError()'
+     Exception raised when an error code in the range 500-599 is
+     received.  For backwards compatibility, the exception `error_perm'
+     is equivalent to this class.
+
+`NNTPProtocolError()'
+     Exception raised when a reply is received from the server that does
+     not begin with a digit in the range 1-5.  For backwards
+     compatibility, the exception `error_proto' is equivalent to this
+     class.
+
+`NNTPDataError()'
+     Exception raised when there is some error in the response data.
+     For backwards compatibility, the exception `error_data' is
+     equivalent to this class.
+
+* Menu:
+
+* NNTP Objects::
+
+
+File: python-lib.info,  Node: NNTP Objects,  Prev: nntplib,  Up: nntplib
+
+NNTP Objects
+------------
+
+NNTP instances have the following methods.  The RESPONSE that is
+returned as the first item in the return tuple of almost all methods is
+the server's response: a string beginning with a three-digit code.  If
+the server's response indicates an error, the method raises one of the
+above exceptions.
+
+`getwelcome()'
+     Return the welcome message sent by the server in reply to the
+     initial connection.  (This message sometimes contains disclaimers
+     or help information that may be relevant to the user.)
+
+`set_debuglevel(level)'
+     Set the instance's debugging level.  This controls the amount of
+     debugging output printed.  The default, `0', produces no debugging
+     output.  A value of `1' produces a moderate amount of debugging
+     output, generally a single line per request or response.  A value
+     of `2' or higher produces the maximum amount of debugging output,
+     logging each line sent and received on the connection (including
+     message text).
+
+`newgroups(date, time, [file])'
+     Send a `NEWGROUPS' command.  The DATE argument should be a string
+     of the form `'YYMMDD'' indicating the date, and TIME should be a
+     string of the form `'HHMMSS'' indicating the time.  Return a pair
+     `(RESPONSE, GROUPS)' where GROUPS is a list of group names that
+     are new since the given date and time.  If the FILE parameter is
+     supplied, then the output of the `NEWGROUPS' command is stored in
+     a file.  If FILE is a string, then the method will open a file
+     object with that name, write to it then close it.  If FILE is a
+     file object, then it will start calling `write()' on it to store
+     the lines of the command output.  If FILE is supplied, then the
+     returned LIST is an empty list.
+
+`newnews(group, date, time, [file])'
+     Send a `NEWNEWS' command.  Here, GROUP is a group name or `'*'',
+     and DATE and TIME have the same meaning as for `newgroups()'.
+     Return a pair `(RESPONSE, ARTICLES)' where ARTICLES is a list of
+     article ids.  If the FILE parameter is supplied, then the output
+     of the `NEWNEWS' command is stored in a file.  If FILE is a string,
+     then the method will open a file object with that name, write to it
+     then close it.  If FILE is a file object, then it will start
+     calling `write()' on it to store the lines of the command output.
+     If FILE is supplied, then the returned LIST is an empty list.
+
+`list([file])'
+     Send a `LIST' command.  Return a pair `(RESPONSE, LIST)' where
+     LIST is a list of tuples.  Each tuple has the form `(GROUP, LAST,
+     FIRST, FLAG)', where GROUP is a group name, LAST and FIRST are the
+     last and first article numbers (as strings), and FLAG is `'y'' if
+     posting is allowed, `'n'' if not, and `'m'' if the newsgroup is
+     moderated.  (Note the ordering: LAST, FIRST.)  If the FILE
+     parameter is supplied, then the output of the `LIST' command is
+     stored in a file.  If FILE is a string, then the method will open
+     a file object with that name, write to it then close it.  If FILE
+     is a file object, then it will start calling `write()' on it to
+     store the lines of the command output.  If FILE is supplied, then
+     the returned LIST is an empty list.
+
+`group(name)'
+     Send a `GROUP' command, where NAME is the group name.  Return a
+     tuple `(RESPONSE, COUNT, FIRST, LAST, NAME)' where COUNT is the
+     (estimated) number of articles in the group, FIRST is the first
+     article number in the group, LAST is the last article number in
+     the group, and NAME is the group name.  The numbers are returned
+     as strings.
+
+`help([file])'
+     Send a `HELP' command.  Return a pair `(RESPONSE, LIST)' where
+     LIST is a list of help strings.  If the FILE parameter is
+     supplied, then the output of the `HELP' command is stored in a
+     file.  If FILE is a string, then the method will open a file
+     object with that name, write to it then close it.  If FILE is a
+     file object, then it will start calling `write()' on it to store
+     the lines of the command output.  If FILE is supplied, then the
+     returned LIST is an empty list.
+
+`stat(id)'
+     Send a `STAT' command, where ID is the message id (enclosed in `<'
+     and `>') or an article number (as a string).  Return a triple
+     `(RESPONSE, NUMBER, ID)' where NUMBER is the article number (as a
+     string) and ID is the article id  (enclosed in `<' and `>').
+
+`next()'
+     Send a `NEXT' command.  Return as for `stat()'.
+
+`last()'
+     Send a `LAST' command.  Return as for `stat()'.
+
+`head(id)'
+     Send a `HEAD' command, where ID has the same meaning as for
+     `stat()'.  Return a tuple `(RESPONSE, NUMBER, ID, LIST)' where the
+     first three are the same as for `stat()', and LIST is a list of
+     the article's headers (an uninterpreted list of lines, without
+     trailing newlines).
+
+`body(id,[file])'
+     Send a `BODY' command, where ID has the same meaning as for
+     `stat()'.  If the FILE parameter is supplied, then the body is
+     stored in a file.  If FILE is a string, then the method will open
+     a file object with that name, write to it then close it.  If FILE
+     is a file object, then it will start calling `write()' on it to
+     store the lines of the body.  Return as for `head()'.  If FILE is
+     supplied, then the returned LIST is an empty list.
+
+`article(id)'
+     Send an `ARTICLE' command, where ID has the same meaning as for
+     `stat()'.  Return as for `head()'.
+
+`slave()'
+     Send a `SLAVE' command.  Return the server's RESPONSE.
+
+`xhdr(header, string, [file])'
+     Send an `XHDR' command.  This command is not defined in the RFC
+     but is a common extension.  The HEADER argument is a header
+     keyword, e.g. `'subject''.  The STRING argument should have the
+     form `'FIRST-LAST'' where FIRST and LAST are the first and last
+     article numbers to search.  Return a pair `(RESPONSE, LIST)',
+     where LIST is a list of pairs `(ID, TEXT)', where ID is an article
+     id (as a string) and TEXT is the text of the requested header for
+     that article.  If the FILE parameter is supplied, then the output
+     of the `XHDR' command is stored in a file.  If FILE is a string,
+     then the method will open a file object with that name, write to it
+     then close it.  If FILE is a file object, then it will start
+     calling `write()' on it to store the lines of the command output.
+     If FILE is supplied, then the returned LIST is an empty list.
+
+`post(file)'
+     Post an article using the `POST' command.  The FILE argument is an
+     open file object which is read until EOF using its `readline()'
+     method.  It should be a well-formed news article, including the
+     required headers.  The `post()' method automatically escapes lines
+     beginning with `.'.
+
+`ihave(id, file)'
+     Send an `IHAVE' command.  If the response is not an error, treat
+     FILE exactly as for the `post()' method.
+
+`date()'
+     Return a triple `(RESPONSE, DATE, TIME)', containing the current
+     date and time in a form suitable for the `newnews()' and
+     `newgroups()' methods.  This is an optional NNTP extension, and
+     may not be supported by all servers.
+
+`xgtitle(name, [file])'
+     Process an `XGTITLE' command, returning a pair `(RESPONSE, LIST)',
+     where LIST is a list of tuples containing `(NAME, TITLE)'.  If the
+     FILE parameter is supplied, then the output of the `XGTITLE'
+     command is stored in a file.  If FILE is a string, then the method
+     will open a file object with that name, write to it then close it.
+     If FILE is a file object, then it will start calling `write()' on
+     it to store the lines of the command output.  If FILE is supplied,
+     then the returned LIST is an empty list.  This is an optional NNTP
+     extension, and may not be supported by all servers.
+
+`xover(start, end, [file])'
+     Return a pair `(RESP, LIST)'.  LIST is a list of tuples, one for
+     each article in the range delimited by the START and END article
+     numbers.  Each tuple is of the form `(ARTICLE NUMBER, SUBJECT,
+     POSTER, DATE, ID, REFERENCES, SIZE, LINES)'.  If the FILE
+     parameter is supplied, then the output of the `XOVER' command is
+     stored in a file.  If FILE is a string, then the method will open
+     a file object with that name, write to it then close it.  If FILE
+     is a file object, then it will start calling `write()' on it to
+     store the lines of the command output.  If FILE is supplied, then
+     the returned LIST is an empty list.  This is an optional NNTP
+     extension, and may not be supported by all servers.
+
+`xpath(id)'
+     Return a pair `(RESP, PATH)', where PATH is the directory path to
+     the article with message ID ID.  This is an optional NNTP
+     extension, and may not be supported by all servers.
+
+`quit()'
+     Send a `QUIT' command and close the connection.  Once this method
+     has been called, no other methods of the NNTP object should be
+     called.
+
+
+File: python-lib.info,  Node: smtplib,  Next: telnetlib,  Prev: nntplib,  Up: Internet Protocols and Support
+
+SMTP protocol client
+====================
+
+SMTP protocol client (requires sockets).
+
+The `smtplib' module defines an SMTP client session object that can be
+used to send mail to any Internet machine with an SMTP or ESMTP
+listener daemon.  For details of SMTP and ESMTP operation, consult RFC
+821 () and RFC 1869
+
+().
+
+`SMTP([host[, port[, local_hostname]]])'
+     A `SMTP' instance encapsulates an SMTP connection.  It has methods
+     that support a full repertoire of SMTP and ESMTP operations. If
+     the optional host and port parameters are given, the SMTP
+     `connect()' method is called with those parameters during
+     initialization.  An `SMTPConnectError' is raised if the specified
+     host doesn't respond correctly.
+
+     For normal use, you should only require the initialization/connect,
+     `sendmail()', and `quit()' methods.  An example is included below.
+
+A nice selection of exceptions is defined as well:
+
+`SMTPException'
+     Base exception class for all exceptions raised by this module.
+
+`SMTPServerDisconnected'
+     This exception is raised when the server unexpectedly disconnects,
+     or when an attempt is made to use the `SMTP' instance before
+     connecting it to a server.
+
+`SMTPResponseException'
+     Base class for all exceptions that include an SMTP error code.
+     These exceptions are generated in some instances when the SMTP
+     server returns an error code.  The error code is stored in the
+     `smtp_code' attribute of the error, and the `smtp_error' attribute
+     is set to the error message.
+
+`SMTPSenderRefused'
+     Sender address refused.  In addition to the attributes set by on
+     all `SMTPResponseException' exceptions, this sets `sender' to the
+     string that the SMTP server refused.
+
+`SMTPRecipientsRefused'
+     All recipient addresses refused.  The errors for each recipient are
+     accessible through the attribute `recipients', which is a
+     dictionary of exactly the same sort as `SMTP.sendmail()' returns.
+
+`SMTPDataError'
+     The SMTP server refused to accept the message data.
+
+`SMTPConnectError'
+     Error occurred during establishment of a connection  with the
+     server.
+
+`SMTPHeloError'
+     The server refused our `HELO' message.
+
+See also:
+    *RFC821 Simple Mail Transfer Protocol*
+          Protocol definition for SMTP.  This document covers the
+          model, operating procedure, and protocol details for SMTP.
+
+    *RFC1869 SMTP Service Extensions*
+          Definition of the ESMTP extensions for SMTP.  This describes
+          a framework for extending SMTP with new commands, supporting
+          dynamic discovery of the commands provided by the server, and
+          defines a few additional commands.
+
+* Menu:
+
+* SMTP Objects::
+* SMTP Example::
+
+
+File: python-lib.info,  Node: SMTP Objects,  Next: SMTP Example,  Prev: smtplib,  Up: smtplib
+
+SMTP Objects
+------------
+
+An `SMTP' instance has the following methods:
+
+`set_debuglevel(level)'
+     Set the debug output level.  A true value for LEVEL results in
+     debug messages for connection and for all messages sent to and
+     received from the server.
+
+`connect([host[, port]])'
+     Connect to a host on a given port.  The defaults are to connect to
+     the local host at the standard SMTP port (25).  If the hostname
+     ends with a colon (`:') followed by a number, that suffix will be
+     stripped off and the number interpreted as the port number to use.
+     This method is automatically invoked by the constructor if a host
+     is specified during instantiation.
+
+`docmd(cmd, [, argstring])'
+     Send a command CMD to the server.  The optional argument ARGSTRING
+     is simply concatenated to the command, separated by a space.
+
+     This returns a 2-tuple composed of a numeric response code and the
+     actual response line (multiline responses are joined into one long
+     line.)
+
+     In normal operation it should not be necessary to call this method
+     explicitly.  It is used to implement other methods and may be
+     useful for testing private extensions.
+
+     If the connection to the server is lost while waiting for the
+     reply, `SMTPServerDisconnected' will be raised.
+
+`helo([hostname])'
+     Identify yourself to the SMTP server using `HELO'.  The hostname
+     argument defaults to the fully qualified domain name of the local
+     host.
+
+     In normal operation it should not be necessary to call this method
+     explicitly.  It will be implicitly called by the `sendmail()' when
+     necessary.
+
+`ehlo([hostname])'
+     Identify yourself to an ESMTP server using `EHLO'.  The hostname
+     argument defaults to the fully qualified domain name of the local
+     host.  Examine the response for ESMTP option and store them for
+     use by `has_extn()'.
+
+     Unless you wish to use `has_extn()' before sending mail, it should
+     not be necessary to call this method explicitly.  It will be
+     implicitly called by `sendmail()' when necessary.
+
+`has_extn(name)'
+     Return `1' if NAME is in the set of SMTP service extensions
+     returned by the server, `0' otherwise.  Case is ignored.
+
+`verify(address)'
+     Check the validity of an address on this server using SMTP `VRFY'.
+     Returns a tuple consisting of code 250 and a full RFC 822 address
+     (including human name) if the user address is valid. Otherwise
+     returns an SMTP error code of 400 or greater and an error string.
+
+     _Note:_ Many sites disable SMTP `VRFY' in order to foil spammers.
+
+`login(user, password)'
+     Log in on an SMTP server that requires authentication.  The
+     arguments are the username and the password to authenticate with.
+     If there has been no previous `EHLO' or `HELO' command this
+     session, this method tries ESMTP `EHLO' first.  This method will
+     return normally if the authentication was successful, or may raise
+     the following exceptions:
+
+    ``SMTPHeloError''
+          The server didn't reply properly to the `HELO' greeting.
+
+    ``SMTPAuthenticationError''
+          The server didn't accept the username/password combination.
+
+    ``SMTPError''
+          No suitable authentication method was found.
+
+`starttls([keyfile[, certfile]])'
+     Put the SMTP connection in TLS (Transport Layer Security) mode.
+     All SMTP commands that follow will be encrypted.  You should then
+     call `ehlo()' again.
+
+     If KEYFILE and CERTFILE are provided, these are passed to the
+     `socket' module's `ssl()' function.
+
+`sendmail(from_addr, to_addrs, msg[, mail_options, rcpt_options])'
+     Send mail.  The required arguments are an RFC 822 from-address
+     string, a list of RFC 822 to-address strings, and a message string.
+     The caller may pass a list of ESMTP options (such as `8bitmime')
+     to be used in `MAIL FROM' commands as MAIL_OPTIONS.  ESMTP options
+     (such as `DSN' commands) that should be used with all `RCPT'
+     commands can be passed as RCPT_OPTIONS.  (If you need to use
+     different ESMTP options to different recipients you have to use
+     the low-level methods such as `mail', `rcpt' and `data' to send
+     the message.)
+
+     _Note:_ The FROM_ADDR and TO_ADDRS parameters are used to
+     construct the message envelope used by the transport agents. The
+     `SMTP' does not modify the message headers in any way.
+
+     If there has been no previous `EHLO' or `HELO' command this
+     session, this method tries ESMTP `EHLO' first. If the server does
+     ESMTP, message size and each of the specified options will be
+     passed to it (if the option is in the feature set the server
+     advertises).  If `EHLO' fails, `HELO' will be tried and ESMTP
+     options suppressed.
+
+     This method will return normally if the mail is accepted for at
+     least one recipient. Otherwise it will throw an exception.  That
+     is, if this method does not throw an exception, then someone
+     should get your mail.  If this method does not throw an exception,
+     it returns a dictionary, with one entry for each recipient that
+     was refused.  Each entry contains a tuple of the SMTP error code
+     and the accompanying error message sent by the server.
+
+     This method may raise the following exceptions:
+
+    ``SMTPRecipientsRefused''
+          All recipients were refused.  Nobody got the mail.  The
+          `recipients' attribute of the exception object is a dictionary
+          with information about the refused recipients (like the one
+          returned when at least one recipient was accepted).
+
+    ``SMTPHeloError''
+          The server didn't reply properly to the `HELO' greeting.
+
+    ``SMTPSenderRefused''
+          The server didn't accept the FROM_ADDR.
+
+    ``SMTPDataError''
+          The server replied with an unexpected error code (other than
+          a refusal of a recipient).
+
+     Unless otherwise noted, the connection will be open even after an
+     exception is raised.
+
+`quit()'
+     Terminate the SMTP session and close the connection.
+
+Low-level methods corresponding to the standard SMTP/ESMTP commands
+`HELP', `RSET', `NOOP', `MAIL', `RCPT', and `DATA' are also supported.
+Normally these do not need to be called directly, so they are not
+documented here.  For details, consult the module code.
+
+
+File: python-lib.info,  Node: SMTP Example,  Prev: SMTP Objects,  Up: smtplib
+
+SMTP Example
+------------
+
+This example prompts the user for addresses needed in the message
+envelope (`To' and `From' addresses), and the message to be delivered.
+Note that the headers to be included with the message must be included
+in the message as entered; this example doesn't do any processing of
+the RFC 822 headers.  In particular, the `To' and `From' addresses must
+be included in the message headers explicitly.
+
+     import smtplib
+     
+     def prompt(prompt):
+         return raw_input(prompt).strip()
+     
+     fromaddr = prompt("From: ")
+     toaddrs  = prompt("To: ").split()
+     print "Enter message, end with ^D (Unix) or ^Z (Windows):"
+     
+     # Add the From: and To: headers at the start!
+     msg = ("From: %s\r\nTo: %s\r\n\r\n"
+            % (fromaddr, ", ".join(toaddrs)))
+     while 1:
+         try:
+             line = raw_input()
+         except EOFError:
+             break
+         if not line:
+             break
+         msg = msg + line
+     
+     print "Message length is " + repr(len(msg))
+     
+     server = smtplib.SMTP('localhost')
+     server.set_debuglevel(1)
+     server.sendmail(fromaddr, toaddrs, msg)
+     server.quit()
+
+
+File: python-lib.info,  Node: telnetlib,  Next: urlparse,  Prev: smtplib,  Up: Internet Protocols and Support
+
+Telnet client
+=============
+
+Telnet client class.
+
+The `telnetlib' module provides a `Telnet' class that implements the
+Telnet protocol.  See RFC 854 for details about the protocol. In
+addition, it provides symbolic constants for the protocol characters
+(see below), and for the telnet options. The symbolic names of the
+telnet options follow the definitions in `arpa/telnet.h', with the
+leading `TELOPT_' removed. For symbolic names of options which are
+traditionally not included in `arpa/telnet.h', see the module source
+itself.
+
+The symbolic constants for the telnet commands are: IAC, DONT, DO,
+WONT, WILL, SE (Subnegotiation End), NOP (No Operation), DM (Data
+Mark), BRK (Break), IP (Interrupt process), AO (Abort output), AYT (Are
+You There), EC (Erase Character), EL (Erase Line), GA (Go Ahead), SB
+(Subnegotiation Begin).
+
+`Telnet([host[, port]])'
+     `Telnet' represents a connection to a Telnet server. The instance
+     is initially not connected by default; the `open()' method must be
+     used to establish a connection.  Alternatively, the host name and
+     optional port number can be passed to the constructor, to, in
+     which case the connection to the server will be established before
+     the constructor returns.
+
+     Do not reopen an already connected instance.
+
+     This class has many `read_*()' methods.  Note that some of them
+     raise `EOFError' when the end of the connection is read, because
+     they can return an empty string for other reasons.  See the
+     individual descriptions below.
+
+See also:
+    *RFC854 Telnet Protocol Specification*
+          Definition of the Telnet protocol.
+
+* Menu:
+
+* Telnet Objects::
+* Telnet Example::
+
+
+File: python-lib.info,  Node: Telnet Objects,  Next: Telnet Example,  Prev: telnetlib,  Up: telnetlib
+
+Telnet Objects
+--------------
+
+`Telnet' instances have the following methods:
+
+`read_until(expected[, timeout])'
+     Read until a given string, EXPECTED, is encountered or until
+     TIMEOUT seconds have passed.
+
+     When no match is found, return whatever is available instead,
+     possibly the empty string.  Raise `EOFError' if the connection is
+     closed and no cooked data is available.
+
+`read_all()'
+     Read all data until `EOF'; block until connection closed.
+
+`read_some()'
+     Read at least one byte of cooked data unless `EOF' is hit.  Return
+     `''' if `EOF' is hit.  Block if no data is immediately available.
+
+`read_very_eager()'
+     Read everything that can be without blocking in I/O (eager).
+
+     Raise `EOFError' if connection closed and no cooked data
+     available.  Return `''' if no cooked data available otherwise.  Do
+     not block unless in the midst of an IAC sequence.
+
+`read_eager()'
+     Read readily available data.
+
+     Raise `EOFError' if connection closed and no cooked data
+     available.  Return `''' if no cooked data available otherwise.  Do
+     not block unless in the midst of an IAC sequence.
+
+`read_lazy()'
+     Process and return data already in the queues (lazy).
+
+     Raise `EOFError' if connection closed and no data available.
+     Return `''' if no cooked data available otherwise.  Do not block
+     unless in the midst of an IAC sequence.
+
+`read_very_lazy()'
+     Return any data available in the cooked queue (very lazy).
+
+     Raise `EOFError' if connection closed and no data available.
+     Return `''' if no cooked data available otherwise.  This method
+     never blocks.
+
+`read_sb_data()'
+     Return the data collected between a SB/SE pair (suboption
+     begin/end).  The callback should access these data when it was
+     invoked with a `SE' command. This method never blocks.
+
+     _Added in Python version 2.3_
+
+`open(host[, port])'
+     Connect to a host.  The optional second argument is the port
+     number, which defaults to the standard Telnet port (23).
+
+     Do not try to reopen an already connected instance.
+
+`msg(msg[, *args])'
+     Print a debug message when the debug level is `>' 0.  If extra
+     arguments are present, they are substituted in the message using
+     the standard string formatting operator.
+
+`set_debuglevel(debuglevel)'
+     Set the debug level.  The higher the value of DEBUGLEVEL, the more
+     debug output you get (on `sys.stdout').
+
+`close()'
+     Close the connection.
+
+`get_socket()'
+     Return the socket object used internally.
+
+`fileno()'
+     Return the file descriptor of the socket object used internally.
+
+`write(buffer)'
+     Write a string to the socket, doubling any IAC characters.  This
+     can block if the connection is blocked.  May raise `socket.error'
+     if the connection is closed.
+
+`interact()'
+     Interaction function, emulates a very dumb Telnet client.
+
+`mt_interact()'
+     Multithreaded version of `interact()'.
+
+`expect(list[, timeout])'
+     Read until one from a list of a regular expressions matches.
+
+     The first argument is a list of regular expressions, either
+     compiled (`re.RegexObject' instances) or uncompiled (strings).
+     The optional second argument is a timeout, in seconds; the default
+     is to block indefinitely.
+
+     Return a tuple of three items: the index in the list of the first
+     regular expression that matches; the match object returned; and
+     the text read up till and including the match.
+
+     If end of file is found and no text was read, raise `EOFError'.
+     Otherwise, when nothing matches, return `(-1, None, TEXT)' where
+     TEXT is the text received so far (may be the empty string if a
+     timeout happened).
+
+     If a regular expression ends with a greedy match (such as ".*") or
+     if more than one expression can match the same input, the results
+     are indeterministic, and may depend on the I/O timing.
+
+`set_option_negotiation_callback(callback)'
+     Each time a telnet option is read on the input flow, this CALLBACK
+     (if set) is called with the following parameters : callback(telnet
+     socket, command (DO/DONT/WILL/WONT), option).  No other action is
+     done afterwards by telnetlib.
+
+
+File: python-lib.info,  Node: Telnet Example,  Prev: Telnet Objects,  Up: telnetlib
+
+Telnet Example
+--------------
+
+A simple example illustrating typical use:
+
+     import getpass
+     import sys
+     import telnetlib
+     
+     HOST = "localhost"
+     user = raw_input("Enter your remote account: ")
+     password = getpass.getpass()
+     
+     tn = telnetlib.Telnet(HOST)
+     
+     tn.read_until("login: ")
+     tn.write(user + "\n")
+     if password:
+         tn.read_until("Password: ")
+         tn.write(password + "\n")
+     
+     tn.write("ls\n")
+     tn.write("exit\n")
+     
+     print tn.read_all()
+
+
+File: python-lib.info,  Node: urlparse,  Next: SocketServer,  Prev: telnetlib,  Up: Internet Protocols and Support
+
+Parse URLs into components
+==========================
+
+Parse URLs into components.
+
+This module defines a standard interface to break Uniform Resource
+Locator (URL) strings up in components (addressing scheme, network
+location, path etc.), to combine the components back into a URL string,
+and to convert a "relative URL" to an absolute URL given a "base URL."
+
+The module has been designed to match the Internet RFC on Relative
+Uniform Resource Locators (and discovered a bug in an earlier draft!).
+
+It defines the following functions:
+
+`urlparse(urlstring[, default_scheme[, allow_fragments]])'
+     Parse a URL into 6 components, returning a 6-tuple: (addressing
+     scheme, network location, path, parameters, query, fragment
+     identifier).  This corresponds to the general structure of a URL:
+     `SCHEME://NETLOC/PATH;PARAMETERS?QUERY#FRAGMENT'.  Each tuple item
+     is a string, possibly empty.  The components are not broken up in
+     smaller parts (e.g. the network location is a single string), and
+     % escapes are not expanded.  The delimiters as shown above are not
+     part of the tuple items, except for a leading slash in the PATH
+     component, which is retained if present.
+
+     Example:
+
+          urlparse('http://www.cwi.nl:80/%7Eguido/Python.html')
+
+     yields the tuple
+
+          ('http', 'www.cwi.nl:80', '/%7Eguido/Python.html', '', '', '')
+
+     If the DEFAULT_SCHEME argument is specified, it gives the default
+     addressing scheme, to be used only if the URL string does not
+     specify one.  The default value for this argument is the empty
+     string.
+
+     If the ALLOW_FRAGMENTS argument is zero, fragment identifiers are
+     not allowed, even if the URL's addressing scheme normally does
+     support them.  The default value for this argument is `1'.
+
+`urlunparse(tuple)'
+     Construct a URL string from a tuple as returned by `urlparse()'.
+     This may result in a slightly different, but equivalent URL, if the
+     URL that was parsed originally had redundant delimiters, e.g. a ?
+     with an empty query (the draft states that these are equivalent).
+
+`urlsplit(urlstring[, default_scheme[, allow_fragments]])'
+     This is similar to `urlparse()', but does not split the params
+     from the URL.  This should generally be used instead of
+     `urlparse()' if the more recent URL syntax allowing parameters to
+     be applied to each segment of the PATH portion of the URL (see RFC
+     2396 ).  A separate function is needed to separate the path
+     segments and parameters.  This function returns a 5-tuple:
+     (addressing scheme, network location, path, query, fragment
+     identifier).  _Added in Python version 2.2_
+
+`urlunsplit(tuple)'
+     Combine the elements of a tuple as returned by `urlsplit()' into a
+     complete URL as a string.  _Added in Python version 2.2_
+
+`urljoin(base, url[, allow_fragments])'
+     Construct a full ("absolute") URL by combining a "base URL" (BASE)
+     with a "relative URL" (URL).  Informally, this uses components of
+     the base URL, in particular the addressing scheme, the network
+     location and (part of) the path, to provide missing components in
+     the relative URL.
+
+     Example:
+
+          urljoin('http://www.cwi.nl/%7Eguido/Python.html', 'FAQ.html')
+
+     yields the string
+
+          'http://www.cwi.nl/%7Eguido/FAQ.html'
+
+     The ALLOW_FRAGMENTS argument has the same meaning as for
+     `urlparse()'.
+
+`urldefrag(url)'
+     If URL contains a fragment identifier, returns a modified version
+     of URL with no fragment identifier, and the fragment identifier as
+     a separate string.  If there is no fragment identifier in URL,
+     returns URL unmodified and an empty string.
+
+See also:
+    *RFC1738 Uniform Resource Locators (URL)*
+          This specifies the formal syntax and semantics of absolute
+          URLs.
+
+    *RFC1808 Relative Uniform Resource Locators*
+          This Request For Comments includes the rules for joining an
+          absolute and a relative URL, including a fair number of
+          "Abnormal Examples" which govern the treatment of border
+          cases.
+
+    *RFC2396 Uniform Resource Identifiers (URI): Generic Syntax*
+          Document describing the generic syntactic requirements for
+          both Uniform Resource Names (URNs) and Uniform Resource
+          Locators (URLs).
+
+
+File: python-lib.info,  Node: SocketServer,  Next: BaseHTTPServer,  Prev: urlparse,  Up: Internet Protocols and Support
+
+A framework for network servers
+===============================
+
+A framework for network servers.
+
+The `SocketServer' module simplifies the task of writing network
+servers.
+
+There are four basic server classes: `TCPServer' uses the Internet TCP
+protocol, which provides for continuous streams of data between the
+client and server.  `UDPServer' uses datagrams, which are discrete
+packets of information that may arrive out of order or be lost while in
+transit.  The more infrequently used `UnixStreamServer' and
+`UnixDatagramServer' classes are similar, but use UNIX domain sockets;
+they're not available on non-UNIX platforms.  For more details on
+network programming, consult a book such as W. Richard Steven's or
+Ralph Davis's .
+
+These four classes process requests "synchronously"; each request must
+be completed before the next request can be started.  This isn't
+suitable if each request takes a long time to complete, because it
+requires a lot of computation, or because it returns a lot of data
+which the client is slow to process.  The solution is to create a
+separate process or thread to handle each request; the `ForkingMixIn'
+and `ThreadingMixIn' mix-in classes can be used to support asynchronous
+behaviour.
+
+Creating a server requires several steps.  First, you must create a
+request handler class by subclassing the `BaseRequestHandler' class and
+overriding its `handle()' method; this method will process incoming
+requests.  Second, you must instantiate one of the server classes,
+passing it the server's address and the request handler class.
+Finally, call the `handle_request()' or `serve_forever()' method of the
+server object to process one or many requests.
+
+When inheriting from `ThreadingMixIn' for threaded connection behavior,
+you should explicitly declare how you want your threads to behave on an
+abrupt shutdown. The `ThreadingMixIn' class defines an attribute
+DAEMON_THREADS, which indicates whether or not the server should wait
+for thread termination. You should set the flag explicitly if you would
+like threads to behave autonomously; the default is `False', meaning
+that Python will not exit until all threads created by `ThreadingMixIn'
+have exited.
+
+Server classes have the same external methods and attributes, no matter
+what network protocol they use:
+
+`fileno()'
+     Return an integer file descriptor for the socket on which the
+     server is listening.  This function is most commonly passed to
+     `select.select()', to allow monitoring multiple servers in the
+     same process.
+
+`handle_request()'
+     Process a single request.  This function calls the following
+     methods in order: `get_request()', `verify_request()', and
+     `process_request()'.  If the user-provided `handle()' method of
+     the handler class raises an exception, the server's
+     `handle_error()' method will be called.
+
+`serve_forever()'
+     Handle an infinite number of requests.  This simply calls
+     `handle_request()' inside an infinite loop.
+
+`address_family'
+     The family of protocols to which the server's socket belongs.
+     `socket.AF_INET' and `socket.AF_UNIX' are two possible values.
+
+`RequestHandlerClass'
+     The user-provided request handler class; an instance of this class
+     is created for each request.
+
+`server_address'
+     The address on which the server is listening.  The format of
+     addresses varies depending on the protocol family; see the
+     documentation for the socket module for details.  For Internet
+     protocols, this is a tuple containing a string giving the address,
+     and an integer port number: `('127.0.0.1', 80)', for example.
+
+`socket'
+     The socket object on which the server will listen for incoming
+     requests.
+
+The server classes support the following class variables:
+
+`allow_reuse_address'
+     Whether the server will allow the reuse of an address. This
+     defaults to `False', and can be set in subclasses to change the
+     policy.
+
+`request_queue_size'
+     The size of the request queue.  If it takes a long time to process
+     a single request, any requests that arrive while the server is
+     busy are placed into a queue, up to `request_queue_size' requests.
+     Once the queue is full, further requests from clients will get a
+     "Connection denied" error.  The default value is usually 5, but
+     this can be overridden by subclasses.
+
+`socket_type'
+     The type of socket used by the server; `socket.SOCK_STREAM' and
+     `socket.SOCK_DGRAM' are two possible values.
+
+There are various server methods that can be overridden by subclasses
+of base server classes like `TCPServer'; these methods aren't useful to
+external users of the server object.
+
+`finish_request()'
+     Actually processes the request by instantiating
+     `RequestHandlerClass' and calling its `handle()' method.
+
+`get_request()'
+     Must accept a request from the socket, and return a 2-tuple
+     containing the _new_ socket object to be used to communicate with
+     the client, and the client's address.
+
+`handle_error(request, client_address)'
+     This function is called if the `RequestHandlerClass''s `handle()'
+     method raises an exception.  The default action is to print the
+     traceback to standard output and continue handling further
+     requests.
+
+`process_request(request, client_address)'
+     Calls `finish_request()' to create an instance of the
+     `RequestHandlerClass'.  If desired, this function can create a new
+     process or thread to handle the request; the `ForkingMixIn' and
+     `ThreadingMixIn' classes do this.
+
+`server_activate()'
+     Called by the server's constructor to activate the server.  May be
+     overridden.
+
+`server_bind()'
+     Called by the server's constructor to bind the socket to the
+     desired address.  May be overridden.
+
+`verify_request(request, client_address)'
+     Must return a Boolean value; if the value is true, the request
+     will be processed, and if it's false, the request will be denied.
+     This function can be overridden to implement access controls for a
+     server.  The default implementation always return true.
+
+The request handler class must define a new `handle()' method, and can
+override any of the following methods.  A new instance is created for
+each request.
+
+`finish()'
+     Called after the `handle()' method to perform any clean-up actions
+     required.  The default implementation does nothing.  If `setup()'
+     or `handle()' raise an exception, this function will not be called.
+
+`handle()'
+     This function must do all the work required to service a request.
+     Several instance attributes are available to it; the request is
+     available as `self.request'; the client address as
+     `self.client_address'; and the server instance as `self.server',
+     in case it needs access to per-server information.
+
+     The type of `self.request' is different for datagram or stream
+     services.  For stream services, `self.request' is a socket object;
+     for datagram services, `self.request' is a string.  However, this
+     can be hidden by using the mix-in request handler classes
+     `StreamRequestHandler' or `DatagramRequestHandler', which override
+     the `setup()' and `finish()' methods, and provides `self.rfile'
+     and `self.wfile' attributes.  `self.rfile' and `self.wfile' can be
+     read or written, respectively, to get the request data or return
+     data to the client.
+
+`setup()'
+     Called before the `handle()' method to perform any initialization
+     actions required.  The default implementation does nothing.
+

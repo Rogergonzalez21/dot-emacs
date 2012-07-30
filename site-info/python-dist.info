@@ -1,0 +1,54 @@
+This is python-dist.info, produced by makeinfo version 4.3 from
+python-dist.texi.
+
+
+Indirect:
+python-dist.info-1: 83
+python-dist.info-2: 47940
+
+Tag Table:
+(Indirect)
+Node: Top83
+Node: Introduction880
+Node: Concepts & Terminology1233
+Node: A Simple Example2633
+Node: General Python terminology6330
+Node: Distutils-specific terminology8443
+Node: Writing the Setup Script9742
+Node: Listing whole packages13062
+Node: Listing individual modules15547
+Node: Describing extension modules16468
+Node: Extension names and packages18267
+Node: Extension source files19471
+Node: Preprocessor options20760
+Node: Library options23760
+Node: Other options24895
+Node: Installing Scripts25694
+Node: Installing Additional Files26592
+Node: Additional meta-data28307
+Node: Debugging the setup script33262
+Node: Writing the Setup Configuration File34346
+Ref: Writing the Setup Configuration File-Footnote-139638
+Node: Creating a Source Distribution39743
+Node: Specifying the files to distribute41531
+Node: Manifest-related options46500
+Node: Creating Built Distributions47940
+Node: Creating dumb built distributions53728
+Node: Creating RPM packages54065
+Node: Creating Windows Installers59281
+Node: Postinstallation script61498
+Node: Registering with the Package Index64238
+Node: Examples66296
+Node: Pure Python distribution by module66546
+Node: Pure Python distribution by package68380
+Node: Single extension module72218
+Node: Reference73283
+Node: Installing modules the install command family73515
+Node: install_data73982
+Node: install_scripts74260
+Node: Creating a source distribution the sdist command74485
+Node: distutilssysconfig76452
+Node: Function-Method-Variable Index80796
+Node: Miscellaneous Index81621
+
+End Tag Table

@@ -1,0 +1,1095 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: BaseHTTPServer,  Next: SimpleHTTPServer,  Prev: SocketServer,  Up: Internet Protocols and Support
+
+Basic HTTP server
+=================
+
+Basic HTTP server (base class for `SimpleHTTPServer' and
+`CGIHTTPServer').
+
+This module defines two classes for implementing HTTP servers (Web
+servers). Usually, this module isn't used directly, but is used as a
+basis for building functioning Web servers. See the `SimpleHTTPServer'
+and `CGIHTTPServer'  modules.
+
+The first class, `HTTPServer', is a `SocketServer.TCPServer' subclass.
+It creates and listens at the HTTP socket, dispatching the requests to
+a handler.  Code to create and run the server looks like this:
+
+     def run(server_class=BaseHTTPServer.HTTPServer,
+             handler_class=BaseHTTPServer.BaseHTTPRequestHandler):
+         server_address = ('', 8000)
+         httpd = server_class(server_address, handler_class)
+         httpd.serve_forever()
+
+`HTTPServer(server_address, RequestHandlerClass)'
+     This class builds on the `TCPServer' class by storing the server
+     address as instance variables named `server_name' and
+     `server_port'. The server is accessible by the handler, typically
+     through the handler's `server' instance variable.
+
+`BaseHTTPRequestHandler(request, client_address, server)'
+     This class is used to handle the HTTP requests that arrive at the
+     server. By itself, it cannot respond to any actual HTTP requests;
+     it must be subclassed to handle each request method (e.g. GET or
+     POST).  `BaseHTTPRequestHandler' provides a number of class and
+     instance variables, and methods for use by subclasses.
+
+     The handler will parse the request and the headers, then call a
+     method specific to the request type. The method name is constructed
+     from the request. For example, for the request method `SPAM', the
+     `do_SPAM()' method will be called with no arguments. All of the
+     relevant information is stored in instance variables of the
+     handler.  Subclasses should not need to override or extend the
+     `__init__()' method.
+
+`BaseHTTPRequestHandler' has the following instance variables:
+
+`client_address'
+     Contains a tuple of the form `(HOST, PORT)' referring to the
+     client's address.
+
+`command'
+     Contains the command (request type). For example, `'GET''.
+
+`path'
+     Contains the request path.
+
+`request_version'
+     Contains the version string from the request. For example,
+     `'HTTP/1.0''.
+
+`headers'
+     Holds an instance of the class specified by the `MessageClass'
+     class variable. This instance parses and manages the headers in
+     the HTTP request.
+
+`rfile'
+     Contains an input stream, positioned at the start of the optional
+     input data.
+
+`wfile'
+     Contains the output stream for writing a response back to the
+     client.  Proper adherence to the HTTP protocol must be used when
+     writing to this stream.
+
+`BaseHTTPRequestHandler' has the following class variables:
+
+`server_version'
+     Specifies the server software version.  You may want to override
+     this.  The format is multiple whitespace-separated strings, where
+     each string is of the form name[/version].  For example,
+     `'BaseHTTP/0.2''.
+
+`sys_version'
+     Contains the Python system version, in a form usable by the
+     `version_string' method and the `server_version' class variable.
+     For example, `'Python/1.4''.
+
+`error_message_format'
+     Specifies a format string for building an error response to the
+     client. It uses parenthesized, keyed format specifiers, so the
+     format operand must be a dictionary. The CODE key should be an
+     integer, specifying the numeric HTTP error code value.  MESSAGE
+     should be a string containing a (detailed) error message of what
+     occurred, and EXPLAIN should be an explanation of the error code
+     number. Default MESSAGE and EXPLAIN values can found in the
+     RESPONSES class variable.
+
+`protocol_version'
+     This specifies the HTTP protocol version used in responses.  If set
+     to `'HTTP/1.1'', the server will permit HTTP persistent
+     connections; however, your server _must_ then include an accurate
+     `Content-Length' header (using `send_header()') in all of its
+     responses to clients.  For backwards compatibility, the setting
+     defaults to `'HTTP/1.0''.
+
+`MessageClass'
+     Specifies a `rfc822.Message'-like class to parse HTTP headers.
+     Typically, this is not overridden, and it defaults to
+     `mimetools.Message'.
+
+`responses'
+     This variable contains a mapping of error code integers to
+     two-element tuples containing a short and long message. For
+     example, `{CODE: (SHORTMESSAGE, LONGMESSAGE)}'. The SHORTMESSAGE
+     is usually used as the MESSAGE key in an error response, and
+     LONGMESSAGE as the EXPLAIN key (see the `error_message_format'
+     class variable).
+
+A `BaseHTTPRequestHandler' instance has the following methods:
+
+`handle()'
+     Calls `handle_one_request()' once (or, if persistent connections
+     are enabled, multiple times) to handle incoming HTTP requests.
+     You should never need to override it; instead, implement
+     appropriate `do_*()' methods.
+
+`handle_one_request()'
+     This method will parse and dispatch the request to the appropriate
+     `do_*()' method.  You should never need to override it.
+
+`send_error(code[, message])'
+     Sends and logs a complete error reply to the client. The numeric
+     CODE specifies the HTTP error code, with MESSAGE as optional, more
+     specific text. A complete set of headers is sent, followed by text
+     composed using the `error_message_format' class variable.
+
+`send_response(code[, message])'
+     Sends a response header and logs the accepted request. The HTTP
+     response line is sent, followed by _Server_ and _Date_ headers.
+     The values for these two headers are picked up from the
+     `version_string()' and `date_time_string()' methods, respectively.
+
+`send_header(keyword, value)'
+     Writes a specific MIME header to the output stream. KEYWORD should
+     specify the header keyword, with VALUE specifying its value.
+
+`end_headers()'
+     Sends a blank line, indicating the end of the MIME headers in the
+     response.
+
+`log_request([code[, size]])'
+     Logs an accepted (successful) request. CODE should specify the
+     numeric HTTP code associated with the response. If a size of the
+     response is available, then it should be passed as the SIZE
+     parameter.
+
+`log_error(...)'
+     Logs an error when a request cannot be fulfilled. By default, it
+     passes the message to `log_message()', so it takes the same
+     arguments (FORMAT and additional values).
+
+`log_message(format, ...)'
+     Logs an arbitrary message to `sys.stderr'. This is typically
+     overridden to create custom error logging mechanisms. The FORMAT
+     argument is a standard printf-style format string, where the
+     additional arguments to `log_message()' are applied as inputs to
+     the formatting. The client address and current date and time are
+     prefixed to every message logged.
+
+`version_string()'
+     Returns the server software's version string. This is a combination
+     of the `server_version' and `sys_version' class variables.
+
+`date_time_string()'
+     Returns the current date and time, formatted for a message header.
+
+`log_data_time_string()'
+     Returns the current date and time, formatted for logging.
+
+`address_string()'
+     Returns the client address, formatted for logging. A name lookup
+     is performed on the client's IP address.
+
+See also:
+     *Note CGIHTTPServer:: Extended request handler that supports CGI
+     scripts.
+
+     *Note SimpleHTTPServer:: Basic request handler that limits
+     response to files actually under the document root.
+
+
+File: python-lib.info,  Node: SimpleHTTPServer,  Next: CGIHTTPServer,  Prev: BaseHTTPServer,  Up: Internet Protocols and Support
+
+Simple HTTP request handler
+===========================
+
+This module provides a basic request handler for HTTP servers.
+
+The `SimpleHTTPServer' module defines a request-handler class,
+interface compatible with `BaseHTTPServer.BaseHTTPRequestHandler' which
+serves files only from a base directory.
+
+The `SimpleHTTPServer' module defines the following class:
+
+`SimpleHTTPRequestHandler(request, client_address, server)'
+     This class is used, to serve files from current directory and
+     below, directly mapping the directory structure to HTTP requests.
+
+     A lot of the work is done by the base class
+     `BaseHTTPServer.BaseHTTPRequestHandler', such as parsing the
+     request.  This class implements the `do_GET()' and `do_HEAD()'
+     functions.
+
+The `SimpleHTTPRequestHandler' defines the following member variables:
+
+`server_version'
+     This will be `"SimpleHTTP/" + __version__', where `__version__' is
+     defined in the module.
+
+`extensions_map'
+     A dictionary mapping suffixes into MIME types. Default is signified
+     by an empty string, and is considered to be `text/plain'.  The
+     mapping is used case-insensitively, and so should contain only
+     lower-cased keys.
+
+The `SimpleHTTPRequestHandler' defines the following methods:
+
+`do_HEAD()'
+     This method serves the `'HEAD'' request type: it sends the headers
+     it would send for the equivalent `GET' request. See the `do_GET()'
+     method for more complete explanation of the possible headers.
+
+`do_GET()'
+     The request is mapped to a local file by interpreting the request
+     as a path relative to the current working directory.
+
+     If the request was mapped to a directory, a `403' respond is
+     output, followed by the explanation `'Directory listing not
+     supported''.  Any `IOError' exception in opening the requested
+     file, is mapped to a `404', `'File not found'' error. Otherwise,
+     the content type is guessed using the EXTENSIONS_MAP variable.
+
+     A `'Content-type:'' with the guessed content type is output, and
+     then a blank line, signifying end of headers, and then the
+     contents of the file. The file is always opened in binary mode.
+
+     For example usage, see the implementation of the `test()' function.
+
+See also:
+     *Note BaseHTTPServer:: Base class implementation for Web server
+     and request handler.
+
+
+File: python-lib.info,  Node: CGIHTTPServer,  Next: Cookie,  Prev: SimpleHTTPServer,  Up: Internet Protocols and Support
+
+CGI-capable HTTP request handler
+================================
+
+This module provides a request handler for HTTP servers which can run
+CGI scripts.
+
+The `CGIHTTPServer' module defines a request-handler class, interface
+compatible with `BaseHTTPServer.BaseHTTPRequestHandler' and inherits
+behavior from `SimpleHTTPServer.SimpleHTTPRequestHandler' but can also
+run CGI scripts.
+
+_Note:_ This module can run CGI scripts on UNIX and Windows systems; on
+Mac OS it will only be able to run Python scripts within the same
+process as itself.
+
+The `CGIHTTPServer' module defines the following class:
+
+`CGIHTTPRequestHandler(request, client_address, server)'
+     This class is used to serve either files or output of CGI scripts
+     from the current directory and below. Note that mapping HTTP
+     hierarchic structure to local directory structure is exactly as in
+     `SimpleHTTPServer.SimpleHTTPRequestHandler'.
+
+     The class will however, run the CGI script, instead of serving it
+     as a file, if it guesses it to be a CGI script. Only
+     directory-based CGI are used -- the other common server
+     configuration is to treat special extensions as denoting CGI
+     scripts.
+
+     The `do_GET()' and `do_HEAD()' functions are modified to run CGI
+     scripts and serve the output, instead of serving files, if the
+     request leads to somewhere below the `cgi_directories' path.
+
+The `CGIHTTPRequestHandler' defines the following data member:
+
+`cgi_directories'
+     This defaults to `['/cgi-bin', '/htbin']' and describes
+     directories to treat as containing CGI scripts.
+
+The `CGIHTTPRequestHandler' defines the following methods:
+
+`do_POST()'
+     This method serves the `'POST'' request type, only allowed for CGI
+     scripts.  Error 501, "Can only POST to CGI scripts", is output
+     when trying to POST to a non-CGI url.
+
+Note that CGI scripts will be run with UID of user nobody, for security
+reasons. Problems with the CGI script will be translated to error 403.
+
+For example usage, see the implementation of the `test()' function.
+
+See also:
+     *Note BaseHTTPServer:: Base class implementation for Web server
+     and request handler.
+
+
+File: python-lib.info,  Node: Cookie,  Next: xmlrpclib,  Prev: CGIHTTPServer,  Up: Internet Protocols and Support
+
+HTTP state management
+=====================
+
+Support for HTTP state management (cookies).
+
+The `Cookie' module defines classes for abstracting the concept of
+cookies, an HTTP state management mechanism. It supports both simple
+string-only cookies, and provides an abstraction for having any
+serializable data-type as cookie value.
+
+The module formerly strictly applied the parsing rules described in the
+RFC 2109 and RFC 2068 specifications.  It has since been discovered
+that MSIE 3.0x doesn't follow the character rules outlined in those
+specs.  As a result, the parsing rules used are a bit less strict.
+
+`CookieError'
+     Exception failing because of RFC 2109 invalidity: incorrect
+     attributes, incorrect `Set-Cookie' header, etc.
+
+`BaseCookie([input])'
+     This class is a dictionary-like object whose keys are strings and
+     whose values are `Morsel' instances. Note that upon setting a key
+     to a value, the value is first converted to a `Morsel' containing
+     the key and the value.
+
+     If INPUT is given, it is passed to the `load()' method.
+
+`SimpleCookie([input])'
+     This class derives from `BaseCookie' and overrides
+     `value_decode()' and `value_encode()' to be the identity and
+     `str()' respectively.
+
+`SerialCookie([input])'
+     This class derives from `BaseCookie' and overrides
+     `value_decode()' and `value_encode()' to be the `pickle.loads()'
+     and `pickle.dumps()'.
+
+     _This is deprecated in Python 2.3.  Reading pickled values from
+     untrusted cookie data is a huge security hole, as pickle strings
+     can be crafted to cause arbitrary code to execute on your server.
+     It is supported for backwards compatibility only, and may
+     eventually go away._
+
+`SmartCookie([input])'
+     This class derives from `BaseCookie'. It overrides
+     `value_decode()' to be `pickle.loads()' if it is a valid pickle,
+     and otherwise the value itself. It overrides `value_encode()' to
+     be `pickle.dumps()' unless it is a string, in which case it
+     returns the value itself.
+
+     _This is deprecated in Python 2.3.  The same security warning from
+     `SerialCookie' applies here._
+
+A further security note is warranted.  For backwards compatibility, the
+`Cookie' module exports a class named `Cookie' which is just an alias
+for `SmartCookie'.  This is probably a mistake and will likely be
+removed in a future version.  You should not use the `Cookie' class in
+your applications, for the same reason why you should not use the
+`SerialCookie' class.
+
+See also:
+    *RFC2109 HTTP State Management Mechanism*
+          This is the state management specification implemented by
+          this module.
+
+* Menu:
+
+* Cookie Objects::
+* Morsel Objects::
+* Example 9::
+
+
+File: python-lib.info,  Node: Cookie Objects,  Next: Morsel Objects,  Prev: Cookie,  Up: Cookie
+
+Cookie Objects
+--------------
+
+`value_decode(val)'
+     Return a decoded value from a string representation. Return value
+     can be any type. This method does nothing in `BaseCookie' -- it
+     exists so it can be overridden.
+
+`value_encode(val)'
+     Return an encoded value. VAL can be any type, but return value
+     must be a string. This method does nothing in `BaseCookie' -- it
+     exists so it can be overridden
+
+     In general, it should be the case that `value_encode()' and
+     `value_decode()' are inverses on the range of VALUE_DECODE.
+
+`output([attrs[, header[, sep]]])'
+     Return a string representation suitable to be sent as HTTP headers.
+     ATTRS and HEADER are sent to each `Morsel''s `output()' method.
+     SEP is used to join the headers together, and is by default a
+     newline.
+
+`js_output([attrs])'
+     Return an embeddable JavaScript snippet, which, if run on a
+     browser which supports JavaScript, will act the same as if the
+     HTTP headers was sent.
+
+     The meaning for ATTRS is the same as in `output()'.
+
+`load(rawdata)'
+     If RAWDATA is a string, parse it as an `HTTP_COOKIE' and add the
+     values found there as `Morsel's. If it is a dictionary, it is
+     equivalent to:
+
+          for k, v in rawdata.items():
+              cookie[k] = v
+
+
+File: python-lib.info,  Node: Morsel Objects,  Next: Example 9,  Prev: Cookie Objects,  Up: Cookie
+
+Morsel Objects
+--------------
+
+`Morsel()'
+     Abstract a key/value pair, which has some RFC 2109 attributes.
+
+     Morsels are dictionary-like objects, whose set of keys is constant
+     -- the valid RFC 2109 attributes, which are
+
+        * `expires'
+
+        * `path'
+
+        * `comment'
+
+        * `domain'
+
+        * `max-age'
+
+        * `secure'
+
+        * `version'
+
+     The keys are case-insensitive.
+
+`value'
+     The value of the cookie.
+
+`coded_value'
+     The encoded value of the cookie -- this is what should be sent.
+
+`key'
+     The name of the cookie.
+
+`set(key, value, coded_value)'
+     Set the KEY, VALUE and CODED_VALUE members.
+
+`isReservedKey(K)'
+     Whether K is a member of the set of keys of a `Morsel'.
+
+`output([attrs[, header]])'
+     Return a string representation of the Morsel, suitable to be sent
+     as an HTTP header. By default, all the attributes are included,
+     unless ATTRS is given, in which case it should be a list of
+     attributes to use. HEADER is by default `"Set-Cookie:"'.
+
+`js_output([attrs])'
+     Return an embeddable JavaScript snippet, which, if run on a
+     browser which supports JavaScript, will act the same as if the
+     HTTP header was sent.
+
+     The meaning for ATTRS is the same as in `output()'.
+
+`OutputString([attrs])'
+     Return a string representing the Morsel, without any surrounding
+     HTTP or JavaScript.
+
+     The meaning for ATTRS is the same as in `output()'.
+
+
+File: python-lib.info,  Node: Example 9,  Prev: Morsel Objects,  Up: Cookie
+
+Example
+-------
+
+The following example demonstrates how to use the `Cookie' module.
+
+     >>> import Cookie
+     >>> C = Cookie.SimpleCookie()
+     >>> C = Cookie.SerialCookie()
+     >>> C = Cookie.SmartCookie()
+     >>> C["fig"] = "newton"
+     >>> C["sugar"] = "wafer"
+     >>> print C # generate HTTP headers
+     Set-Cookie: sugar=wafer;
+     Set-Cookie: fig=newton;
+     >>> print C.output() # same thing
+     Set-Cookie: sugar=wafer;
+     Set-Cookie: fig=newton;
+     >>> C = Cookie.SmartCookie()
+     >>> C["rocky"] = "road"
+     >>> C["rocky"]["path"] = "/cookie"
+     >>> print C.output(header="Cookie:")
+     Cookie: rocky=road; Path=/cookie;
+     >>> print C.output(attrs=[], header="Cookie:")
+     Cookie: rocky=road;
+     >>> C = Cookie.SmartCookie()
+     >>> C.load("chips=ahoy; vienna=finger") # load from a string (HTTP header)
+     >>> print C
+     Set-Cookie: vienna=finger;
+     Set-Cookie: chips=ahoy;
+     >>> C = Cookie.SmartCookie()
+     >>> C.load('keebler="E=everybody; L=\\"Loves\\"; fudge=\\012;";')
+     >>> print C
+     Set-Cookie: keebler="E=everybody; L=\"Loves\"; fudge=\012;";
+     >>> C = Cookie.SmartCookie()
+     >>> C["oreo"] = "doublestuff"
+     >>> C["oreo"]["path"] = "/"
+     >>> print C
+     Set-Cookie: oreo=doublestuff; Path=/;
+     >>> C = Cookie.SmartCookie()
+     >>> C["twix"] = "none for you"
+     >>> C["twix"].value
+     'none for you'
+     >>> C = Cookie.SimpleCookie()
+     >>> C["number"] = 7 # equivalent to C["number"] = str(7)
+     >>> C["string"] = "seven"
+     >>> C["number"].value
+     '7'
+     >>> C["string"].value
+     'seven'
+     >>> print C
+     Set-Cookie: number=7;
+     Set-Cookie: string=seven;
+     >>> C = Cookie.SerialCookie()
+     >>> C["number"] = 7
+     >>> C["string"] = "seven"
+     >>> C["number"].value
+     7
+     >>> C["string"].value
+     'seven'
+     >>> print C
+     Set-Cookie: number="I7\012.";
+     Set-Cookie: string="S'seven'\012p1\012.";
+     >>> C = Cookie.SmartCookie()
+     >>> C["number"] = 7
+     >>> C["string"] = "seven"
+     >>> C["number"].value
+     7
+     >>> C["string"].value
+     'seven'
+     >>> print C
+     Set-Cookie: number="I7\012.";
+     Set-Cookie: string=seven;
+
+
+File: python-lib.info,  Node: xmlrpclib,  Next: SimpleXMLRPCServer,  Prev: Cookie,  Up: Internet Protocols and Support
+
+XML-RPC client access
+=====================
+
+XML-RPC client access.
+
+_Added in Python version 2.2_
+
+XML-RPC is a Remote Procedure Call method that uses XML passed via HTTP
+as a transport.  With it, a client can call methods with parameters on
+a remote server (the server is named by a URI) and get back structured
+data.  This module supports writing XML-RPC client code; it handles all
+the details of translating between conformable Python objects and XML
+on the wire.
+
+`ServerProxy(uri[, transport[, encoding[, verbose[,  allow_none]]]])'
+     A `ServerProxy' instance is an object that manages communication
+     with a remote XML-RPC server.  The required first argument is a URI
+     (Uniform Resource Indicator), and will normally be the URL of the
+     server.  The optional second argument is a transport factory
+     instance; by default it is an internal `SafeTransport' instance
+     for https: URLs and an internal HTTP `Transport' instance
+     otherwise.  The optional third argument is an encoding, by default
+     UTF-8. The optional fourth argument is a debugging flag.  If
+     ALLOW_NONE is true, the Python constant `None' will be translated
+     into XML; the default behaviour is for `None' to raise a
+     `TypeError'.  This is a commonly-used extension to the XML-RPC
+     specification, but isn't supported by all clients and servers; see
+     <http://ontosys.com/xml-rpc/extensions.html> for a description.
+
+     Both the HTTP and HTTPS transports support the URL syntax
+     extension for HTTP Basic Authentication:
+     `http://user:pass@host:port/path'.  The `user:pass' portion will
+     be base64-encoded as an HTTP `Authorization' header, and sent to
+     the remote server as part of the connection process when invoking
+     an XML-RPC method.  You only need to use this if the remote server
+     requires a Basic Authentication user and password.
+
+     The returned instance is a proxy object with methods that can be
+     used to invoke corresponding RPC calls on the remote server.  If
+     the remote server supports the introspection API, the proxy can
+     also be used to query the remote server for the methods it
+     supports (service discovery) and fetch other server-associated
+     metadata.
+
+     `ServerProxy' instance methods take Python basic types and objects
+     as arguments and return Python basic types and classes.  Types
+     that are conformable (e.g. that can be marshalled through XML),
+     include the following (and except where noted, they are
+     unmarshalled as the same Python type):
+
+     Name                               Meaning
+     ------                             -----
+     boolean                            The `True' and `False' constants
+     integers                           Pass in directly
+     floating-point numbers             Pass in directly
+     strings                            Pass in directly
+     arrays                             Any Python sequence type
+                                        containing conformable elements.
+                                        Arrays are returned as lists
+     structures                         A Python dictionary. Keys must be
+                                        strings, values may be any
+                                        conformable type.
+     dates                              in seconds since the epoch; pass
+                                        in an instance of the `DateTime'
+                                        wrapper class
+     binary data                        pass in an instance of the
+                                        `Binary' wrapper class
+
+     This is the full set of data types supported by XML-RPC.  Method
+     calls may also raise a special `Fault' instance, used to signal
+     XML-RPC server errors, or `ProtocolError' used to signal an error
+     in the HTTP/HTTPS transport layer.  Note that even though starting
+     with Python 2.2 you can subclass builtin types, the xmlrpclib
+     module currently does not marshal instances of such subclasses.
+
+     When passing strings, characters special to XML such as `<', `>',
+     and `&' will be automatically escaped.  However, it's the caller's
+     responsibility to ensure that the string is free of characters
+     that aren't allowed in XML, such as the control characters with
+     ASCII values between 0 and 31; failing to do this will result in
+     an XML-RPC request that isn't well-formed XML.  If you have to pass
+     arbitrary strings via XML-RPC, use the `Binary' wrapper class
+     described below.
+
+     `Server' is retained as an alias for `ServerProxy' for backwards
+     compatibility.  New code should use `ServerProxy'.
+
+See also:
+     `XML-RPC HOWTO'{A good description of XML operation and client
+     software in several languages.  Contains pretty much everything an
+     XML-RPC client developer needs to know.} `XML-RPC-Hacks
+     page'{Extensions for various open-source libraries to support
+     instrospection and multicall.}
+
+* Menu:
+
+* ServerProxy Objects::
+* Boolean Objects::
+* DateTime Objects::
+* Binary Objects::
+* Fault Objects::
+* ProtocolError Objects::
+* Convenience Functions::
+* Example of Client Usage::
+
+
+File: python-lib.info,  Node: ServerProxy Objects,  Next: Boolean Objects,  Prev: xmlrpclib,  Up: xmlrpclib
+
+ServerProxy Objects
+-------------------
+
+A `ServerProxy' instance has a method corresponding to each remote
+procedure call accepted by the XML-RPC server.  Calling the method
+performs an RPC, dispatched by both name and argument signature (e.g.
+the same method name can be overloaded with multiple argument
+signatures).  The RPC finishes by returning a value, which may be
+either returned data in a conformant type or a `Fault' or
+`ProtocolError' object indicating an error.
+
+Servers that support the XML introspection API support some common
+methods grouped under the reserved `system' member:
+
+`system.listMethods()'
+     This method returns a list of strings, one for each (non-system)
+     method supported by the XML-RPC server.
+
+`system.methodSignature(name)'
+     This method takes one parameter, the name of a method implemented
+     by the XML-RPC server.It returns an array of possible signatures
+     for this method. A signature is an array of types. The first of
+     these types is the return type of the method, the rest are
+     parameters.
+
+     Because multiple signatures (ie. overloading) is permitted, this
+     method returns a list of signatures rather than a singleton.
+
+     Signatures themselves are restricted to the top level parameters
+     expected by a method. For instance if a method expects one array of
+     structs as a parameter, and it returns a string, its signature is
+     simply "string, array". If it expects three integers and returns a
+     string, its signature is "string, int, int, int".
+
+     If no signature is defined for the method, a non-array value is
+     returned. In Python this means that the type of the returned value
+     will be something other that list.
+
+`system.methodHelp(name)'
+     This method takes one parameter, the name of a method implemented
+     by the XML-RPC server.  It returns a documentation string
+     describing the use of that method. If no such string is available,
+     an empty string is returned. The documentation string may contain
+     HTML markup.
+
+Introspection methods are currently supported by servers written in
+PHP, C and Microsoft .NET. Partial introspection support is included in
+recent updates to UserLand Frontier. Introspection support for Perl,
+Python and Java is available at the XML-RPC Hacks page.
+
+
+File: python-lib.info,  Node: Boolean Objects,  Next: DateTime Objects,  Prev: ServerProxy Objects,  Up: xmlrpclib
+
+Boolean Objects
+---------------
+
+This class may be initialized from any Python value; the instance
+returned depends only on its truth value.  It supports various Python
+operators through `__cmp__()', `__repr__()', `__int__()', and
+`__nonzero__()' methods, all implemented in the obvious ways.
+
+It also has the following method, supported mainly for internal use by
+the unmarshalling code:
+
+`encode(out)'
+     Write the XML-RPC encoding of this Boolean item to the out stream
+     object.
+
+
+File: python-lib.info,  Node: DateTime Objects,  Next: Binary Objects,  Prev: Boolean Objects,  Up: xmlrpclib
+
+DateTime Objects
+----------------
+
+This class may initialized from date in seconds since the epoch, a time
+tuple, or an ISO 8601 time/date string.  It has the following methods,
+supported mainly for internal use by the marshalling/unmarshalling code:
+
+`decode(string)'
+     Accept a string as the instance's new time value.
+
+`encode(out)'
+     Write the XML-RPC encoding of this DateTime item to the out stream
+     object.
+
+It also supports certain of Python's built-in operators through
+`_cmp__' and `__repr__' methods.
+
+
+File: python-lib.info,  Node: Binary Objects,  Next: Fault Objects,  Prev: DateTime Objects,  Up: xmlrpclib
+
+Binary Objects
+--------------
+
+This class may initialized from string data (which may include NULs).
+The primary acess to the content of a `Binary' object is provided by an
+attribute:
+
+`data'
+     The binary data encapsulated by the `Binary' instance.  The data
+     is provided as an 8-bit string.
+
+`Binary' objects have the following methods, supported mainly for
+internal use by the marshalling/unmarshalling code:
+
+`decode(string)'
+     Accept a base64 string and decode it as the instance's new data.
+
+`encode(out)'
+     Write the XML-RPC base 64 encoding of this binary item to the out
+     stream object.
+
+It also supports certain of Python's built-in operators through a
+`_cmp__()' method.
+
+
+File: python-lib.info,  Node: Fault Objects,  Next: ProtocolError Objects,  Prev: Binary Objects,  Up: xmlrpclib
+
+Fault Objects
+-------------
+
+A `Fault' object encapsulates the content of an XML-RPC fault tag.
+Fault objects have the following members:
+
+`faultCode'
+     A string indicating the fault type.
+
+`faultString'
+     A string containing a diagnostic message associated with the fault.
+
+
+File: python-lib.info,  Node: ProtocolError Objects,  Next: Convenience Functions,  Prev: Fault Objects,  Up: xmlrpclib
+
+ProtocolError Objects
+---------------------
+
+A `ProtocolError' object describes a protocol error in the underlying
+transport layer (such as a 404 `not found' error if the server named by
+the URI does not exist).  It has the following members:
+
+`url'
+     The URI or URL that triggered the error.
+
+`errcode'
+     The error code.
+
+`errmsg'
+     The error message or diagnostic string.
+
+`headers'
+     A string containing the headers of the HTTP/HTTPS request that
+     triggered the error.
+
+
+File: python-lib.info,  Node: Convenience Functions,  Next: Example of Client Usage,  Prev: ProtocolError Objects,  Up: xmlrpclib
+
+Convenience Functions
+---------------------
+
+`boolean(value)'
+     Convert any Python value to one of the XML-RPC Boolean constants,
+     `True' or `False'.
+
+`binary(data)'
+     Trivially convert any Python string to a `Binary' object.
+
+
+File: python-lib.info,  Node: Example of Client Usage,  Prev: Convenience Functions,  Up: xmlrpclib
+
+Example of Client Usage
+-----------------------
+
+     # simple test program (from the XML-RPC specification)
+     
+     # server = ServerProxy("http://localhost:8000") # local server
+     server = ServerProxy("http://betty.userland.com")
+     
+     print server
+     
+     try:
+         print server.examples.getStateName(41)
+     except Error, v:
+         print "ERROR", v
+
+
+File: python-lib.info,  Node: SimpleXMLRPCServer,  Next: DocXMLRPCServer,  Prev: xmlrpclib,  Up: Internet Protocols and Support
+
+Basic XML-RPC server
+====================
+
+Basic XML-RPC server implementation.
+
+The `SimpleXMLRPCServer' module provides a basic server framework for
+XML-RPC servers written in Python.  Servers can either be free
+standing, using `SimpleXMLRPCServer', or embedded in a CGI environment,
+using `CGIXMLRPCRequestHandler'.
+
+`SimpleXMLRPCServer(addr[, requestHandler[, logRequests]])'
+     Create a new server instance.  The REQUESTHANDLER parameter should
+     be a factory for request handler instances; it defaults to
+     `SimpleXMLRPCRequestHandler'.  The ADDR and REQUESTHANDLER
+     parameters are passed to the ``SocketServer'.TCPServer'
+     constructor.  If LOGREQUESTS is true (the default), requests will
+     be logged; setting this parameter to false will turn off logging.
+     This class provides methods for registration of functions that can
+     be called by the XML-RPC protocol.
+
+`CGIXMLRPCRequestHandler()'
+     Create a new instance to handle XML-RPC requests in a CGI
+     environment. _Added in Python version 2.3_
+
+`SimpleXMLRPCRequestHandler()'
+     Create a new request handler instance.  This request handler
+     supports `POST' requests and modifies logging so that the
+     LOGREQUESTS parameter to the `SimpleXMLRPCServer' constructor
+     parameter is honored.
+
+* Menu:
+
+* SimpleXMLRPCServer Objects::
+* CGIXMLRPCRequestHandler::
+
+
+File: python-lib.info,  Node: SimpleXMLRPCServer Objects,  Next: CGIXMLRPCRequestHandler,  Prev: SimpleXMLRPCServer,  Up: SimpleXMLRPCServer
+
+SimpleXMLRPCServer Objects
+--------------------------
+
+The `SimpleXMLRPCServer' class is based on `SocketServer.TCPServer' and
+provides a means of creating simple, stand alone XML-RPC servers.
+
+`register_function(function[, name])'
+     Register a function that can respond to XML-RPC requests.  If NAME
+     is given, it will be the method name associated with FUNCTION,
+     otherwise `FUNCTION.__name__' will be used.  NAME can be either a
+     normal or Unicode string, and may contain characters not legal in
+     Python identifiers, including the period character.
+
+`register_instance(instance)'
+     Register an object which is used to expose method names which have
+     not been registered using `register_function()'.  If INSTANCE
+     contains a `_dispatch()' method, it is called with the requested
+     method name and the parameters from the request; the return value
+     is returned to the client as the result.  If INSTANCE does not
+     have a `_dispatch()' method, it is searched for an attribute
+     matching the name of the requested method; if the requested method
+     name contains periods, each component of the method name is
+     searched for individually, with the effect that a simple
+     hierarchical search is performed.  The value found from this
+     search is then called with the parameters from the request, and the
+     return value is passed back to the client.
+
+`register_introspection_functions()'
+     Registers the XML-RPC introspection functions `system.listMethods',
+     `system.methodHelp' and `system.methodSignature'.  _Added in
+     Python version 2.3_
+
+`register_multicall_functions()'
+     Registers the XML-RPC multicall function system.multicall.
+
+Example:
+
+     class MyFuncs:
+         def div(self, x, y) : return div(x,y)
+     
+     server = SimpleXMLRPCServer(("localhost", 8000))
+     server.register_function(pow)
+     server.register_function(lambda x,y: x+y, 'add')
+     server.register_introspection_functions()
+     server.register_instance(MyFuncs())
+     server.serve_forever()
+
+
+File: python-lib.info,  Node: CGIXMLRPCRequestHandler,  Prev: SimpleXMLRPCServer Objects,  Up: SimpleXMLRPCServer
+
+CGIXMLRPCRequestHandler
+-----------------------
+
+The `CGIXMLRPCRequestHandler' class can be used to handle XML-RPC
+requests sent to Python CGI scripts.
+
+`register_function(function[, name])'
+     Register a function that can respond to XML-RPC requests. If NAME
+     is given, it will be the method name associated with function,
+     otherwise FUNCTION.__NAME__ will be used. NAME can be either a
+     normal or Unicode string, and may contain characters not legal in
+     Python identifiers, including the period character.
+
+`register_instance(instance)'
+     Register an object which is used to expose method names which have
+     not been registered using `register_function()'. If instance
+     contains a `_dispatch()' method, it is called with the requested
+     method name and the parameters from the request; the return value
+     is returned to the client as the result.  If instance does not
+     have a `_dispatch()' method, it is searched for an attribute
+     matching the name of the requested method; if the requested method
+     name contains periods, each component of the method name is
+     searched for individually, with the effect that a simple
+     hierarchical search is performed.  The value found from this
+     search is then called with the parameters from the request, and
+     the return value is passed back to the client.
+
+`register_introspection_functions()'
+     Register the XML-RPC introspection functions `system.listMethods',
+     `system.methodHelp' and `system.methodSignature'.
+
+`register_multicall_functions()'
+     Register the XML-RPC multicall function `system.multicall'.
+
+`handle_request([request_text = None])'
+     Handle a XML-RPC request. If REQUEST_TEXT is given, it should be
+     the POST data provided by the HTTP server, otherwise the contents
+     of stdin will be used.
+
+Example:
+
+     class MyFuncs:
+         def div(self, x, y) : return div(x,y)
+     
+     handler = CGIXMLRPCRequestHandler()
+     handler.register_function(pow)
+     handler.register_function(lambda x,y: x+y, 'add')
+     handler.register_introspection_functions()
+     handler.register_instance(MyFuncs())
+     handler.handle_request()
+
+
+File: python-lib.info,  Node: DocXMLRPCServer,  Next: asyncore,  Prev: SimpleXMLRPCServer,  Up: Internet Protocols and Support
+
+Self-documenting XML-RPC server
+===============================
+
+Self-documenting XML-RPC server implementation.
+
+_Added in Python version 2.3_
+
+The `DocXMLRPCServer' module extends the classes found in
+`SimpleXMLRPCServer' to serve HTML documentation in response to HTTP
+GET requests. Servers can either be free standing, using
+`DocXMLRPCServer', or embedded in a CGI environment, using
+`DocCGIXMLRPCRequestHandler'.
+
+`DocXMLRPCServer(addr[,  requestHandler[, logRequests]])'
+     Create a new server instance. All parameters have the same meaning
+     as for `SimpleXMLRPCServer.SimpleXMLRPCServer'; REQUESTHANDLER
+     defaults to `DocXMLRPCRequestHandler'.
+
+`DocCGIXMLRPCRequestHandler()'
+     Create a new instance to handle XML-RPC requests in a CGI
+     environment.
+
+`DocXMLRPCRequestHandler()'
+     Create a new request handler instance. This request handler
+     supports XML-RPC POST requests, documentation GET requests, and
+     modifies logging so that the LOGREQUESTS parameter to the
+     `DocXMLRPCServer' constructor parameter is honored.
+
+* Menu:
+
+* DocXMLRPCServer Objects::
+* DocCGIXMLRPCRequestHandler::
+
+
+File: python-lib.info,  Node: DocXMLRPCServer Objects,  Next: DocCGIXMLRPCRequestHandler,  Prev: DocXMLRPCServer,  Up: DocXMLRPCServer
+
+DocXMLRPCServer Objects
+-----------------------
+
+The `DocXMLRPCServer' class is derived from
+`SimpleXMLRPCServer.SimpleXMLRPCServer' and provides a means of
+creating self-documenting, stand alone XML-RPC servers. HTTP POST
+requests are handled as XML-RPC method calls. HTTP GET requests are
+handled by generating pydoc-style HTML documentation. This allows a
+server to provide its own web-based documentation.
+
+`set_server_title(server_title)'
+     Set the title used in the generated HTML documentation. This title
+     will be used inside the HTML "title" element.
+
+`set_server_name(server_name)'
+     Set the name used in the generated HTML documentation. This name
+     will appear at the top of the generated documentation inside a "h1"
+     element.
+
+`set_server_documentation(server_documentation)'
+     Set the description used in the generated HTML documentation. This
+     description will appear as a paragraph, below the server name, in
+     the documentation.
+
+
+File: python-lib.info,  Node: DocCGIXMLRPCRequestHandler,  Prev: DocXMLRPCServer Objects,  Up: DocXMLRPCServer
+
+DocCGIXMLRPCRequestHandler
+--------------------------
+
+The `DocCGIXMLRPCRequestHandler' class is derived from
+`SimpleXMLRPCServer.CGIXMLRPCRequestHandler' and provides a means of
+creating self-documenting, XML-RPC CGI scripts. HTTP POST requests are
+handled as XML-RPC method calls. HTTP GET requests are handled by
+generating pydoc-style HTML documentation. This allows a server to
+provide its own web-based documentation.
+
+`set_server_title(server_title)'
+     Set the title used in the generated HTML documentation. This title
+     will be used inside the HTML "title" element.
+
+`set_server_name(server_name)'
+     Set the name used in the generated HTML documentation. This name
+     will appear at the top of the generated documentation inside a "h1"
+     element.
+
+`set_server_documentation(server_documentation)'
+     Set the description used in the generated HTML documentation. This
+     description will appear as a paragraph, below the server name, in
+     the documentation.
+

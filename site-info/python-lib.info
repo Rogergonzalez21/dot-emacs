@@ -1,0 +1,860 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+Indirect:
+python-lib.info-1: 98
+python-lib.info-2: 7289
+python-lib.info-3: 56913
+python-lib.info-4: 99097
+python-lib.info-5: 135545
+python-lib.info-6: 181803
+python-lib.info-7: 231119
+python-lib.info-8: 280340
+python-lib.info-9: 330090
+python-lib.info-10: 378488
+python-lib.info-11: 428233
+python-lib.info-12: 477080
+python-lib.info-13: 524971
+python-lib.info-14: 574512
+python-lib.info-15: 620293
+python-lib.info-16: 668052
+python-lib.info-17: 717221
+python-lib.info-18: 765297
+python-lib.info-19: 811001
+python-lib.info-20: 860854
+python-lib.info-21: 910545
+python-lib.info-22: 960395
+python-lib.info-23: 1010177
+python-lib.info-24: 1059484
+python-lib.info-25: 1108812
+python-lib.info-26: 1157552
+python-lib.info-27: 1206828
+python-lib.info-28: 1254477
+python-lib.info-29: 1302126
+python-lib.info-30: 1350557
+python-lib.info-31: 1399886
+python-lib.info-32: 1442301
+python-lib.info-33: 1483958
+python-lib.info-34: 1520983
+python-lib.info-35: 1569792
+python-lib.info-36: 1617323
+python-lib.info-37: 1666095
+python-lib.info-38: 1713630
+python-lib.info-39: 1762992
+python-lib.info-40: 1811709
+python-lib.info-41: 1861016
+python-lib.info-42: 1908733
+python-lib.info-43: 1955159
+python-lib.info-44: 1991911
+python-lib.info-45: 2041496
+python-lib.info-46: 2090129
+python-lib.info-47: 2136643
+python-lib.info-48: 2161967
+python-lib.info-49: 2187042
+python-lib.info-50: 2403853
+
+Tag Table:
+(Indirect)
+Node: Top98
+Node: Front Matter1058
+Node: Introduction3223
+Node: Built-In Objects6126
+Ref: Built-In Objects-Footnote-17145
+Node: Built-in Functions7289
+Ref: Built-in Functions-Footnote-152970
+Ref: Built-in Functions-Footnote-253053
+Ref: Built-in Functions-Footnote-353381
+Node: Built-in Types53566
+Node: Truth Value Testing54834
+Ref: Truth Value Testing-Footnote-155924
+Node: Boolean Operations56000
+Node: Comparisons56913
+Node: Numeric Types59238
+Ref: Numeric Types-Footnote-163667
+Node: Bit-string Operations63772
+Node: Iterator Types65525
+Node: Sequence Types68129
+Ref: Sequence Types-Footnote-172898
+Node: String Methods72972
+Node: String Formatting Operations80639
+Ref: String Formatting Operations-Footnote-187593
+Ref: String Formatting Operations-Footnote-287717
+Node: XRange Type87961
+Node: Mutable Sequence Types88506
+Node: Mapping Types94252
+Node: File Objects99097
+Ref: File Objects-Footnote-1108482
+Ref: File Objects-Footnote-2108573
+Node: Other Built-in Types108918
+Node: Modules109377
+Node: Classes and Instances110496
+Node: Functions110710
+Node: Methods112152
+Node: Code Objects113857
+Node: Type Objects114553
+Node: Null Object114974
+Node: Ellipsis Object115329
+Node: Boolean Values115690
+Node: Internal Objects116375
+Node: Special Attributes116615
+Node: Built-in Exceptions117529
+Node: Built-in Constants133964
+Node: Python Runtime Services134837
+Node: sys135545
+Node: gc158356
+Ref: gc-Footnote-1165350
+Node: weakref165481
+Node: Weak Reference Objects170206
+Node: Example171531
+Node: Weak References in Extension Types172201
+Node: fpectl174923
+Node: Example 2177153
+Node: Limitations and other considerations177815
+Node: atexit178918
+Node: atexit Example180683
+Node: types181803
+Node: UserDict185968
+Node: UserList188360
+Node: UserString190432
+Node: operator192867
+Node: Mapping Operators to Functions199989
+Node: inspect202864
+Node: Types and members203791
+Node: Retrieving source code215740
+Node: Classes and functions217674
+Node: interpreter stack220250
+Node: traceback222743
+Node: Traceback Example227925
+Node: linecache228665
+Node: pickle230035
+Ref: pickle-Footnote-1231069
+Node: Relationship to other Python modules231119
+Node: Data stream format234829
+Node: Usage236579
+Ref: Usage-Footnote-1243482
+Ref: Usage-Footnote-2243839
+Node: What can be pickled and unpickled?244335
+Ref: What can be pickled and unpickled?-Footnote-1246768
+Node: pickle protocol246881
+Node: Pickling and unpickling normal class instances247726
+Ref: Pickling and unpickling normal class instances-Footnote-1249353
+Ref: Pickling and unpickling normal class instances-Footnote-2249427
+Node: Pickling and unpickling extension types249532
+Node: Pickling and unpickling external objects252182
+Ref: Pickling and unpickling external objects-Footnote-1255316
+Ref: Pickling and unpickling external objects-Footnote-2255680
+Node: Subclassing Unpicklers255788
+Ref: Subclassing Unpicklers-Footnote-1257948
+Node: Example 3258226
+Node: cPickle260944
+Ref: cPickle-Footnote-1262282
+Node: copy_reg262621
+Node: shelve264099
+Node: Restrictions266179
+Node: Example 4269323
+Node: copy271325
+Node: marshal274067
+Ref: marshal-Footnote-1278056
+Node: warnings278421
+Node: Warning Categories280340
+Node: Warnings Filter281980
+Node: Available Functions284687
+Node: imp287733
+Node: Examples297056
+Node: pkgutil298329
+Node: code300312
+Node: Interactive Interpreter Objects303149
+Node: Interactive Console Objects305585
+Node: codeop307409
+Node: pprint311031
+Node: PrettyPrinter Objects316057
+Node: repr318487
+Node: Repr Objects319704
+Node: Subclassing Repr Objects321861
+Node: new322607
+Node: site324657
+Node: user327622
+Node: __builtin__330090
+Node: __main__330483
+Node: __future__331054
+Node: String Services333430
+Node: string333959
+Node: re344719
+Node: Regular Expression Syntax346611
+Node: Matching vs Searching361883
+Node: Contents of Module re363079
+Node: Regular Expression Objects370997
+Node: Match Objects373775
+Node: Examples 2378488
+Node: struct380714
+Node: difflib388773
+Node: SequenceMatcher Objects397967
+Node: SequenceMatcher Examples404952
+Node: Differ Objects406615
+Node: Differ Example408198
+Node: fpformat410501
+Node: StringIO412002
+Node: cStringIO413331
+Node: textwrap414705
+Node: codecs420562
+Node: Codec Base Classes428233
+Node: Codec Objects430373
+Node: StreamWriter Objects432436
+Node: StreamReader Objects434666
+Node: StreamReaderWriter Objects438159
+Node: StreamRecoder Objects439116
+Node: Standard Encodings440767
+Node: encodingsidna --- Internationalized Domain Names in Applications452109
+Node: unicodedata454777
+Node: stringprep459169
+Node: Miscellaneous Services463061
+Node: pydoc463623
+Node: doctest466142
+Node: Normal Usage470161
+Node: Which Docstrings Are Examined?471529
+Node: What's the Execution Context?472696
+Node: What About Exceptions?473522
+Node: Advanced Usage474206
+Node: How are Docstring Examples Recognized?477080
+Node: Warnings479047
+Node: Soapbox482068
+Node: unittest483400
+Node: Basic example487197
+Node: Organizing test code490568
+Node: Re-using old test code498285
+Node: Classes and functions 2499612
+Node: TestCase Objects502614
+Node: TestSuite Objects508816
+Node: TestResult Objects509891
+Node: TestLoader Objects512961
+Node: Getting Extended Error Information516326
+Node: test517900
+Node: Writing Unit Tests for the test package519002
+Node: Running tests Using testregrtest523250
+Node: testtest_support524971
+Node: math527667
+Node: cmath531537
+Node: random535637
+Node: whrandom544934
+Node: bisect547510
+Node: bisect-example549526
+Node: heapq550621
+Node: Theory553244
+Ref: Theory-Footnote-1557531
+Node: array558177
+Node: sets566580
+Node: Set Objects569288
+Node: Example 5574512
+Node: Protocol for automatic conversion to immutable575857
+Node: itertools577487
+Node: Itertool functions579597
+Node: Examples 3587635
+Node: ConfigParser591145
+Node: RawConfigParser Objects595487
+Node: ConfigParser Objects599930
+Node: fileinput600726
+Node: xreadlines605498
+Node: calendar607192
+Node: cmd610898
+Node: Cmd Objects612242
+Node: shlex618075
+Node: Module Contents618721
+Node: shlex Objects620293
+Node: Parsing Rules626563
+Node: Generic Operating System Services628492
+Node: os629371
+Node: Process Parameters632524
+Node: File Object Creation638176
+Node: File Descriptor Operations641168
+Node: Files and Directories647887
+Node: Process Management668052
+Node: Miscellaneous System Information685780
+Node: ospath690003
+Node: dircache698897
+Node: stat700483
+Node: statcache704563
+Node: statvfs706187
+Node: filecmp707269
+Node: dircmp class709068
+Node: popen2711056
+Node: Popen3 and Popen4 Objects713948
+Node: Flow Control Issues715243
+Node: datetime717221
+Node: Available Types719468
+Node: timedelta Objects721141
+Node: date Objects726155
+Node: datetime Objects733644
+Node: time Objects748679
+Node: tzinfo Objects752807
+Node: strftime Behavior763225
+Node: time765297
+Ref: time-Footnote-1784589
+Node: sched784989
+Node: Scheduler Objects786411
+Node: mutex788302
+Node: Mutex Objects789431
+Node: getpass790122
+Node: curses791028
+Node: Functions 2792567
+Node: Window Objects811001
+Node: Constants827297
+Node: cursestextpad837813
+Node: Textbox objects839210
+Node: curseswrapper843027
+Node: cursesascii844220
+Node: cursespanel850404
+Node: Functions 3850930
+Node: Panel Objects851506
+Node: getopt852896
+Node: optparse858306
+Node: Philosophy860339
+Node: Terminology860854
+Node: What are options for?865119
+Node: What are positional arguments for?867003
+Node: Basic Usage868444
+Node: store action869795
+Node: Other store_* actions872224
+Node: Setting default values873121
+Node: Generating help874747
+Node: Print a version number879534
+Node: Error-handling880378
+Node: Putting it all together881051
+Node: Advanced Usage 2882098
+Node: Creating and populating the parser882424
+Node: Defining options884522
+Node: Option actions887605
+Node: Option types893865
+Node: Querying and manipulating your option parser895516
+Node: Conflicts between options896540
+Node: Callback Options899403
+Node: Defining a callback option900037
+Node: How callbacks are called901926
+Node: Error handling904610
+Node: Examples 4905140
+Node: Extending optparse910545
+Node: Adding new types911201
+Node: Adding new actions914349
+Node: Other reasons to extend optparse918079
+Node: Examples 5919911
+Node: tempfile920518
+Node: errno928352
+Node: glob933984
+Node: fnmatch935456
+Node: shutil937402
+Node: Example 6941461
+Node: locale942428
+Node: Background958328
+Node: For extension writers and programs that embed Python960395
+Node: Access to message catalogs962299
+Node: gettext963282
+Node: GNU gettext API964201
+Ref: GNU gettext API-Footnote-1967138
+Node: Class-based API967548
+Ref: Class-based API-Footnote-1971273
+Node: NullTranslations class971325
+Node: GNUTranslations class974445
+Node: Solaris message catalog support978503
+Node: Catalog constructor978875
+Node: Internationalizing your programs and modules979606
+Ref: Internationalizing your programs and modules-Footnote-1982919
+Ref: Internationalizing your programs and modules-Footnote-2983111
+Node: Localizing your module983368
+Node: Localizing your application984314
+Node: Changing languages on the fly985221
+Node: Deferred translations986029
+Ref: Deferred translations-Footnote-1988156
+Node: Acknowledgements988277
+Node: logging988747
+Node: Logger Objects998490
+Node: Handler Objects1002371
+Node: StreamHandler1005398
+Node: FileHandler1006426
+Node: RotatingFileHandler1007022
+Node: SocketHandler1008620
+Node: DatagramHandler1010177
+Node: SysLogHandler1011085
+Node: NTEventLogHandler1012171
+Node: SMTPHandler1015045
+Node: MemoryHandler1015946
+Node: HTTPHandler1017916
+Node: Formatter Objects1018447
+Node: Filter Objects1023142
+Node: LogRecord Objects1024142
+Node: Thread Safety1025546
+Node: Configuration1025988
+Node: Configuration functions1026202
+Node: Configuration file format1027873
+Node: Using the logging package1033481
+Node: Basic example - log to a file1033673
+Node: Optional Operating System Services1035085
+Node: signal1035871
+Node: Signal Example1041733
+Node: socket1042688
+Node: Socket Objects1059484
+Node: SSL Objects1068976
+Node: Example 71069425
+Node: select1073034
+Node: Polling Objects1075907
+Node: thread1079075
+Node: threading1083451
+Node: Lock Objects1088030
+Node: RLock Objects1090177
+Node: Condition Objects1092590
+Node: Semaphore Objects1097538
+Node: Semaphore Example1099528
+Node: Event Objects1100450
+Node: Thread Objects1101831
+Node: Timer Objects1106967
+Node: dummy_thread1108083
+Node: dummy_threading1108812
+Node: Queue1109560
+Node: Queue Objects1110873
+Node: mmap1112861
+Node: anydbm1119244
+Node: dbhash1121490
+Node: Database Objects1123108
+Node: whichdb1124429
+Node: bsddb1125150
+Node: Hash1129406
+Node: dumbdbm1132196
+Node: Dumbdbm Objects1134188
+Node: zlib1134556
+Node: gzip1142236
+Node: bz21145227
+Node: Decompression of files1146528
+Node: Sequential decompression1149902
+Node: One-shot decompression1151541
+Node: zipfile1152214
+Node: ZipFile Objects1154515
+Node: PyZipFile Objects1157552
+Node: ZipInfo Objects1159107
+Node: tarfile1160976
+Node: TarFile Objects1166536
+Node: TarInfo Objects1171959
+Node: Examples 61173969
+Node: readline1175357
+Node: Example 81178656
+Node: rlcompleter1179342
+Node: Completer Objects1180702
+Node: Unix Specific Services1181421
+Node: posix1181976
+Node: Large File Support1183406
+Node: Module Contents 21184655
+Node: pwd1185834
+Node: grp1187927
+Node: crypt1189688
+Node: dl1191234
+Node: Dl Objects1193002
+Node: dbm1194200
+Node: gdbm1196668
+Node: termios1200109
+Node: termios Example1202932
+Node: TERMIOS1203724
+Node: tty1204225
+Node: pty1205154
+Node: fcntl1206828
+Node: pipes1213414
+Node: Template Objects1214236
+Node: posixfile1215785
+Node: resource1222022
+Node: Resource Limits1222729
+Node: Resource Usage1226492
+Node: nis1230625
+Node: syslog1231884
+Node: commands1234269
+Node: Python Debugger1235923
+Node: Debugger Commands1239309
+Node: How It Works1247816
+Node: Python Profiler1249827
+Ref: Python Profiler-Footnote-11252063
+Node: Profiler Introduction1252209
+Node: Profiler Changes1252813
+Node: Instant Users Manual1254477
+Node: Deterministic Profiling1258365
+Node: Reference Manual1260263
+Node: Stats Class1264370
+Ref: Stats Class-Footnote-11271056
+Node: Limitations1271218
+Node: Calibration1273529
+Ref: Calibration-Footnote-11275340
+Node: Profiler Extensions1275537
+Node: hotshot1277166
+Node: Profile Objects1278223
+Node: Using hotshot data1279335
+Node: Example Usage1279823
+Node: timeit1280846
+Node: Command Line Interface1284107
+Node: Examples 71286513
+Node: Internet Protocols and Support1288647
+Node: webbrowser1289489
+Node: Browser Controller Objects1294054
+Node: cgi1294618
+Node: cgi-intro1295304
+Node: Using the cgi module1297097
+Node: Higher Level Interface1302126
+Ref: Higher Level Interface-Footnote-11305589
+Node: Old classes1305840
+Node: Functions in cgi module1306708
+Node: Caring about security1310863
+Node: Installing your CGI script on a UNIX system1311752
+Node: Testing your CGI script1313843
+Node: Debugging CGI scripts1314584
+Node: Common problems and solutions1317758
+Node: cgitb1318968
+Node: urllib1321573
+Node: URLopener Objects1335651
+Node: Urllib Examples1338306
+Node: urllib21339477
+Node: Request Objects1346859
+Node: OpenerDirector Objects1348782
+Node: BaseHandler Objects1350557
+Node: HTTPRedirectHandler Objects1353628
+Node: ProxyHandler Objects1355536
+Node: HTTPPasswordMgr Objects1356076
+Node: AbstractBasicAuthHandler Objects1356985
+Node: HTTPBasicAuthHandler Objects1357612
+Node: ProxyBasicAuthHandler Objects1357941
+Node: AbstractDigestAuthHandler Objects1358273
+Node: HTTPDigestAuthHandler Objects1358818
+Node: ProxyDigestAuthHandler Objects1359152
+Node: HTTPHandler Objects1359474
+Node: HTTPSHandler Objects1359764
+Node: FileHandler Objects1360047
+Node: FTPHandler Objects1360405
+Node: CacheFTPHandler Objects1360693
+Node: GopherHandler Objects1361094
+Node: UnknownHandler Objects1361339
+Node: Examples 81361558
+Node: httplib1362556
+Node: HTTPConnection Objects1366244
+Node: HTTPResponse Objects1368175
+Node: Examples 91368877
+Node: ftplib1370021
+Node: FTP Objects1372805
+Node: gopherlib1380958
+Node: poplib1382264
+Node: POP3 Objects1383783
+Node: POP3 Example1386674
+Node: imaplib1387250
+Node: IMAP4 Objects1390983
+Node: IMAP4 Example1399346
+Node: nntplib1399886
+Node: NNTP Objects1403798
+Node: smtplib1412885
+Node: SMTP Objects1415747
+Node: SMTP Example1422193
+Node: telnetlib1423445
+Node: Telnet Objects1425238
+Node: Telnet Example1429560
+Node: urlparse1430173
+Node: SocketServer1434639
+Node: BaseHTTPServer1442301
+Node: SimpleHTTPServer1450075
+Node: CGIHTTPServer1452554
+Node: Cookie1454837
+Node: Cookie Objects1457675
+Node: Morsel Objects1459071
+Node: Example 91460620
+Node: xmlrpclib1462877
+Node: ServerProxy Objects1468194
+Node: Boolean Objects1470612
+Node: DateTime Objects1471219
+Node: Binary Objects1471855
+Node: Fault Objects1472665
+Node: ProtocolError Objects1473062
+Node: Convenience Functions1473674
+Node: Example of Client Usage1474044
+Node: SimpleXMLRPCServer1474522
+Node: SimpleXMLRPCServer Objects1476013
+Node: CGIXMLRPCRequestHandler1478203
+Node: DocXMLRPCServer1480487
+Node: DocXMLRPCServer Objects1481744
+Node: DocCGIXMLRPCRequestHandler1482856
+Node: asyncore1483958
+Node: asyncore Example basic HTTP client1492525
+Node: asynchat1493518
+Node: asynchat - Auxiliary Classes and Functions1500351
+Node: asynchat Example1501914
+Node: Internet Data Handling1504322
+Node: formatter1504861
+Node: Formatter Interface1506439
+Node: Formatter Implementations1512152
+Node: Writer Interface1513093
+Node: Writer Implementations1516924
+Node: email1518005
+Node: Representing an email message1520983
+Node: Deprecated methods1541463
+Node: Parsing email messages1543695
+Node: Parser class API1545923
+Node: Additional notes1549351
+Node: Generating MIME documents1550399
+Node: Deprecated methods 21555617
+Node: Creating email and MIME objects from scratch1556052
+Node: Internationalized headers1562795
+Node: Representing character sets1569792
+Node: Encoders1578853
+Ref: Encoders-Footnote-11580754
+Node: Exception classes1580857
+Node: Miscellaneous utilities1583041
+Ref: Miscellaneous utilities-Footnote-11588164
+Node: Iterators1588378
+Node: Differences from email v1 up to Python 2211590774
+Node: Differences from mimelib1594254
+Ref: Differences from mimelib-Footnote-11598896
+Node: Examples 101598963
+Ref: Examples 10-Footnote-11599715
+Node: mailcap1599794
+Node: mailbox1603453
+Node: Mailbox Objects1608637
+Node: mhlib1609521
+Node: MH Objects1610374
+Node: Folder Objects1611286
+Node: Message Objects1612789
+Node: mimetools1613059
+Node: Additional Methods of Message Objects1615634
+Node: mimetypes1617323
+Node: MimeTypes Objects1623197
+Node: MimeWriter1624848
+Node: MimeWriter Objects1625839
+Node: mimify1627982
+Node: multifile1631416
+Node: MultiFile Objects1633149
+Node: MultiFile Example1636592
+Node: rfc8221637682
+Ref: rfc822-Footnote-11643545
+Node: Message Objects 21643812
+Node: AddressList Objects1649615
+Node: base641650968
+Node: binascii1653410
+Node: binhex1658482
+Node: Notes1659950
+Node: quopri1660347
+Node: uu1662821
+Node: xdrlib1664770
+Node: Packer Objects1666095
+Node: Unpacker Objects1668938
+Node: Exceptions1671762
+Node: netrc1672414
+Node: netrc Objects1673543
+Node: robotparser1674815
+Node: csv1676594
+Node: Module Contents 31678673
+Node: Dialects and Formatting Parameters1685127
+Node: Reader Objects1687088
+Node: Writer Objects1687491
+Node: Examples 111688003
+Node: Structured Markup Processing Tools1688422
+Node: HTMLParser1689802
+Node: Example HTML Parser Application1695184
+Node: sgmllib1695787
+Node: htmllib1703942
+Node: HTMLParser Objects1707209
+Node: htmlentitydefs1709263
+Node: xmlparsersexpat1710246
+Node: XMLParser Objects1713630
+Node: ExpatError Exceptions1726190
+Node: Example 101726890
+Node: Content Model Descriptions1728116
+Node: Expat error constants1729718
+Node: xmldom1732163
+Node: Module Contents 41735977
+Node: Objects in the DOM1738618
+Node: DOMImplementation Objects1741233
+Node: Node Objects1741718
+Node: NodeList Objects1746736
+Node: DocumentType Objects1748074
+Node: Document Objects1750070
+Node: Element Objects1752749
+Node: Attr Objects1755103
+Node: NamedNodeMap Objects1755647
+Node: Comment Objects1756357
+Node: Text and CDATASection Objects1756822
+Node: ProcessingInstruction Objects1757870
+Node: Exceptions 21758439
+Node: Conformance1762670
+Node: Type Mapping1762992
+Node: Accessor Methods1763945
+Node: xmldomminidom1765550
+Node: DOM Objects1769885
+Node: DOM Example1772223
+Node: minidom and the DOM standard1772551
+Node: xmldompulldom1775336
+Node: DOMEventStream Objects1776246
+Node: xmlsax1776463
+Node: SAXException Objects1781803
+Node: xmlsaxhandler1782156
+Node: ContentHandler Objects1787145
+Node: DTDHandler Objects1794789
+Node: EntityResolver Objects1795206
+Node: ErrorHandler Objects1795623
+Node: xmlsaxsaxutils1797156
+Node: xmlsaxxmlreader1800292
+Node: XMLReader Objects1804115
+Node: IncrementalParser Objects1807120
+Node: Locator Objects1807861
+Node: InputSource Objects1808380
+Node: Attributes Interface1810338
+Node: AttributesNS Interface1810991
+Node: xmllib1811709
+Ref: xmllib-Footnote-11821202
+Node: XML Namespaces1822016
+Node: Multimedia Services1823103
+Node: audioop1823629
+Node: imageop1832903
+Node: aifc1836098
+Node: sunau1842549
+Node: AU_read Objects1845542
+Node: AU_write Objects1847448
+Node: wave1848738
+Node: Wave_read Objects1850037
+Node: Wave_write Objects1851581
+Node: chunk1852872
+Ref: chunk-Footnote-11857310
+Node: colorsys1857413
+Node: rgbimg1858999
+Node: imghdr1861016
+Node: sndhdr1862990
+Node: ossaudiodev1864496
+Node: Audio Device Objects1867343
+Node: Mixer Device Objects1874759
+Node: Cryptographic Services1878109
+Node: hmac1878926
+Node: md51880464
+Node: sha1883051
+Node: mpz1885488
+Node: rotor1889113
+Node: Graphical User Interfaces with Tk1893535
+Node: Tkinter1894680
+Node: Tkinter Modules1895881
+Node: Tkinter Life Preserver1897811
+Node: How To Use This Section1898816
+Node: A Simple Hello World Program1900599
+Node: A Very Quick Look at Tcl/Tk1901572
+Node: Mapping Basic Tk into Tkinter1904980
+Node: How Tk and Tkinter are Related1906923
+Node: Handy Reference1908409
+Node: Setting Options1908733
+Node: Packer1911514
+Node: Packer Options1913284
+Node: Coupling Widget Variables1914048
+Node: Window Manager1916329
+Node: Tk Option Data Types1917809
+Node: Bindings and Events1920928
+Node: index Parameter1923091
+Node: Images1925565
+Node: Tix1926326
+Node: Using Tix1927947
+Node: Tix Widgets1929441
+Node: Basic Widgets1929906
+Node: File Selectors1932060
+Node: Hierachical ListBox1934067
+Node: Tabular ListBox1934930
+Node: Manager Widgets1935481
+Node: Image Types1936672
+Node: Miscellaneous Widgets1937289
+Node: Form Geometry Manager1937595
+Node: Tix Commands1937888
+Node: ScrolledText1942282
+Node: turtle1943280
+Node: Pen and RawPen Objects1947039
+Node: Idle1947563
+Node: Menus1948324
+Node: File menu1948539
+Node: Edit menu1949383
+Node: Windows menu1950943
+Node: Debug menu in the Python Shell window only1951317
+Node: Basic editing and navigation1951845
+Node: Automatic indentation1952386
+Node: Python Shell window1952975
+Node: Syntax colors1953463
+Node: Command line usage1954092
+Node: Other Graphical User Interface Packages1955159
+Node: Restricted Execution1959289
+Node: rexec1962600
+Node: RExec Objects1966367
+Node: Defining restricted environments1969283
+Node: An example1972372
+Node: Bastion1973906
+Node: Python Language Services1976046
+Node: parser1976589
+Node: Creating AST Objects1981366
+Node: Converting AST Objects1983786
+Node: Queries on AST Objects1986824
+Node: Exceptions and Error Handling1988030
+Node: AST Objects1989477
+Node: Examples 121990175
+Node: Emulation of compile1990733
+Node: Information Discovery1991911
+Node: symbol2006913
+Node: token2007913
+Node: keyword2009147
+Node: tokenize2009718
+Node: tabnanny2012245
+Node: pyclbr2013868
+Node: Class Descriptor Objects2015037
+Node: py_compile2015970
+Node: compileall2017897
+Node: dis2019656
+Node: Python Byte Code Instructions2022823
+Node: distutils2036185
+Node: Python compiler package2037525
+Node: basic interface2038935
+Node: Limitations 22040733
+Node: Python Abstract Syntax2041496
+Node: AST Nodes2042851
+Node: Assignment nodes2054359
+Node: Examples 132055712
+Node: Using Visitors to Walk ASTs2057696
+Node: Bytecode Generation2059378
+Node: SGI IRIX Specific Services2059927
+Node: al2060359
+Node: Configuration Objects2062569
+Node: Port Objects2063315
+Node: AL2064506
+Node: cd2065034
+Node: Player Objects2068560
+Node: Parser Objects2072866
+Node: fl2076173
+Node: FL Functions2078066
+Node: Form Objects2080999
+Node: FORMS Objects2086493
+Node: FL2089060
+Node: flp2089589
+Node: fm2090129
+Node: gl2092487
+Node: DEVICE2097089
+Node: GL2097481
+Node: imgfile2097850
+Node: jpeg2100461
+Node: SunOS Specific Services2103712
+Node: sunaudiodev2104125
+Node: Audio Device Objects 22105657
+Node: SUNAUDIODEV2109012
+Node: MS Windows Specific Services2109484
+Node: msvcrt - Useful routines from the MS VC++ runtime2109872
+Node: File Operations2110668
+Node: Console I/O2112439
+Node: Other Functions2113459
+Node: _winreg - Windows registry access2113807
+Node: Registry Handle Objects2126963
+Node: winsound2128810
+Node: Undocumented Modules2133144
+Node: Frameworks2133816
+Node: Miscellaneous useful utilities2134259
+Node: Platform specific modules2135178
+Node: Multimedia2135897
+Node: Obsolete2136643
+Node: SGI-specific Extension modules2140303
+Node: Reporting Bugs2140720
+Node: History and License2143539
+Node: History of the software2143790
+Node: Terms and conditions for accessing or otherwise using Python2147082
+Node: Module Index2157723
+Node: Class-Exception-Object Index2161967
+Node: Function-Method-Variable Index2187042
+Node: Miscellaneous Index2403853
+
+End Tag Table

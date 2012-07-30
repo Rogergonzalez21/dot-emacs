@@ -1,0 +1,1331 @@
+This is python-lib.info, produced by makeinfo version 4.3 from
+python-lib.texi.
+
+October 3, 2003
+
+
+File: python-lib.info,  Node: Setting Options,  Next: Packer,  Prev: Handy Reference,  Up: Handy Reference
+
+Setting Options
+...............
+
+Options control things like the color and border width of a widget.
+Options can be set in three ways:
+
+`At object creation time, using keyword arguments'
+     :
+          fred = Button(self, fg = "red", bg = "blue")
+
+`After object creation, treating the option name like a dictionary index'
+     :
+          fred["fg"] = "red"
+          fred["bg"] = "blue"
+
+`Use the config() method to update multiple attrs subesequent to'
+     object creation :
+          fred.config(fg = "red", bg = "blue")
+
+For a complete explanation of a given option and its behavior, see the
+Tk man pages for the widget in question.
+
+Note that the man pages list "STANDARD OPTIONS" and "WIDGET SPECIFIC
+OPTIONS" for each widget.  The former is a list of options that are
+common to many widgets, the latter are the options that are
+ideosyncratic to that particular widget.  The Standard Options are
+documented on the `options(3)' man page.
+
+No distinction between standard and widget-specific options is made in
+this document.  Some options don't apply to some kinds of widgets.
+Whether a given widget responds to a particular option depends on the
+class of the widget; buttons have a `command' option, labels do not.
+
+The options supported by a given widget are listed in that widget's man
+page, or can be queried at runtime by calling the `config()' method
+without arguments, or by calling the `keys()' method on that widget.
+The return value of these calls is a dictionary whose key is the name
+of the option as a string (for example, `'relief'') and whose values
+are 5-tuples.
+
+Some options, like `bg' are synonyms for common options with long names
+(`bg' is shorthand for "background"). Passing the `config()' method the
+name of a shorthand option will return a 2-tuple, not 5-tuple. The
+2-tuple passed back will contain the name of the synonym and the "real"
+option (such as `('bg', 'background')').
+
+Index                    Meaning                  Example
+------                   -----                    -----
+0                        option name              `'relief''
+1                        option name for          `'relief''
+                         database lookup          
+2                        option class for         `'Relief''
+                         database lookup          
+3                        default value            `'raised''
+4                        current value            `'groove''
+
+Example:
+
+     >>> print fred.config()
+     {'relief' : ('relief', 'relief', 'Relief', 'raised', 'groove')}
+
+Of course, the dictionary printed will include all the options
+available and their values.  This is meant only as an example.
+
+
+File: python-lib.info,  Node: Packer,  Next: Packer Options,  Prev: Setting Options,  Up: Handy Reference
+
+The Packer
+..........
+
+The packer is one of Tk's geometry-management mechanisms.  See also .
+
+Geometry managers are used to specify the relative positioning of the
+positioning of widgets within their container - their mutual _master_.
+In contrast to the more cumbersome _placer_ (which is used less
+commonly, and we do not cover here), the packer takes qualitative
+relationship specification - _above_, _to the left of_, _filling_, etc
+- and works everything out to determine the exact placement coordinates
+for you.
+
+The size of any _master_ widget is determined by the size of the "slave
+widgets" inside.  The packer is used to control where slave widgets
+appear inside the master into which they are packed.  You can pack
+widgets into frames, and frames into other frames, in order to achieve
+the kind of layout you desire.  Additionally, the arrangement is
+dynamically adjusted to accomodate incremental changes to the
+configuration, once it is packed.
+
+Note that widgets do not appear until they have had their geometry
+specified with a geometry manager.  It's a common early mistake to
+leave out the geometry specification, and then be surprised when the
+widget is created but nothing appears.  A widget will appear only after
+it has had, for example, the packer's `pack()' method applied to it.
+
+The pack() method can be called with keyword-option/value pairs that
+control where the widget is to appear within its container, and how it
+is to behave when the main application window is resized.  Here are
+some examples:
+
+         fred.pack()                     # defaults to side = "top"
+         fred.pack(side = "left")
+         fred.pack(expand = 1)
+
+
+File: python-lib.info,  Node: Packer Options,  Next: Coupling Widget Variables,  Prev: Packer,  Up: Handy Reference
+
+Packer Options
+..............
+
+For more extensive information on the packer and the options that it
+can take, see the man pages and page 183 of John Ousterhout's book.
+
+`anchor '
+     Anchor type.  Denotes where the packer is to place each slave in
+     its parcel.
+
+`expand'
+     Boolean, `0' or `1'.
+
+`fill'
+     Legal values: `'x'', `'y'', `'both'', `'none''.
+
+`ipadx and ipady'
+     A distance - designating internal padding on each side of the slave
+     widget.
+
+`padx and pady'
+     A distance - designating external padding on each side of the slave
+     widget.
+
+`side'
+     Legal values are: `'left'', `'right'', `'top'', `'bottom''.
+
+
+File: python-lib.info,  Node: Coupling Widget Variables,  Next: Window Manager,  Prev: Packer Options,  Up: Handy Reference
+
+Coupling Widget Variables
+.........................
+
+The current-value setting of some widgets (like text entry widgets) can
+be connected directly to application variables by using special
+options.  These options are `variable', `textvariable', `onvalue',
+`offvalue', and `value'.  This connection works both ways: if the
+variable changes for any reason, the widget it's connected to will be
+updated to reflect the new value.
+
+Unfortunately, in the current implementation of `Tkinter' it is not
+possible to hand over an arbitrary Python variable to a widget through
+a `variable' or `textvariable' option.  The only kinds of variables for
+which this works are variables that are subclassed from a class called
+Variable, defined in the `Tkinter' module.
+
+There are many useful subclasses of Variable already defined:
+`StringVar', `IntVar', `DoubleVar', and `BooleanVar'.  To read the
+current value of such a variable, call the `get()' method on it, and to
+change its value you call the `set()' method.  If you follow this
+protocol, the widget will always track the value of the variable, with
+no further intervention on your part.
+
+For example:
+     class App(Frame):
+         def __init__(self, master=None):
+             Frame.__init__(self, master)
+             self.pack()
+     
+             self.entrythingy = Entry()
+             self.entrythingy.pack()
+     
+             self.button.pack()
+             # here is the application variable
+             self.contents = StringVar()
+             # set it to some value
+             self.contents.set("this is a variable")
+             # tell the entry widget to watch this variable
+             self.entrythingy["textvariable"] = self.contents
+     
+             # and here we get a callback when the user hits return.
+             # we will have the program print out the value of the
+             # application variable when the user hits return
+             self.entrythingy.bind('<Key-Return>',
+                                   self.print_contents)
+     
+         def print_contents(self, event):
+             print "hi. contents of entry is now ---->", \
+                   self.contents.get()
+
+
+File: python-lib.info,  Node: Window Manager,  Next: Tk Option Data Types,  Prev: Coupling Widget Variables,  Up: Handy Reference
+
+The Window Manager
+..................
+
+In Tk, there is a utility command, `wm', for interacting with the
+window manager.  Options to the `wm' command allow you to control
+things like titles, placement, icon bitmaps, and the like.  In
+`Tkinter', these commands have been implemented as methods on the `Wm'
+class.  Toplevel widgets are subclassed from the `Wm' class, and so can
+call the `Wm' methods directly.
+
+To get at the toplevel window that contains a given widget, you can
+often just refer to the widget's master.  Of course if the widget has
+been packed inside of a frame, the master won't represent a toplevel
+window.  To get at the toplevel window that contains an arbitrary
+widget, you can call the `_root()' method.  This method begins with an
+underscore to denote the fact that this function is part of the
+implementation, and not an interface to Tk functionality.
+
+Here are some examples of typical usage:
+
+     import Tkinter
+     class App(Frame):
+         def __init__(self, master=None):
+             Frame.__init__(self, master)
+             self.pack()
+     
+     # create the application
+     myapp = App()
+     
+     #
+     # here are method calls to the window manager class
+     #
+     myapp.master.title("My Do-Nothing Application")
+     myapp.master.maxsize(1000, 400)
+     
+     # start the program
+     myapp.mainloop()
+
+
+File: python-lib.info,  Node: Tk Option Data Types,  Next: Bindings and Events,  Prev: Window Manager,  Up: Handy Reference
+
+Tk Option Data Types
+....................
+
+`anchor'
+     Legal values are points of the compass: `"n"', `"ne"', `"e"',
+     `"se"', `"s"', `"sw"', `"w"', `"nw"', and also `"center"'.
+
+`bitmap'
+     There are eight built-in, named bitmaps: `'error'', `'gray25'',
+     `'gray50'', `'hourglass'', `'info'', `'questhead'', `'question'',
+     `'warning''.  To specify an X bitmap filename, give the full path
+     to the file, preceded with an `@', as in
+     `"@/usr/contrib/bitmap/gumby.bit"'.
+
+`boolean'
+     You can pass integers 0 or 1 or the strings `"yes"' or `"no"' .
+
+`callback'
+     This is any Python function that takes no arguments.  For example:
+              def print_it():
+                      print "hi there"
+              fred["command"] = print_it
+
+`color'
+     Colors can be given as the names of X colors in the rgb.txt file,
+     or as strings representing RGB values in 4 bit: `"#RGB"', 8 bit:
+     `"#RRGGBB"', 12 bit" `"#RRRGGGBBB"', or 16 bit `"#RRRRGGGGBBBB"'
+     ranges, where R,G,B here represent any legal hex digit.  See page
+     160 of Ousterhout's book for details.
+
+`cursor'
+     The standard X cursor names from `cursorfont.h' can be used,
+     without the `XC_' prefix.  For example to get a hand cursor
+     (`XC_hand2'), use the string `"hand2"'.  You can also specify a
+     bitmap and mask file of your own.  See page 179 of Ousterhout's
+     book.
+
+`distance'
+     Screen distances can be specified in either pixels or absolute
+     distances.  Pixels are given as numbers and absolute distances as
+     strings, with the trailing character denoting units: `c' for
+     centimeters, `i' for inches, `m' for millimeters, `p' for
+     printer's points.  For example, 3.5 inches is expressed as
+     `"3.5i"'.
+
+`font'
+     Tk uses a list font name format, such as `{courier 10 bold}'.
+     Font sizes with positive numbers are measured in points; sizes
+     with negative numbers are measured in pixels.
+
+`geometry'
+     This is a string of the form `WIDTHxHEIGHT', where width and
+     height are measured in pixels for most widgets (in characters for
+     widgets displaying text).  For example: `fred["geometry"] =
+     "200x100"'.
+
+`justify'
+     Legal values are the strings: `"left"', `"center"', `"right"', and
+     `"fill"'.
+
+`region'
+     This is a string with four space-delimited elements, each of which
+     is a legal distance (see above).  For example: `"2 3 4 5"' and
+     `"3i 2i 4.5i 2i"' and `"3c 2c 4c 10.43c"' are all legal regions.
+
+`relief'
+     Determines what the border style of a widget will be.  Legal
+     values are: `"raised"', `"sunken"', `"flat"', `"groove"', and
+     `"ridge"'.
+
+`scrollcommand'
+     This is almost always the `set()' method of some scrollbar widget,
+     but can be any widget method that takes a single argument.  Refer
+     to the file `Demo/tkinter/matt/canvas-with-scrollbars.py' in the
+     Python source distribution for an example.
+
+`wrap:'
+     Must be one of: `"none"', `"char"', or `"word"'.
+
+
+File: python-lib.info,  Node: Bindings and Events,  Next: index Parameter,  Prev: Tk Option Data Types,  Up: Handy Reference
+
+Bindings and Events
+...................
+
+The bind method from the widget command allows you to watch for certain
+events and to have a callback function trigger when that event type
+occurs.  The form of the bind method is:
+
+         def bind(self, sequence, func, add=''):
+
+where:
+
+`sequence'
+     is a string that denotes the target kind of event.  (See the bind
+     man page and page 201 of John Ousterhout's book for details).
+
+`func'
+     is a Python function, taking one argument, to be invoked when the
+     event occurs.  An Event instance will be passed as the argument.
+     (Functions deployed this way are commonly known as CALLBACKS.)
+
+`add'
+     is optional, either `' or `+'.  Passing an empty string denotes
+     that this binding is to replace any other bindings that this event
+     is associated with.  Preceeding with a `+' means that this
+     function is to be added to the list of functions bound to this
+     event type.
+
+For example:
+         def turnRed(self, event):
+             event.widget["activeforeground"] = "red"
+     
+         self.button.bind("<Enter>", self.turnRed)
+
+Notice how the widget field of the event is being accesed in the
+`turnRed()' callback.  This field contains the widget that caught the X
+event.  The following table lists the other event fields you can
+access, and how they are denoted in Tk, which can be useful when
+referring to the Tk man pages.
+
+     Tk      Tkinter Event Field             Tk      Tkinter Event Field
+     --      -------------------             --      -------------------
+     %f      focus                           %A      char
+     %h      height                          %E      send_event
+     %k      keycode                         %K      keysym
+     %s      state                           %N      keysym_num
+     %t      time                            %T      type
+     %w      width                           %W      widget
+     %x      x                               %X      x_root
+     %y      y                               %Y      y_root
+
+
+File: python-lib.info,  Node: index Parameter,  Next: Images,  Prev: Bindings and Events,  Up: Handy Reference
+
+The index Parameter
+...................
+
+A number of widgets require"index" parameters to be passed.  These are
+used to point at a specific place in a Text widget, or to particular
+characters in an Entry widget, or to particular menu items in a Menu
+widget.
+
+`Entry widget indexes (index, view index, etc.)'
+     Entry widgets have options that refer to character positions in the
+     text being displayed.  You can use these `Tkinter' functions to
+     access these special points in text widgets:
+
+    `AtEnd()'
+          refers to the last position in the text
+
+    `AtInsert()'
+          refers to the point where the text cursor is
+
+    `AtSelFirst()'
+          indicates the beginning point of the selected text
+
+    `AtSelLast()'
+          denotes the last point of the selected text and finally
+
+    `At(x[, y])'
+          refers to the character at pixel location X, Y (with Y not
+          used in the case of a text entry widget, which contains a
+          single line of text).
+
+`Text widget indexes'
+     The index notation for Text widgets is very rich and is best
+     described in the Tk man pages.
+
+`Menu indexes (menu.invoke(), menu.entryconfig(), etc.)'
+     Some options and methods for menus manipulate specific menu
+     entries.  Anytime a menu index is needed for an option or a
+     parameter, you may pass in:
+        * an integer which refers to the numeric position of the entry
+          in the widget, counted from the top, starting with 0;
+
+        * the string `'active'', which refers to the menu position that
+          is currently under the cursor;
+
+        * the string `"last"' which refers to the last menu item;
+
+        * An integer preceded by `@', as in `@6', where the integer is
+          interpreted as a y pixel coordinate in the menu's coordinate
+          system;
+
+        * the string `"none"', which indicates no menu entry at all,
+          most often used with menu.activate() to deactivate all
+          entries, and finally,
+
+        * a text string that is pattern matched against the label of the
+          menu entry, as scanned from the top of the menu to the
+          bottom.  Note that this index type is considered after all
+          the others, which means that matches for menu items labelled
+          `last', `active', or `none' may be interpreted as the above
+          literals, instead.
+
+
+File: python-lib.info,  Node: Images,  Prev: index Parameter,  Up: Handy Reference
+
+Images
+......
+
+Bitmap/Pixelmap images can be created through the subclasses of
+`Tkinter.Image':
+
+   * `BitmapImage' can be used for X11 bitmap data.
+
+   * `PhotoImage' can be used for GIF and PPM/PGM color bitmaps.
+
+Either type of image is created through either the `file' or the `data'
+option (other options are available as well).
+
+The image object can then be used wherever an `image' option is
+supported by some widget (e.g. labels, buttons, menus). In these cases,
+Tk will not keep a reference to the image. When the last Python
+reference to the image object is deleted, the image data is deleted as
+well, and Tk will display an empty box wherever the image was used.
+
+
+File: python-lib.info,  Node: Tix,  Next: ScrolledText,  Prev: Tkinter,  Up: Graphical User Interfaces with Tk
+
+Extension widgets for Tk
+========================
+
+Tk Extension Widgets for Tkinter
+
+The `Tix' (Tk Interface Extension) module provides an additional rich
+set of widgets. Although the standard Tk library has many useful
+widgets, they are far from complete. The `Tix' library provides most of
+the commonly needed widgets that are missing from standard Tk: `HList',
+`ComboBox', `Control' (a.k.a. SpinBox) and an assortment of scrollable
+widgets. `Tix' also includes many more widgets that are generally
+useful in a wide range of applications: `NoteBook', `FileEntry',
+`PanedWindow', etc; there are more than 40 of them.
+
+With all these new widgets, you can introduce new interaction
+techniques into applications, creating more useful and more intuitive
+user interfaces. You can design your application by choosing the most
+appropriate widgets to match the special needs of your application and
+users.
+
+See also:
+     `Tix Homepage' {The home page for `Tix'.  This includes links to
+     additional documentation and downloads.} `Tix Man Pages' {On-line
+     version of the man pages and reference material.} `Tix Programming
+     Guide' {On-line version of the programmer's reference material.}
+     `Tix Development Applications' {Tix applications for development
+     of Tix and Tkinter programs. Tide applications work under Tk or
+     Tkinter, and include `TixInspect', an inspector to remotely modify
+     and debug Tix/Tk/Tkinter applications.}
+
+* Menu:
+
+* Using Tix::
+* Tix Widgets::
+* Tix Commands::
+
+
+File: python-lib.info,  Node: Using Tix,  Next: Tix Widgets,  Prev: Tix,  Up: Tix
+
+Using Tix
+---------
+
+`Tix(screenName[, baseName[, className]])'
+     Toplevel widget of Tix which represents mostly the main window of
+     an application. It has an associated Tcl interpreter.
+
+     Classes in the `Tix' module subclasses the classes in the
+     `Tkinter' module. The former imports the latter, so to use `Tix'
+     with Tkinter, all you need to do is to import one module. In
+     general, you can just import `Tix', and replace the toplevel call
+     to `Tkinter.Tk' with `Tix.Tk':
+          import Tix
+          from Tkconstants import *
+          root = Tix.Tk()
+
+To use `Tix', you must have the `Tix' widgets installed, usually
+alongside your installation of the Tk widgets.  To test your
+installation, try the following:
+     import Tix
+     root = Tix.Tk()
+     root.tk.eval('package require Tix')
+
+If this fails, you have a Tk installation problem which must be
+resolved before proceeding. Use the environment variable `TIX_LIBRARY'
+to point to the installed `Tix' library directory, and make sure you
+have the dynamic object library (`tix8183.dll' or `libtix8183.so') in
+the same directory that contains your Tk dynamic object library
+(`tk8183.dll' or `libtk8183.so'). The directory with the dynamic object
+library should also have a file called `pkgIndex.tcl' (case sensitive),
+which contains the line:
+
+     package ifneeded Tix 8.1 [list load "[file join $dir tix8183.dll]" Tix]
+
+
+File: python-lib.info,  Node: Tix Widgets,  Next: Tix Commands,  Prev: Using Tix,  Up: Tix
+
+Tix Widgets
+-----------
+
+Tix introduces over 40 widget classes to the `Tkinter' repertoire.
+There is a demo of all the `Tix' widgets in the `Demo/tix' directory of
+the standard distribution.
+
+* Menu:
+
+* Basic Widgets::
+* File Selectors::
+* Hierachical ListBox::
+* Tabular ListBox::
+* Manager Widgets::
+* Image Types::
+* Miscellaneous Widgets::
+* Form Geometry Manager::
+
+
+File: python-lib.info,  Node: Basic Widgets,  Next: File Selectors,  Prev: Tix Widgets,  Up: Tix Widgets
+
+Basic Widgets
+.............
+
+`Balloon()'
+     A Balloon that pops up over a widget to provide help.  When the
+     user moves the cursor inside a widget to which a Balloon widget
+     has been bound, a small pop-up window with a descriptive message
+     will be shown on the screen.
+
+`ButtonBox()'
+     The ButtonBox widget creates a box of buttons, such as is commonly
+     used for `Ok Cancel'.
+
+`ComboBox()'
+     The ComboBox widget is similar to the combo box control in MS
+     Windows. The user can select a choice by either typing in the
+     entry subwdget or selecting from the listbox subwidget.
+
+`Control()'
+     The Control widget is also known as the `SpinBox' widget. The user
+     can adjust the value by pressing the two arrow buttons or by
+     entering the value directly into the entry. The new value will be
+     checked against the user-defined upper and lower limits.
+
+`LabelEntry()'
+     The LabelEntry widget packages an entry widget and a label into
+     one mega widget. It can be used be used to simplify the creation
+     of "entry-form" type of interface.
+
+`LabelFrame()'
+     The LabelFrame widget packages a frame widget and a label into one
+     mega widget.  To create widgets inside a LabelFrame widget, one
+     creates the new widgets relative to the `frame' subwidget and
+     manage them inside the `frame' subwidget.
+
+`Meter()'
+     The Meter widget can be used to show the progress of a background
+     job which may take a long time to execute.
+
+`OptionMenu()'
+     The OptionMenu creates a menu button of options.
+
+`PopupMenu()'
+     The PopupMenu widget can be used as a replacement of the `tk_popup'
+     command. The advantage of the `Tix' `PopupMenu' widget is it
+     requires less application code to manipulate.
+
+`Select()'
+     The Select widget is a container of button subwidgets. It can be
+     used to provide radio-box or check-box style of selection options
+     for the user.
+
+`StdButtonBox()'
+     The StdButtonBox widget is a group of standard buttons for
+     Motif-like dialog boxes.
+
+
+File: python-lib.info,  Node: File Selectors,  Next: Hierachical ListBox,  Prev: Basic Widgets,  Up: Tix Widgets
+
+File Selectors
+..............
+
+`DirList()'
+     The DirList widget displays a list view of a directory, its
+     previous directories and its sub-directories. The user can choose
+     one of the directories displayed in the list or change to another
+     directory.
+
+`DirTree()'
+     The DirTree widget displays a tree view of a directory, its
+     previous directories and its sub-directories. The user can choose
+     one of the directories displayed in the list or change to another
+     directory.
+
+`DirSelectDialog()'
+     The DirSelectDialog widget presents the directories in the file
+     system in a dialog window.  The user can use this dialog window to
+     navigate through the file system to select the desired directory.
+
+`DirSelectBox()'
+     The `DirSelectBox' is similar to the standard Motif(TM)
+     directory-selection box. It is generally used for the user to
+     choose a directory. DirSelectBox stores the directories mostly
+     recently selected into a ComboBox widget so that they can be
+     quickly selected again.
+
+`ExFileSelectBox()'
+     The ExFileSelectBox widget is usually embedded in a
+     tixExFileSelectDialog widget. It provides an convenient method for
+     the user to select files. The style of the `ExFileSelectBox'
+     widget is very similar to the standard file dialog on MS Windows
+     3.1.
+
+`FileSelectBox()'
+     The FileSelectBox is similar to the standard Motif(TM)
+     file-selection box. It is generally used for the user to choose a
+     file. FileSelectBox stores the files mostly recently selected into
+     a `ComboBox' widget so that they can be quickly selected again.
+
+`FileEntry()'
+     The FileEntry widget can be used to input a filename. The user can
+     type in the filename manually. Alternatively, the user can press
+     the button widget that sits next to the entry, which will bring up
+     a file selection dialog.
+
+
+File: python-lib.info,  Node: Hierachical ListBox,  Next: Tabular ListBox,  Prev: File Selectors,  Up: Tix Widgets
+
+Hierachical ListBox
+...................
+
+`HList()'
+     The HList widget can be used to display any data that have a
+     hierarchical structure, for example, file system directory trees.
+     The list entries are indented and connected by branch lines
+     according to their places in the hierachy.
+
+`CheckList()'
+     The CheckList widget displays a list of items to be selected by
+     the user. CheckList acts similarly to the Tk checkbutton or
+     radiobutton widgets, except it is capable of handling many more
+     items than checkbuttons or radiobuttons.
+
+`Tree()'
+     The Tree widget can be used to display hierachical data in a tree
+     form. The user can adjust the view of the tree by opening or
+     closing parts of the tree.
+
+
+File: python-lib.info,  Node: Tabular ListBox,  Next: Manager Widgets,  Prev: Hierachical ListBox,  Up: Tix Widgets
+
+Tabular ListBox
+...............
+
+`TList()'
+     The TList widget can be used to display data in a tabular format.
+     The list entries of a `TList' widget are similar to the entries in
+     the Tk listbox widget.  The main differences are (1) the `TList'
+     widget can display the list entries in a two dimensional format
+     and (2) you can use graphical images as well as multiple colors
+     and fonts for the list entries.
+
+
+File: python-lib.info,  Node: Manager Widgets,  Next: Image Types,  Prev: Tabular ListBox,  Up: Tix Widgets
+
+Manager Widgets
+...............
+
+`PanedWindow()'
+     The PanedWindow widget allows the user to interactively manipulate
+     the sizes of several panes.  The panes can be arranged either
+     vertically or horizontally.  The user changes the sizes of the
+     panes by dragging the resize handle between two panes.
+
+`ListNoteBook()'
+     The ListNoteBook widget is very similar to the `TixNoteBook'
+     widget: it can be used to display many windows in a limited space
+     using a notebook metaphor. The notebook is divided into a stack of
+     pages (windows). At one time only one of these pages can be shown.
+     The user can navigate through these pages by choosing the name of
+     the desired page in the `hlist' subwidget.
+
+`NoteBook()'
+     The NoteBook widget can be used to display many windows in a
+     limited space using a notebook metaphor. The notebook is divided
+     into a stack of pages. At one time only one of these pages can be
+     shown. The user can navigate through these pages by choosing the
+     visual "tabs" at the top of the NoteBook widget.
+
+
+File: python-lib.info,  Node: Image Types,  Next: Miscellaneous Widgets,  Prev: Manager Widgets,  Up: Tix Widgets
+
+Image Types
+...........
+
+The `Tix' module adds:
+   * pixmap capabilities to all `Tix' and `Tkinter' widgets to create
+     color images from XPM files.
+
+   * Compound image types can be used to create images that consists of
+     multiple horizontal lines; each line is composed of a series of
+     items (texts, bitmaps, images or spaces) arranged from left to
+     right. For example, a compound image can be used to display a
+     bitmap and a text string simutaneously in a Tk `Button' widget.
+
+
+
+File: python-lib.info,  Node: Miscellaneous Widgets,  Next: Form Geometry Manager,  Prev: Image Types,  Up: Tix Widgets
+
+Miscellaneous Widgets
+.....................
+
+`InputOnly()'
+     The InputOnly widgets are to accept inputs from the user, which
+     can be done with the `bind' command (UNIX only).
+
+
+File: python-lib.info,  Node: Form Geometry Manager,  Prev: Miscellaneous Widgets,  Up: Tix Widgets
+
+Form Geometry Manager
+.....................
+
+In addition, `Tix' augments `Tkinter' by providing:
+
+`Form()'
+     The Form geometry manager based on attachment rules for all Tk
+     widgets.
+
+
+File: python-lib.info,  Node: Tix Commands,  Prev: Tix Widgets,  Up: Tix
+
+Tix Commands
+------------
+
+`tixCommand()'
+     The tix commands provide access to miscellaneous elements of
+     `Tix''s internal state and the  `Tix' application context.  Most
+     of the information manipulated by these methods pertains to the
+     application as a whole, or to a screen or display, rather than to
+     a particular window.
+
+     To view the current settings, the common usage is:
+          import Tix
+          root = Tix.Tk()
+          print root.tix_configure()
+
+`tix_configure([cnf,] **kw)'
+     Query or modify the configuration options of the Tix application
+     context. If no option is specified, returns a dictionary all of the
+     available options.  If option is specified with no value, then the
+     method returns a list describing the one named option (this list
+     will be identical to the corresponding sublist of the value
+     returned if no option is specified).  If one or more option-value
+     pairs are specified, then the method modifies the given option(s)
+     to have the given value(s); in this case the method returns an
+     empty string.  Option may be any of the configuration options.
+
+`tix_cget(option)'
+     Returns the current value of the configuration option given by
+     OPTION. Option may be any of the configuration options.
+
+`tix_getbitmap(name)'
+     Locates a bitmap file of the name `name.xpm' or `name' in one of
+     the bitmap directories (see the `tix_addbitmapdir()' method).  By
+     using `tix_getbitmap()', you can avoid hard coding the pathnames
+     of the bitmap files in your application. When successful, it
+     returns the complete pathname of the bitmap file, prefixed with
+     the character `@'.  The returned value can be used to configure
+     the `bitmap' option of the Tk and Tix widgets.
+
+`tix_addbitmapdir(directory)'
+     Tix maintains a list of directories under which the
+     `tix_getimage()' and `tix_getbitmap()' methods will search for
+     image files.  The standard bitmap directory is
+     `$TIX_LIBRARY/bitmaps'. The `tix_addbitmapdir()' method adds
+     DIRECTORY into this list. By using this method, the image files of
+     an applications can also be located using the `tix_getimage()' or
+     `tix_getbitmap()' method.
+
+`tix_filedialog([dlgclass])'
+     Returns the file selection dialog that may be shared among
+     different calls from this application.  This method will create a
+     file selection dialog widget when it is called the first time.
+     This dialog will be returned by all subsequent calls to
+     `tix_filedialog()'.  An optional dlgclass parameter can be passed
+     as a string to specified what type of file selection dialog widget
+     is desired.  Possible options are `tix', `FileSelectDialog' or
+     `tixExFileSelectDialog'.
+
+`tix_getimage(self, name)'
+     Locates an image file of the name `name.xpm', `name.xbm' or
+     `name.ppm' in one of the bitmap directories (see the
+     `tix_addbitmapdir()' method above). If more than one file with the
+     same name (but different extensions) exist, then the image type is
+     chosen according to the depth of the X display: xbm images are
+     chosen on monochrome displays and color images are chosen on color
+     displays. By using `tix_getimage()', you can avoid hard coding the
+     pathnames of the image files in your application. When successful,
+     this method returns the name of the newly created image, which can
+     be used to configure the `image' option of the Tk and Tix widgets.
+
+`tix_option_get(name)'
+     Gets the options manitained by the Tix scheme mechanism.
+
+`tix_resetoptions(newScheme, newFontSet[, newScmPrio])'
+     Resets the scheme and fontset of the Tix application to NEWSCHEME
+     and NEWFONTSET, respectively.  This affects only those widgets
+     created after this call.  Therefore, it is best to call the
+     resetoptions method before the creation of any widgets in a Tix
+     application.
+
+     The optional parameter NEWSCMPRIO can be given to reset the
+     priority level of the Tk options set by the Tix schemes.
+
+     Because of the way Tk handles the X option database, after Tix has
+     been has imported and inited, it is not possible to reset the color
+     schemes and font sets using the `tix_config()' method.  Instead,
+     the `tix_resetoptions()' method must be used.
+
+
+File: python-lib.info,  Node: ScrolledText,  Next: turtle,  Prev: Tix,  Up: Graphical User Interfaces with Tk
+
+Scrolled Text Widget
+====================
+
+Text widget with a vertical scroll bar.
+
+The `ScrolledText' module provides a class of the same name which
+implements a basic text widget which has a vertical scroll bar
+configured to do the "right thing."  Using the `ScrolledText' class is
+a lot easier than setting up a text widget and scroll bar directly.
+The constructor is the same as that of the `Tkinter.Text' class.
+
+The text widget and scrollbar are packed together in a `Frame', and the
+methods of the `Grid' and `Pack' geometry managers are acquired from
+the `Frame' object.  This allows the `ScrolledText' widget to be used
+directly to achieve most normal geometry management behavior.
+
+Should more specific control be necessary, the following attributes are
+available:
+
+`frame'
+     The frame which surrounds the text and scroll bar widgets.
+
+`vbar'
+     The scroll bar widget.
+
+
+File: python-lib.info,  Node: turtle,  Next: Idle,  Prev: ScrolledText,  Up: Graphical User Interfaces with Tk
+
+Turtle graphics for Tk
+======================
+
+An environment for turtle graphics.
+
+The `turtle' module provides turtle graphics primitives, in both an
+object-oriented and procedure-oriented ways. Because it uses `Tkinter'
+for the underlying graphics, it needs a version of python installed with
+Tk support.
+
+The procedural interface uses a pen and a canvas which are automagically
+created when any of the functions are called.
+
+The `turtle' module defines the following functions:
+
+`degrees()'
+     Set angle measurement units to degrees.
+
+`radians()'
+     Set angle measurement units to radians.
+
+`reset()'
+     Clear the screen, re-center the pen, and set variables to the
+     default values.
+
+`clear()'
+     Clear the screen.
+
+`tracer(flag)'
+     Set tracing on/off (according to whether flag is true or not).
+     Tracing means line are drawn more slowly, with an animation of an
+     arrow along the line.
+
+`forward(distance)'
+     Go forward DISTANCE steps.
+
+`backward(distance)'
+     Go backward DISTANCE steps.
+
+`left(angle)'
+     Turn left ANGLE units. Units are by default degrees, but can be
+     set via the `degrees()' and `radians()' functions.
+
+`right(angle)'
+     Turn right ANGLE units. Units are by default degrees, but can be
+     set via the `degrees()' and `radians()' functions.
+
+`up()'
+     Move the pen up -- stop drawing.
+
+`down()'
+     Move the pen up -- draw when moving.
+
+`width(width)'
+     Set the line width to WIDTH.
+
+`color(s)'
+
+`color (r, g, b)'
+
+`color r, g, b'
+     Set the pen color.  In the first form, the color is specified as a
+     Tk color specification as a string.  The second form specifies the
+     color as a tuple of the RGB values, each in the range [0..1].  For
+     the third form, the color is specified giving the RGB values as
+     three separate parameters (each in the range [0..1]).
+
+`write(text[, move])'
+     Write TEXT at the current pen position. If MOVE is true, the pen
+     is moved to the bottom-right corner of the text. By default, MOVE
+     is false.
+
+`fill(flag)'
+     The complete specifications are rather complex, but the recommended
+     usage is: call `fill(1)' before drawing a path you want to fill,
+     and call `fill(0)' when you finish to draw the path.
+
+`circle(radius[, extent])'
+     Draw a circle with radius RADIUS whose center-point is RADIUS
+     units left of the turtle.  EXTENT determines which part of a
+     circle is drawn: if not given it defaults to a full circle.
+
+     If EXTENT is not a full circle, one endpoint of the arc is the
+     current pen position. The arc is drawn in a counter clockwise
+     direction if RADIUS is positive, otherwise in a clockwise
+     direction.  In the process, the direction of the turtle is changed
+     by the amount of the EXTENT.
+
+`goto(x, y)'
+
+`goto (x, y)'
+     Go to co-ordinates X, Y.  The co-ordinates may be specified either
+     as two separate arguments or as a 2-tuple.
+
+This module also does `from math import *', so see the documentation
+for the `math' module for additional constants and functions useful for
+turtle graphics.
+
+`demo()'
+     Exercise the module a bit.
+
+`Error'
+     Exception raised on any error caught by this module.
+
+For examples, see the code of the `demo()' function.
+
+This module defines the following classes:
+
+`Pen()'
+     Define a pen. All above functions can be called as a methods on
+     the given pen. The constructor automatically creates a canvas do
+     be drawn on.
+
+`RawPen(canvas)'
+     Define a pen which draws on a canvas CANVAS. This is useful if you
+     want to use the module to create graphics in a "real" program.
+
+* Menu:
+
+* Pen and RawPen Objects::
+
+
+File: python-lib.info,  Node: Pen and RawPen Objects,  Prev: turtle,  Up: turtle
+
+Pen and RawPen Objects
+----------------------
+
+`Pen' and `RawPen' objects have all the global functions described
+above, except for `demo()' as methods, which manipulate the given pen.
+
+The only method which is more powerful as a method is `degrees()'.
+
+`degrees([fullcircle])'
+     FULLCIRCLE is by default 360. This can cause the pen to have any
+     angular units whatever: give FULLCIRCLE 2*$pi$ for radians, or 400
+     for gradians.
+
+
+File: python-lib.info,  Node: Idle,  Next: Other Graphical User Interface Packages,  Prev: turtle,  Up: Graphical User Interfaces with Tk
+
+Idle
+====
+
+Idle is the Python IDE built with the `Tkinter' GUI toolkit.
+
+IDLE has the following features:
+
+   * coded in 100% pure Python, using the `Tkinter' GUI toolkit
+
+   * cross-platform: works on Windows and UNIX (on Mac OS, there are
+     currently problems with Tcl/Tk)
+
+   * multi-window text editor with multiple undo, Python colorizing and
+     many other features, e.g. smart indent and call tips
+
+   * Python shell window (a.k.a. interactive interpreter)
+
+   * debugger (not complete, but you can set breakpoints, view  and
+     step)
+
+* Menu:
+
+* Menus::
+* Basic editing and navigation::
+* Syntax colors::
+
+
+File: python-lib.info,  Node: Menus,  Next: Basic editing and navigation,  Prev: Idle,  Up: Idle
+
+Menus
+-----
+
+* Menu:
+
+* File menu::
+* Edit menu::
+* Windows menu::
+* Debug menu in the Python Shell window only::
+
+
+File: python-lib.info,  Node: File menu,  Next: Edit menu,  Prev: Menus,  Up: Menus
+
+File menu
+.........
+
+`New window'
+     create a new editing window
+
+`Open...'
+     open an existing file
+
+`Open module...'
+     open an existing module (searches sys.path)
+
+`Class browser'
+     show classes and methods in current file
+
+`Path browser'
+     show sys.path directories, modules, classes and methods
+
+`Save'
+     save current window to the associated file (unsaved windows have a
+     * before and after the window title)
+
+`Save As...'
+     save current window to new file, which becomes the associated file
+
+`Save Copy As...'
+     save current window to different file without changing the
+     associated file
+
+`Close'
+     close current window (asks to save if unsaved)
+
+`Exit'
+     close all windows and quit IDLE (asks to save if unsaved)
+
+
+File: python-lib.info,  Node: Edit menu,  Next: Windows menu,  Prev: File menu,  Up: Menus
+
+Edit menu
+.........
+
+`Undo'
+     Undo last change to current window (max 1000 changes)
+
+`Redo'
+     Redo last undone change to current window
+
+`Cut'
+     Copy selection into system-wide clipboard; then delete selection
+
+`Copy'
+     Copy selection into system-wide clipboard
+
+`Paste'
+     Insert system-wide clipboard into window
+
+`Select All'
+     Select the entire contents of the edit buffer
+
+`Find...'
+     Open a search dialog box with many options
+
+`Find again'
+     Repeat last search
+
+`Find selection'
+     Search for the string in the selection
+
+`Find in Files...'
+     Open a search dialog box for searching files
+
+`Replace...'
+     Open a search-and-replace dialog box
+
+`Go to line'
+     Ask for a line number and show that line
+
+`Indent region'
+     Shift selected lines right 4 spaces
+
+`Dedent region'
+     Shift selected lines left 4 spaces
+
+`Comment out region'
+     Insert ## in front of selected lines
+
+`Uncomment region'
+     Remove leading # or ## from selected lines
+
+`Tabify region'
+     Turns _leading_ stretches of spaces into tabs
+
+`Untabify region'
+     Turn _all_ tabs into the right number of spaces
+
+`Expand word'
+     Expand the word you have typed to match another word in the same
+     buffer; repeat to get a different expansion
+
+`Format Paragraph'
+     Reformat the current blank-line-separated paragraph
+
+`Import module'
+     Import or reload the current module
+
+`Run script'
+     Execute the current file in the __main__ namespace
+
+
+File: python-lib.info,  Node: Windows menu,  Next: Debug menu in the Python Shell window only,  Prev: Edit menu,  Up: Menus
+
+Windows menu
+............
+
+`Zoom Height'
+     toggles the window between normal size (24x80) and maximum height.
+
+The rest of this menu lists the names of all open windows; select one
+to bring it to the foreground (deiconifying it if necessary).
+
+
+File: python-lib.info,  Node: Debug menu in the Python Shell window only,  Prev: Windows menu,  Up: Menus
+
+Debug menu (in the Python Shell window only)
+............................................
+
+`Go to file/line'
+     look around the insert point for a filename and linenumber, open
+     the file, and show the line.
+
+`Open stack viewer'
+     show the stack traceback of the last exception
+
+`Debugger toggle'
+     Run commands in the shell under the debugger
+
+`JIT Stack viewer toggle'
+     Open stack viewer on traceback
+
+
+File: python-lib.info,  Node: Basic editing and navigation,  Next: Syntax colors,  Prev: Menus,  Up: Idle
+
+Basic editing and navigation
+----------------------------
+
+   * <Backspace> deletes to the left; <Del> deletes to the right
+
+   * Arrow keys and <Page Up>/<Page Down> to move around
+
+   * <Home>/<End> go to begin/end of line
+
+   * <C-Home>/<C-End> go to begin/end of file
+
+   * Some `Emacs' bindings may also work, including <C-B>, <C-P>,
+     <C-A>, <C-E>, <C-D>, <C-L>
+
+* Menu:
+
+* Automatic indentation::
+* Python Shell window::
+
+
+File: python-lib.info,  Node: Automatic indentation,  Next: Python Shell window,  Prev: Basic editing and navigation,  Up: Basic editing and navigation
+
+Automatic indentation
+.....................
+
+After a block-opening statement, the next line is indented by 4 spaces
+(in the Python Shell window by one tab).  After certain keywords
+(break, return etc.) the next line is dedented.  In leading
+indentation, <Backspace> deletes up to 4 spaces if they are there.
+<Tab> inserts 1-4 spaces (in the Python Shell window one tab).  See
+also the indent/dedent region commands in the edit menu.
+
+
+File: python-lib.info,  Node: Python Shell window,  Prev: Automatic indentation,  Up: Basic editing and navigation
+
+Python Shell window
+...................
+
+   * <C-C> interrupts executing command
+
+   * <C-D> sends end-of-file; closes window if typed at a `>>>~' prompt
+
+   * <Alt-p> retrieves previous command matching what you have typed
+
+   * <Alt-n> retrieves next
+
+   * <Return> while on any previous command retrieves that command
+
+   * <Alt-/> (Expand word) is also useful here
+
+
+File: python-lib.info,  Node: Syntax colors,  Prev: Basic editing and navigation,  Up: Idle
+
+Syntax colors
+-------------
+
+The coloring is applied in a background "thread," so you may
+occasionally see uncolorized text.  To change the color scheme, edit
+the `[Colors]' section in `config.txt'.
+
+`Python syntax colors:'
+
+    `Keywords'
+          orange
+
+    `Strings'
+          green
+
+    `Comments'
+          red
+
+    `Definitions'
+          blue
+
+`Shell colors:'
+
+    `Console output'
+          brown
+
+    `stdout'
+          blue
+
+    `stderr'
+          dark green
+
+    `stdin'
+          black
+
+* Menu:
+
+* Command line usage::
+
+
+File: python-lib.info,  Node: Command line usage,  Prev: Syntax colors,  Up: Syntax colors
+
+Command line usage
+..................
+
+     idle.py [-c command] [-d] [-e] [-s] [-t title] [arg] ...
+     
+     -c command  run this command
+     -d          enable debugger
+     -e          edit mode; arguments are files to be edited
+     -s          run $IDLESTARTUP or $PYTHONSTARTUP first
+     -t title    set title of shell window
+
+If there are arguments:
+
+  1. If `-e' is used, arguments are files opened for editing and
+     `sys.argv' reflects the arguments passed to IDLE itself.
+
+  2. Otherwise, if `-c' is used, all arguments are placed in
+     `sys.argv[1:...]', with `sys.argv[0]' set to `'-c''.
+
+  3. Otherwise, if neither `-e' nor `-c' is used, the first argument is
+     a script which is executed with the remaining arguments in
+     `sys.argv[1:...]'  and `sys.argv[0]' set to the script name.  If
+     the script name is '-', no script is executed but an interactive
+     Python session is started; the arguments are still available in
+     `sys.argv'.
+
