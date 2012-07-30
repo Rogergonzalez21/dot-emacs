@@ -1,8 +1,6 @@
 ;;
 ;; shell and comint stuff
 ;;
-(setq comint-process-echoes t)
-
 (setq explicit-bash-args '("--noediting" "-i"))
  
 ;; a few things to do on windows (cos default shell is "cmdproxy")
