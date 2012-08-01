@@ -275,6 +275,7 @@
     (define-key map "d" 'ediff-buffers)
     (define-key map "t" 'twit)
     (define-key map "s" 'leo-search-my-emacsfiles)
+    (define-key map "m" 'man)
     (define-key map "r" 'run-ruby)
     map)
   "Keymap for mode switching subcommands. (default bounds to C-x g.)")
