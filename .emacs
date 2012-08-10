@@ -249,7 +249,8 @@
 
 (when (not noninteractive)
    (load "leo-frames.el")
-   (define-key ctl-x-5-map "k" 'leo-kill-this-buffer-and-frame))
+   (define-key ctl-x-5-map "k" 'leo-kill-this-buffer-and-frame)
+   (define-key ctl-x-5-map "p" 'leo-set-frame-position-from-index))
 
 ;;
 ;; recentf
