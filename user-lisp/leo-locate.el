@@ -9,7 +9,7 @@
         ((eq system-type 'cygwin)
          "/usr/local/var/")
         ((eq system-type 'darwin)
-         "/opt/local/var/")
+         "/usr/local/var/locate/")
         (t 
          "/usr/var"))
   "*directory with the locate databases"

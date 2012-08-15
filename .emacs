@@ -338,7 +338,6 @@
 (when (eq system-type 'windows-nt)
   (setq server-auth-dir
         (concat leo-emacs-userdata-path "server/")))
-(setq server-window (selected-frame))
 (server-start)
 
 ;;
