@@ -43,6 +43,15 @@ Note: like `toggle-truncate-lines' just without message."
 ;;
 ;; text-mode
 ;;
+(setq-default ispell-program-name "aspell")
+(eval-after-load "flyspell"
+    '(progn
+       (delq (assoc 'mouse-2 flyspell-mouse-map) flyspell-mouse-map)
+       (delq (assoc 'down-mouse-2 flyspell-mouse-map) flyspell-mouse-map)
+       (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
+       (define-key flyspell-mouse-map [mouse-3] #'undefined)))
+
+
 (add-hook 'text-mode-hook
            '(lambda () 
               ;;(leo-toggle-truncate-lines-silent 0)

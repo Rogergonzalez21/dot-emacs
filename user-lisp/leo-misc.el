@@ -226,7 +226,7 @@ To continue searching for next match, use command \\[tags-loop-continue]."
   (cond ((or (eq system-type 'windows-nt) (eq system-type 'cygwin))
          "~/oel/mydoc/snippets")
         ((eq system-type 'darwin)
-         "~/Dropbox/mydoc/snippets")
+         "~/Dropbox/snippets")
         (t 
          "~"))
   "*directory where notes are stored"
