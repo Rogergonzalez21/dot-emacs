@@ -29,7 +29,7 @@
  '(initial-scratch-message "news: 
 ----
 
-* globally C-x g s/r is bound to `leo-search-my-emacsfiles'/`run-ruby' (22-01-2012)
+* new global C-x g bindings:  C-x g r does now 'rename-uniquely' (24-08-2012)
 * note: C-q can be reached via C-S-q (useful on mac!)
 * in locate buffer: C-x-4 c is bound to locate-find-directory-other-window (13-12-2010)
 * in isearch: C-S-w is bound to `leo-isearch-yank-whole-word' (9-03-2010)

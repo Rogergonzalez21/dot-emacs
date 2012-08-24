@@ -7,15 +7,24 @@
 (setq leo-emacs-userroot-path
       (file-name-directory (or load-file-name buffer-file-name)))
 
+
 (setq leo-emacs-userdata-path 
       "~/.emacsdata/")
 
+(setq user-emacs-directory
+      leo-emacs-userdata-path)
+
 (setq leo-emacs-localdata-path
       "~/archive/emacs/")
+
 ;; custom file for easy customization settings
 ;; attention: this file has to be _loaded_ as well (at the end of this file)
 (setq custom-file 
       (concat leo-emacs-userroot-path ".custom"))
+
+;; abbrevs file
+(setq abbrev-file-name
+      (concat leo-emacs-userroot-path "abbrev_defs"))
 
 ;; load-path
 (push (expand-file-name leo-emacs-userroot-path)
@@ -274,10 +283,9 @@
   (let ((map (make-sparse-keymap)))
     (define-key map "c" 'calculator)
     (define-key map "d" 'ediff-buffers)
-    (define-key map "t" 'twit)
     (define-key map "s" 'leo-search-my-emacsfiles)
     (define-key map "m" 'man)
-    (define-key map "r" 'run-ruby)
+    (define-key map "r" 'rename-uniquely)
     map)
   "Keymap for mode switching subcommands. (default bounds to C-x g.)")
 (fset 'leo-general-command-prefix-map leo-general-command-prefix-map)
@@ -317,11 +325,6 @@
 ;; python
 ;;
 (load "leo-python.el")
-
-;;
-;; twitter
-;;
-(load "leo-twitter.el")
 
 ;;
 ;; shell
