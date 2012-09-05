@@ -65,8 +65,9 @@
 ;;
 ;; my functions + info + ediff
 ;;
-(load "leo-misc.el")
+(load "leo-misc")
 
+(load "leo-cygwin")
 ;;
 ;; ls-lisp stuff
 ;; 
@@ -85,12 +86,12 @@
 ;;
 ;; ido stuff
 ;;
-(load "leo-ido.el")
+(load "leo-ido")
 
 ;;
 ;; locate stuff
 ;;
-(load "leo-locate.el")
+(load "leo-locate")
 
 ;;
 ;; goto last change
@@ -257,14 +258,14 @@
 ;;
 
 (when (not noninteractive)
-   (load "leo-frames.el")
+   (load "leo-frames")
    (define-key ctl-x-5-map "k" 'leo-kill-this-buffer-and-frame)
    (define-key ctl-x-5-map "p" 'leo-set-frame-position-from-index))
 
 ;;
 ;; recentf
 ;;
-(load "leo-recentf.el")
+(load "leo-recentf")
 (global-set-key "\C-x\C-o" 'recentf-open-files)
 (global-set-key "\C-x\C-r" 'recentf-open-files-compl)
 (define-key ctl-x-5-map "\C-o" 'leo-recentf-open-files-other-frame)
@@ -308,13 +309,13 @@
 ;;
 ;; general mode things
 ;;
-(load "leo-modes.el")
+(load "leo-modes")
 
 
 ;;
 ;; web (html/php/javascript) things
 ;;
-(load "leo-html.el")
+(load "leo-html")
 
 ;;
 ;; lisp mode
@@ -324,12 +325,12 @@
 ;;
 ;; python
 ;;
-(load "leo-python.el")
+(load "leo-python")
 
 ;;
 ;; shell
 ;;
-(load "leo-shell.el")
+(load "leo-shell")
 (global-set-key "\ez" 'shell)
 
 ;;
@@ -346,7 +347,7 @@
 ;;
 ;; java, cedet and jdee
 ;;
-;;(load "leo-java.el")
+;;(load "leo-java")
 
 ;;
 ;; history stuff

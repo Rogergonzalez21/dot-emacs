@@ -223,9 +223,9 @@ To continue searching for next match, use command \\[tags-loop-continue]."
 ;; things for note creation
 ;;
 (defcustom leo-notes-directory
-  (cond ((or (eq system-type 'windows-nt) (eq system-type 'cygwin))
-         "~/oel/mydoc/snippets")
-        ((eq system-type 'darwin)
+  (cond ((or (eq system-type 'windows-nt) 
+             (eq system-type 'cygwin) 
+             (eq system-type 'darwin))
          "~/Dropbox/snippets")
         (t 
          "~"))
@@ -237,7 +237,7 @@ To continue searching for next match, use command \\[tags-loop-continue]."
   (cond ((or (eq system-type 'windows-nt) (eq system-type 'x))
          "notes-work.txt")
         (t 
-         "notes.txt"))
+         "notes-home.txt"))
   "*generic name for notes"
   :type 'string
   :group 'leos)

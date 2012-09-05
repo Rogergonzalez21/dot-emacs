@@ -225,7 +225,7 @@ this restricts the search to the basename part of the filename"
 ;;
 (defun leo-locate-mod-dbdir-nt (dbfile)
   (let ((case-fold-search t))
-    (if (string-match (regexp-quote "c:/cyg/") dbfile)
+    (if (string-match (regexp-quote leo-cygwin-root) dbfile)
         (replace-match "/" nil nil dbfile)
       dbfile)))
 
@@ -238,7 +238,9 @@ this restricts the search to the basename part of the filename"
   "choose the db-file for locate"
   (interactive 
    (let* ((insert-default-directory nil)
-          (answer (read-file-name "Database file [empty=default]: " leo-locate-dbdir nil t nil))
+          (answer 
+           (read-file-name "Database file [empty=default]: " 
+                                 leo-locate-dbdir nil t nil))
           (dbfile (if (not (equal answer ""))
            (leo-locate-modify-dbdir 
                        (expand-file-name answer leo-locate-dbdir)))))
