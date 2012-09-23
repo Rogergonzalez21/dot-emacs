@@ -1,3 +1,4 @@
+/Users/hallo/Dropbox/mail/settings/hailmail-sieve-rules.txt
 c:/home/dev/eclipse
 c:/home/tmp
 
