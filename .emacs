@@ -7,14 +7,17 @@
 (setq leo-emacs-userroot-path
       (file-name-directory (or load-file-name buffer-file-name)))
 
+(setq leo-emacs-shareddata-path 
+      (concat leo-emacs-userroot-path "shared-data/"))
 
 (setq leo-emacs-userdata-path 
       "~/.emacsdata/")
-
+;; even tually we might try to get ride off leo-emacs-userdata-path completely
+;; and replace it with user-emacs-directory... 
 (setq user-emacs-directory
       leo-emacs-userdata-path)
 
-(setq leo-emacs-localdata-path
+(setq leo-emacs-archivedata-path
       "~/archive/emacs/")
 
 ;; custom file for easy customization settings
@@ -45,7 +48,7 @@
 ;; auto save and backup config
 ;;
 (setq leo-emacs-backup-dir 
-      (concat leo-emacs-localdata-path "backup/"))
+      (concat leo-emacs-archivedata-path "backup/"))
 
 (setq auto-save-file-name-transforms 
       (list
