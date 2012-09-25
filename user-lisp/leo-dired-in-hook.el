@@ -245,7 +245,7 @@ Anything else means ask for each directory."
   (cond ((or (eq system-type 'windows-nt) (eq system-type 'cygwin))
          "deltobin.exe")
         ((eq system-type 'darwin)
-         "trashme")
+         "trash")
         (t 
          "unknown"))
   "*Sets the command name to move a file to the recycle bin."

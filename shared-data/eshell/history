@@ -1,0 +1,54 @@
+alias
+ls
+ll
+set
+echo $EMACS
+echo $USERNAME
+help
+help set
+set e
+SET
+set x=18
+hash
+help
+help set
+echo $PROMPT
+echo $PS1
+exit
+exit
+ll
+alias
+help alias
+alias x="ESHELL-al"
+x
+x
+ls
+alias x="echo es"
+x
+x
+x
+x
+x
+x
+x
+x
+alias
+alias x 
+alias ll="ls -l"
+alias
+ll
+alias
+alias x
+x
+alias ll
+exit
+ll
+ssh
+ssh ghfgddgf
+ssh ghfgddgfs
+ssh CBRFUS07
+exit
+ll
+exit
+pwd
+exit

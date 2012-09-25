@@ -18,3 +18,11 @@
   (local-set-key '[(shift tab)] 'comint-previous-matching-input-from-input))
 
 (add-hook 'shell-mode-hook 'leo-shell-mode-hook)
+
+;;
+;; eshell stuff
+;;
+
+(setq eshell-directory-name 
+      (concat leo-emacs-shareddata-path "eshell"))
+;; eshell-prompt-function and eshell-prompt-regexp are set in .custom

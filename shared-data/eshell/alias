@@ -1,0 +1,2 @@
+alias x echo yyy $*
+alias ll ls -l $*
