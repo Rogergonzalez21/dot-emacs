@@ -213,7 +213,7 @@ internal func for leo's frames managment"
             (leo-set-frame-position-from-list arg leo-frames-default-positions)
             ))
 
-(defun leo-set-frame-position-from-index (index)
+(defun leo-set-frame-from-index (index)
   "set frame postion from index in default position list."
   (interactive
    (if (and current-prefix-arg (not (consp current-prefix-arg)))
@@ -221,11 +221,15 @@ internal func for leo's frames managment"
      ;; Look for a default, a number in the buffer at point.
      (let* ((default 0))
        ;; Read the argument, offering that number (if any) as default.
-       (list (read-number (format "Move frame to position: "
-                                  default)
-                          default)))))
-  (let ((pos (nth index leo-frames-default-positions)))
-    (set-frame-position (selected-frame) (car pos) (cdr pos))))
+       (list (read-number 
+              (format "Move frame to position: " default)
+              default)))))
+  (let ((pos (nth index leo-frames-default-positions))
+        (w (cdr (assoc 'width default-frame-alist)))
+        (h (cdr (assoc 'height default-frame-alist))))
+    (set-frame-position (selected-frame) (car pos) (cdr pos))
+    (set-frame-size (selected-frame) w h)))
+
 
 ;;
 ;; set the special frame alist
