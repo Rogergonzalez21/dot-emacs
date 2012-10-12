@@ -41,7 +41,7 @@ usual. This function can be used as a value of
 
 (setq leo-max-frame-height
       (cond ((eq large-mac t)
-             63)
+             62)
             ((eq window-system 'ns)
              50)
             ((eq window-system 'w32)
@@ -63,7 +63,7 @@ usual. This function can be used as a value of
 
 (setq leo-min-frame-top 
       (cond ((eq large-mac t)
-             223)
+             247)
             ((eq window-system 'ns)
              25)
             ((eq window-system 'w32) 

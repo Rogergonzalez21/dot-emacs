@@ -3,3 +3,4 @@ site-info/**/*
 site-lisp/**/*  
 data/**/* 
 dev/**/*
+shared-data/**/*
