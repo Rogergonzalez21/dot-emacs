@@ -99,3 +99,10 @@ Note: like `toggle-truncate-lines' just without message."
           (delete-backward-char 8))))
 
 (add-hook 'comint-output-filter-functions 'leo-inf-ruby-output-filter)
+
+;;
+;; lua mode
+;;
+(autoload 'lua-mode "lua-mode" "Lua editing mode." t)
+(add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
+(add-to-list 'interpreter-mode-alist '("lua" . lua-mode))
