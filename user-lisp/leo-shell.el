@@ -6,11 +6,13 @@
  
 ;; a few things to do on windows (cos default shell is "cmdproxy")
 (when (or (eq system-type 'windows-nt) (eq system-type 'cygwin))
-  ;;(setq shell-file-name "fakecygpty")
-  ;;(setq shell-file-name "c:/MinGW/msys/1.0/bin/bash.exe")
+  (add-to-list 'explicit-bash-args '"+m" t) 
   (setq shell-file-name "bash") ;; this should be the cygwin bash
   (setenv "SHELL" shell-file-name)
-  (setq shell-completion-execonly nil)) ;; so that shellscript without .exe work
+  (setq shell-completion-execonly nil) ;; so that shellscript without .exe work
+  ;;(setq shell-file-name "fakecygpty")
+  ;;(setq shell-file-name "c:/MinGW/msys/1.0/bin/bash.exe")
+)
 
 (defun leo-shell-mode-hook ()
   "cursor keys get mapped"
