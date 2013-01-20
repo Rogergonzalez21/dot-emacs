@@ -89,8 +89,10 @@ this restricts the search to the basename part of the filename"
   (define-key  locate-mode-map [S-return] 'leo-dired-advertised-find-file)
   (define-key  locate-mode-map "\C-c\C-d"  'leo-locate-choose-db)
   (define-key  locate-mode-map "\C-c\C-b"  'leo-locate-toggle-basename-only)
-  (define-key  locate-mode-map "l"  'leo-locate-with-filter)
-  (define-key  locate-mode-map "L"  'leo-locate)
+  (define-key  locate-mode-map "L"  'leo-locate-with-filter)
+  (define-key  locate-mode-map "l"  'leo-locate)
+  (define-key  locate-mode-map "k"  'leo-locate-keep-filter)
+  (define-key  locate-mode-map "f"  'leo-locate-flush-filter)
   ;; don't use leo-dired-find-container: doesn't work properly
   ;; so use build-in locate-find-directory instead
   (define-key locate-mode-map "c"       'locate-find-directory)
@@ -104,19 +106,17 @@ this restricts the search to the basename part of the filename"
 ;;
 ;; overwrite locate-do-setup for better not found msg & correct default dir
 ;;
-(defun locate-do-setup (search-string &optional run-locate-command)
+(defun leo-locate-do-setup (search-string)
   (goto-char (point-min))
   (save-excursion
-
-    ;; Nothing returned from locate command?
-    (let (db-err-text)
-
+    (let* ((db-err-text (if locate-fcodes-file
+                           (format "database %s" locate-fcodes-file)
+                         "default database")))
+      ;; Nothing returned from locate command?
       (and (eobp)
            (progn
-;;	   (kill-buffer locate-buffer-name)
-             (setq db-err-text (if locate-fcodes-file
-                               (format "database %s" locate-fcodes-file)
-                             "default database"))
+             ;; don't kill buffer keep content
+             ;; (kill-buffer locate-buffer-name)
              (setq db-err-text (if locate-current-filter
                                    (format "no match in %s using filter %s"
                                            db-err-text locate-current-filter)
@@ -139,74 +139,45 @@ this restricts the search to the basename part of the filename"
       (goto-char (point-min))
       (forward-line 1)
 
-      (if run-locate-command
+      (if (and (boundp 'run-locate-command)
+               run-locate-command)
           (insert " ")
         (if leo-locate-basename-only
             (insert " Basename")
           (insert " Wholename")))
-      ))    
+      ))
   (goto-char (point-min)))
 
 (defun leo-locate-convert-output ()
   "Convert output from the locate command to system dependend paths"
   (goto-char (point-min))
-  (if (eq system-type 'windows-nt)
-      (while (re-search-forward "/c/" nil t)
-        (replace-match "C:/" nil nil))))
+  (let ((inhibit-read-only t))
+    (if (eq system-type 'windows-nt)
+        (while (re-search-forward "/c/" nil t)
+          (replace-match "C:/" nil nil)))))
+    
+(defun leo-locate-dired-dont-omit ()
+  ;; empty --> omit mode does not get switched on
+  )
 
 ;;
-;; Same as command `locate', but it doesn't switch to other window.
+;; Same as command `locate', but customised
 ;;
 (defun leo-locate (search-string &optional filter arg)
-  "Same as command `locate', but it doesn't switch to other window."
+  "Same as command `locate', but customised."
   (interactive
    (list
     (locate-prompt-for-search-string)
     nil
     current-prefix-arg))
 
-  (if (equal search-string "")
-      (error "Please specify a filename to search for"))
-  (let* ((locate-cmd-list (funcall locate-make-command-line search-string))
-	 (locate-cmd (car locate-cmd-list))
-	 (locate-cmd-args (cdr locate-cmd-list))
-	 (run-locate-command
-	  (or (and arg (not locate-prompt-for-command))
-	      (and (not arg) locate-prompt-for-command)))
-	 )
-    ;; Find the Locate buffer
-    (save-window-excursion
-      (set-buffer (get-buffer-create locate-buffer-name))
-      (locate-mode)
-      (let ((inhibit-read-only t)
-	    (buffer-undo-list t))
-	(erase-buffer)
+  (add-hook 'locate-post-command-hook 'leo-locate-convert-output)
 
-	(setq locate-current-filter filter)
-	(set (make-local-variable 'locate-local-search) search-string)
-	(set (make-local-variable 'locate-local-filter) filter)
-	(set (make-local-variable 'locate-local-prompt) run-locate-command)
+  (flet ((pop-to-buffer (BUFFER) (switch-to-buffer BUFFER))
+         (locate-do-setup (search-string) (leo-locate-do-setup search-string))
+         (leo-dired-manage-omit-mode() (leo-locate-dired-dont-omit)))
+    (locate search-string filter arg)))
 
-	(if run-locate-command
-	    (shell-command search-string locate-buffer-name)
-	  (apply 'call-process locate-cmd nil t nil locate-cmd-args))
-
-        (leo-locate-convert-output)
-
-	(and filter
-	     (locate-filter-output filter))
-        
-	(locate-do-setup search-string run-locate-command)
-	))
-    (and (not (string-equal (buffer-name) locate-buffer-name))
-	(switch-to-buffer locate-buffer-name))
-
-    (let ((leo-dired-dont-omit t))
-      (run-hooks 'dired-mode-hook))
-    (dired-next-line 3)			;move to first matching file.
-    (run-hooks 'locate-post-command-hook)
-    )
-  )
 ;;
 ;; Same as command `locate-with-filter', but it doesn't switch to other window.
 ;;
@@ -219,6 +190,33 @@ this restricts the search to the basename part of the filename"
 			  nil 'locate-grep-history-list)
     current-prefix-arg))
   (leo-locate search-string filter arg))
+
+;;
+;; in buffer filter commands
+;;
+(defun leo-locate-keep-filter (filter &optional arg)
+  "Filters content of locate buffer KEEPING the lines matching a regex"
+     (interactive
+      (list
+       (read-from-minibuffer "Lines to keep: " nil nil
+                             nil 'locate-grep-history-list)
+       current-prefix-arg))
+
+     (let ((inhibit-read-only t))
+       (goto-char (point-min))
+       (keep-lines filter)))     
+
+(defun leo-locate-flush-filter (filter &optional arg)
+  "Filters content of locate buffer FLUSHING the lines matching a regex"
+     (interactive
+      (list
+       (read-from-minibuffer "Lines to flush: " nil nil
+                             nil 'locate-grep-history-list)
+       current-prefix-arg))
+
+     (let ((inhibit-read-only t))
+       (goto-char (point-min))
+       (flush-lines filter)))     
 
 ;;
 ;; stuff for selecting other locate databases
