@@ -51,16 +51,25 @@ Note: like `toggle-truncate-lines' just without message."
        (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
        (define-key flyspell-mouse-map [mouse-3] #'undefined)))
 
-
+(defun leo-text-mode-hook-func ()
+  (set-input-method "german-prefix")
+  (column-number-mode 1)
+  (flyspell-mode 1))
+ 
 (add-hook 'text-mode-hook
-           '(lambda () 
-              ;;(leo-toggle-truncate-lines-silent 0)
-              (column-number-mode 1)))
-
+           'leo-text-mode-hook-func)
+  
 (add-hook 'help-mode-hook
            '(lambda () 
-              ;;(leo-toggle-truncate-lines-silent 0)
               (column-number-mode 1)))
+
+;;
+;; special stuff for Day One doentry files
+;;
+(defun leo-set-dayone-files-modes ()
+  (nxml-mode)
+  (flyspell-prog-mode))
+(add-to-list 'auto-mode-alist '("\\.doentry$" . leo-set-dayone-files-modes))
 
 ;;
 ;; general stuff for programming modes
@@ -74,31 +83,35 @@ Note: like `toggle-truncate-lines' just without message."
 ;;
 ;; ruby mode
 ;;
-(require 'inf-ruby)
+(if (and (boundp 'emacs-major-version) ; nil if prior to 19.23
+	   (> emacs-major-version 23))     ; nil if prior to 20.0.0
+    (progn
+      (require 'inf-ruby)
 
-(push '("simple-ruby" . "irb --prompt simple") 
-      inf-ruby-implementations)
-;; stay with inf mode ruby for history
-(setq inf-ruby-default-implementation "ruby")
+      (push '("simple-ruby" . "irb --prompt simple") 
+            inf-ruby-implementations)
+      ;; stay with inf mode ruby for history
+      (setq inf-ruby-default-implementation "ruby")
 
-(defun leo-inf-ruby-preoutput-filter (output)
-  (if (equal major-mode 'inf-ruby-mode)
-      (let ((leo-ret-line-pattern "^\n           *$"))
-        (if (string-match leo-ret-line-pattern output)
-            ;; output a marker for output filter if only new prompt
-            "l$pre#o" 
-          ;; normal output
+      (defun leo-inf-ruby-preoutput-filter (output)
+        (if (equal major-mode 'inf-ruby-mode)
+            (let ((leo-ret-line-pattern "^\n           *$"))
+              (if (string-match leo-ret-line-pattern output)
+                  ;; output a marker for output filter if only new prompt
+                  "l$pre#o" 
+                ;; normal output
+                output))
           output))
-    output))
 
-(add-hook 'comint-preoutput-filter-functions 'leo-inf-ruby-preoutput-filter)
+      (add-hook 'comint-preoutput-filter-functions 'leo-inf-ruby-preoutput-filter)
 
-(defun leo-inf-ruby-output-filter (output)
-  (if (equal major-mode 'inf-ruby-mode)
-      (if (string= "l$pre#o" output)
-          (delete-backward-char 8))))
+      (defun leo-inf-ruby-output-filter (output)
+        (if (equal major-mode 'inf-ruby-mode)
+            (if (string= "l$pre#o" output)
+                (delete-backward-char 8))))
 
-(add-hook 'comint-output-filter-functions 'leo-inf-ruby-output-filter)
+      (add-hook 'comint-output-filter-functions 'leo-inf-ruby-output-filter)
+      ))
 
 ;;
 ;; lua mode
