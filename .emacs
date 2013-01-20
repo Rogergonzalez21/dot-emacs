@@ -196,6 +196,10 @@
 (cua-lite 1)
 
 ;;
+;; global keys
+;;
+(global-set-key (kbd "C-/") 'set-mark-command)
+;;
 ;; setting C-tab and C-S-tab (with special case for minibuffer)
 ;;
 (global-set-key [C-tab] 'other-window)

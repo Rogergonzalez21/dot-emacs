@@ -1,6 +1,5 @@
 .DS_Store
-site-info/**/*
-site-lisp/**/*  
-data/**/* 
-dev/**/*
-shared-data/**/*
+site-info/*
+site-lisp/*  
+dev/*
+shared-data/*

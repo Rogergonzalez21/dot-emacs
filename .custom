@@ -4,6 +4,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(Man-notify-method (quote newframe))
+ '(Man-width 70)
  '(comint-input-ignoredups t)
  '(cvs-auto-remove-handled (quote delayed))
  '(delete-old-versions t)
@@ -15,7 +16,8 @@
  '(dired-recursive-copies (quote always))
  '(dired-recursive-deletes (quote top))
  '(eshell-prompt-function (lambda nil (if (= (user-uid) 0) "# " "& ")))
- '(eshell-prompt-regexp "^[^#$\n]* ?[&#$] ")
+ '(eshell-prompt-regexp "^[^#$
+]* ?[&#$] ")
  '(find-grep-options "-q -i")
  '(focus-follows-mouse nil)
  '(font-lock-verbose nil)
@@ -40,6 +42,7 @@
 * in dired `dired-kill-tree' is bound to E-k (23-12-2009)
 
 ")
+ '(ispell-dictionary "british")
  '(jde-key-bindings (list (cons "[? ?]" (quote leo-jde-save-compile-run)) (cons "[? ? ?]" (quote jde-run-menu-run-applet)) (cons "[? ? ?]" (quote jde-build)) (cons "[? ? ?]" (quote jde-compile)) (cons "[? ? ?]" (quote jde-debug)) (cons "[? ? ?]" (quote jde-find)) (cons "[? ? ?]" (quote jde-open-class-at-point)) (cons "[? ? ?]" (quote jde-bsh-run)) (cons "[? ? ?]" (quote jde-gen-println)) (cons "[? ? ?]" (quote jde-help-browse-jdk-doc)) (cons "[? ? ?]" (quote jde-save-project)) (cons "[? ? ?]" (quote jde-wiz-update-class-list)) (cons "[? ? ?]" (quote jde-run)) (cons "[? ? ?]" (quote speedbar-frame-mode)) (cons "[? ? ?]" (quote jde-jdb-menu-debug-applet)) (cons "[? ? ?]" (quote jde-help-symbol)) (cons "[? ? ?]" (quote jde-show-superclass-source)) (cons "[? ? ?]" (quote jde-open-class-at-point)) (cons "[? ? ?]" (quote jde-import-find-and-import)) (cons "[? ? ?e]" (quote jde-wiz-extend-abstract-class)) (cons "[? ? ?f]" (quote jde-gen-try-finally-wrapper)) (cons "[? ? ?i]" (quote jde-wiz-implement-interface)) (cons "[? ? ?j]" (quote jde-javadoc-autodoc-at-line)) (cons "[? ? ?o]" (quote jde-wiz-override-method)) (cons "[? ? ?t]" (quote jde-gen-try-catch-wrapper)) (cons "[? ? ?z]" (quote jde-import-all)) (cons "[? ? ?]" (quote jde-run-etrace-prev)) (cons "[? ? ?]" (quote jde-run-etrace-next)) (cons "[(control c) (control v) (control ?.)]" (quote jde-complete)) (cons "[(control c) (control v) ?.]" (quote jde-complete-in-line))))
  '(kept-new-versions 3)
  '(kill-read-only-ok t)
@@ -63,6 +66,8 @@
  '(dired-header ((t (:foreground "ForestGreen" :weight bold))))
  '(dired-marked ((t (:foreground "black" :weight bold))))
  '(dired-symlink ((t (:inherit default))))
+ '(flyspell-duplicate ((t (:underline t :italic t :inherit shadow))))
+ '(flyspell-incorrect ((t (:underline t :italic t :inherit shadow))))
  '(font-lock-string-face ((((class color) (background light)) (:foreground "black"))))
  '(isearch ((((class color) (background light)) (:background "yellow"))))
  '(lazy-highlight ((((class color) (background light)) (:background "khaki"))))
