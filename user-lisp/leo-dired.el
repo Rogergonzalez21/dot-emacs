@@ -227,13 +227,7 @@ It inherits from `dired-move-to-filename-regexp' and  does just the grouping for
 	    (define-key dired-mode-map "!" 'leo-dired-do-shell-command)
 	    ))
 
-(add-hook 'dired-mode-hook
-	  (lambda ()
-            (let (dont-omit)
-              (if (boundp 'leo-dired-dont-omit)
-                (if leo-dired-dont-omit
-                    (setq dont-omit t)))
-              ;; Set dired-x buffer-local variables here.  For example:
-              (if (not dont-omit)
-                  (dired-omit-mode 1))                    
-              )))
+(add-hook 'dired-mode-hook 'leo-dired-manage-omit-mode)
+(defun leo-dired-manage-omit-mode ()
+  (dired-omit-mode 1))
+
