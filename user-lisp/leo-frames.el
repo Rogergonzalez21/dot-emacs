@@ -41,7 +41,7 @@ usual. This function can be used as a value of
 
 (setq leo-max-frame-height
       (cond ((eq large-mac t)
-             62)
+             63)
             ((eq window-system 'ns)
              50)
             ((eq window-system 'w32)
@@ -52,7 +52,7 @@ usual. This function can be used as a value of
 
 (setq leo-max-frame-width
       (cond ((eq large-mac t)
-             85)
+             83)
             ((eq window-system 'ns)
              83)
             ((eq window-system 'w32)
@@ -63,7 +63,7 @@ usual. This function can be used as a value of
 
 (setq leo-min-frame-top 
       (cond ((eq large-mac t)
-             247)
+             467)
             ((eq window-system 'ns)
              25)
             ((eq window-system 'w32) 
@@ -87,7 +87,7 @@ usual. This function can be used as a value of
 
 (setq leo-inc-frame-left
       (cond ((eq large-mac t)
-             639)
+             622)
             ((eq window-system 'ns)
              400)
             ((eq window-system 'w32)
@@ -169,7 +169,7 @@ usual. This function can be used as a value of
 (setq leo-frames-default-positions
       (frames-make-positions (cons leo-min-frame-left leo-min-frame-top) 
 			     (cons leo-inc-frame-left leo-inc-frame-top)
-			     '(3 . 1)))
+			     '(4 . 1)))
 
 
 (defun leo-frames-frame-on-position (pos)
