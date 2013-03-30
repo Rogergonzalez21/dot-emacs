@@ -50,7 +50,6 @@
 ;;
 ;; buffer swapping (uses buffer-move.el)
 ;;
-
 (require 'buffer-move)
 
 (defun leo-buf-move-down-or-up ()
@@ -208,14 +207,20 @@ Return the width of display's screen in pixels."
                      (concat leo-emacs-userroot-path ".custom"))
                (file-expand-wildcards (concat leo-emacs-userroot-path "user-lisp/*.el"))               
                )
-      "*doc"
+      "*A form with the files to be searched through by `leo-search-my-emacsfiles`."
       :type 'string
       :group 'leos)
 
 (defun leo-search-my-emacsfiles (regexp)
   "Search through emacs user file (as defined in `leo-emacs-userfiles-form' for a match for REGEXP.
 Stops when a match is found.
-To continue searching for next match, use command \\[tags-loop-continue]."
+To continue searching for next match, use command \\[tags-loop-continue].
+
+For seraching the file NAMES use something like:
+
+(dolist (file (eval leo-my-emacsfiles-form))
+  (serach-the-string-and-do--something file))
+"
   (interactive "sSearch emacs user files (regexp): ")
   (tags-search regexp leo-my-emacsfiles-form))
 
@@ -255,11 +260,41 @@ To continue searching for next match, use command \\[tags-loop-continue]."
   (interactive)
   (switch-to-buffer "*Messages*"))
   
-(defun leo-notes-flush-percent-lines ()
-  "this function deletes all lines ending with percent (\"%\"). it does this by replacing each block of those consecutive lines with the string \"---\"."
+(defun leo-notes-remove-rubbish ()
+  "This function deletes all rubbish from the whole buffer. It considers 
+as rubbish:
+\(1\) All lines ending with percent (\"%\"). It replaces each block of those 
+    consecutive lines with the string \"---\".
+\(2\) All white space at the beginning of all other lines."
   (interactive)
-  (beginning-of-buffer)
+  (goto-char (point-min))
   (replace-regexp "\\(^.*%$\\)+" "%@%")
-  (beginning-of-buffer)
+  (goto-char (point-min))
   (replace-regexp "\\(^%@%\\\n\\)+" "---\n")
-)
+  (goto-char (point-min))
+  (replace-regexp "^\\([ 	]*\\)" ""))
+
+;;
+;; deft (should replace notes stuff)
+;;
+(require 'deft)
+
+(setq deft-directory
+      (cond ((eq system-type 'windows-nt)
+             "c:/home/Dropbox/AppSupport/Elements/deft")
+            (t 
+             "/Users/bridge/Dropbox/AppSupport/Elements/deft")))
+
+(defun leo-deft-switch-and-filter-clear ()
+  "switch to deeft buffer and clear filter."
+  (interactive)
+  (deft)
+  (deft-filter-clear))
+
+;;
+;;
+;; 
+(defun leo-delete-process-interactive(p)
+  (interactive `(,(completing-read "Kill proc: "
+    (mapcar 'process-name(process-list))()t)))
+  (delete-process p))
