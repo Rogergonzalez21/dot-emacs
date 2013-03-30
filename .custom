@@ -7,6 +7,7 @@
  '(Man-width 70)
  '(comint-input-ignoredups t)
  '(cvs-auto-remove-handled (quote delayed))
+ '(deft-use-filename-as-title t)
  '(delete-old-versions t)
  '(dired-dnd-protocol-alist nil)
  '(dired-dwim-target nil)
@@ -33,12 +34,12 @@
  '(initial-scratch-message "news: 
 ----
 
-* new global C-x g bindings:  C-x g r does now 'rename-uniquely' (24-08-2012)
+* new global C-x g binding:  C-x g f does now 'leo-spell-switch-mode' (21-02-2013)
+* new global C-x g binding:  C-x g r does now 'rename-uniquely' (24-08-2012)
 * note: C-q can be reached via C-S-q (useful on mac!)
 * in locate buffer: C-x-4 c is bound to locate-find-directory-other-window (13-12-2010)
 * in isearch: C-S-w is bound to `leo-isearch-yank-whole-word' (9-03-2010)
 * in isearch: C-v is bound to `leo-isearch-yank-symbol' (9-03-2010)
-* globally C-x g t/c/d is bound to `twit'/`calculator'/`ediff-buffers' (27-01-2010)
 * in dired `dired-kill-tree' is bound to E-k (23-12-2009)
 
 ")
@@ -48,8 +49,12 @@
  '(kill-read-only-ok t)
  '(leo-locate-basename-only t)
  '(ls-lisp-verbosity (quote (links)))
+ '(markdown-command "multimarkdown")
+ '(password-cache-expiry nil)
  '(recentf-initialize-file-name-history nil)
  '(recentf-keep-non-readable-files-flag t)
+ '(rtm-api-key "0434762e401f47c42df669d474ab84b5")
+ '(rtm-api-shared-secret "4e81793b72bbba9c")
  '(safe-local-variable-values (quote ((dired-actual-switches . "-alhR") (dired-actual-switches . "-laht") (leo-dired-dont-omit . t) (dired-omit-mode . t) (dired-actual-switches . "-alR"))))
  '(savehist-autosave-interval 60)
  '(uniquify-buffer-name-style (quote post-forward) nil (uniquify))
@@ -62,6 +67,10 @@
  ;; If there is more than one, they won't work right.
  '(comint-highlight-input ((t (:foreground "dark green" :weight bold))))
  '(comint-highlight-prompt ((t (:foreground "dark green" :weight bold))))
+ '(deft-header-face ((t (:inherit deft-summary-face))))
+ '(deft-summary-face ((t (:inherit default :foreground "darkgray"))))
+ '(deft-time-face ((t (:inherit deft-summary-face))))
+ '(deft-title-face ((t (:inherit default))))
  '(dired-flagged ((t (:foreground "firebrick" :weight bold))))
  '(dired-header ((t (:foreground "ForestGreen" :weight bold))))
  '(dired-marked ((t (:foreground "black" :weight bold))))
@@ -72,7 +81,17 @@
  '(isearch ((((class color) (background light)) (:background "yellow"))))
  '(lazy-highlight ((((class color) (background light)) (:background "khaki"))))
  '(locate-header ((t (:foreground "black" :slant italic))))
- '(region ((((class color) (background light)) (:background "DarkGrey")))))
+ '(region ((((class color) (background light)) (:background "DarkGrey"))))
+ '(simple-rtm-list ((t (:foreground "#696969" :weight bold))))
+ '(simple-rtm-smart-list ((t (:inherit simple-rtm-list :slant italic))))
+ '(simple-rtm-task ((t (:foreground "midnight blue" :height 1.0))))
+ '(simple-rtm-task-duedate ((t (:inherit simple-rtm-task :foreground "forest green" :slant italic))))
+ '(simple-rtm-task-duedate-due ((t (:inherit simple-rtm-task :foreground "firebrick4" :slant italic))))
+ '(simple-rtm-task-priority-1 ((t (:inherit simple-rtm-task-priority-3 :background "gray25"))))
+ '(simple-rtm-task-priority-2 ((t (:inherit simple-rtm-task-priority-3 :background "gray60"))))
+ '(simple-rtm-task-priority-3 ((t (:inherit simple-rtm-task :background "gray80" :foreground "white"))))
+ '(simple-rtm-task-tag ((t (:inherit simple-rtm-task :background "gray75" :foreground "white" :box (:line-width 2 :color "white") :height 0.8))))
+ '(simple-rtm-task-time-estimate ((t (:inherit simple-rtm-task :slant italic)))))
 
 ;;
 ;; emacs itself's defs go here

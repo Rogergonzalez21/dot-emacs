@@ -66,14 +66,20 @@
 
 
 ;;
-;; my functions + info + ediff
+;; my functions + info + ediff + deft
 ;;
 (load "leo-misc")
 
-(load "leo-cygwin")
 ;;
-;; ls-lisp stuff
+;; rtm
+;;
+(load "leo-rtm")
+
+;;
+;; ls-lisp and cygwin stuff
 ;; 
+(load "leo-cygwin")
+
 (load "leo-ls-lisp")
 
 ;;
@@ -105,7 +111,7 @@
 ;;
 ;; global key bindings
 ;;
-(global-set-key [(control ?.)] 'goto-last-change)
+(global-set-key [?\C-\S-z] 'goto-last-change)
 (global-set-key "\eg" 'goto-line)
 (global-set-key "\er" 'revert-buffer)
 (global-set-key [?\M-\C-r] 'replace-regexp)
@@ -123,9 +129,10 @@
 (global-set-key "\C-xk" 'kill-this-buffer)
 (global-set-key "\C-x\C-b" 'ibuffer)
 
-(global-set-key [?\C-x ?\C-n] 'leo-notes-find-note)
-(global-set-key [?\C-x ?\C-\S-N] 'leo-switch-to-scratch-buffer)
-(global-set-key [?\C-x ?\M-n] 'leo-switch-to-messages-buffer)
+(global-set-key [?\C-x ?\C-n] 'leo-deft-switch-and-filter-clear)
+(global-set-key [?\C-x ?\C-\S-N] 'leo-notes-find-note)
+(global-set-key [?\C-x ?\M-n] 'leo-switch-to-scratch-buffer)
+(global-set-key [?\C-x ?\M-m] 'leo-switch-to-messages-buffer)
 
 (global-set-key [?\C-x ?\M-l] 'leo-locate)
 (global-set-key [?\C-x ?\M-L] 'leo-locate-with-filter)
@@ -150,14 +157,6 @@
 (fset 'leo-ffap-prefix-map leo-ffap-prefix-map)
 (define-key global-map "\C-xa" 'leo-ffap-prefix-map)
 
-
-;;
-;; packages and related key bindings
-;;
-(defun leo-nop ()
-  "no operation (might be assigned to some key strokes)"
-  (interactive)
-  )
 
 ;;
 ;; cua-lite and things like that
@@ -189,8 +188,7 @@
     (global-set-key [S-kp-delete] 'kill-region)
     (global-set-key [S-kp-insert] 'yank)
     (global-set-key [C-kp-insert] 'kill-ring-save)
-    (global-set-key "\M-c" 'leo-nop)
-    (global-set-key "\M-v" 'leo-nop)))
+))
 
 (setq cua-lite-bind-keys-hook '(leo-cua-lite-keys))
 (cua-lite 1)
@@ -199,6 +197,8 @@
 ;; global keys
 ;;
 (global-set-key (kbd "C-/") 'set-mark-command)
+(global-set-key [C-space] 'completion-at-point)
+
 ;;
 ;; setting C-tab and C-S-tab (with special case for minibuffer)
 ;;
@@ -293,7 +293,9 @@
     (define-key map "d" 'ediff-buffers)
     (define-key map "s" 'leo-search-my-emacsfiles)
     (define-key map "m" 'man)
-    (define-key map "r" 'rename-uniquely)
+    (define-key map "f" 'leo-spell-switch-mode)    
+    (define-key map "u" 'rename-uniquely)
+    (define-key map "r" 'simple-rtm-mode)
     map)
   "Keymap for mode switching subcommands. (default bounds to C-x g.)")
 (fset 'leo-general-command-prefix-map leo-general-command-prefix-map)
@@ -312,6 +314,12 @@
   "Keymap for mode switching subcommands. (default bounds to C-x m.)")
 (fset 'leo-mode-switch-prefix-map leo-mode-switch-prefix-map)
 (define-key global-map "\C-xm" 'leo-mode-switch-prefix-map)
+
+;;
+;; spelling stuff
+;;
+(load "leo-spell")
+
 
 ;;
 ;; general mode things
@@ -363,6 +371,16 @@
 (setq savehist-file
       (concat leo-emacs-userdata-path ".emacs-history"))
 (savehist-load)
+
+;;
+;; package stuff
+;;
+(require 'package)
+(add-to-list 'package-archives 
+    '("marmalade" .
+      "http://marmalade-repo.org/packages/"))
+(package-initialize t)
+
 
 ;; load temporary definitions if they exist.
 (load ".emacs-temp" t) 

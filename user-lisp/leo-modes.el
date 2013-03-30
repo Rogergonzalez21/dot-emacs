@@ -1,7 +1,7 @@
 ;;
 ;; general mode things
 ;;
-(setq default-major-mode 'text-mode)
+;;(setq default-major-mode 'text-mode)
 (setq kill-whole-line t)
 (transient-mark-mode t)
 (when (eq system-type 'gnu/linux)
@@ -43,14 +43,6 @@ Note: like `toggle-truncate-lines' just without message."
 ;;
 ;; text-mode
 ;;
-(setq-default ispell-program-name "aspell")
-(eval-after-load "flyspell"
-    '(progn
-       (delq (assoc 'mouse-2 flyspell-mouse-map) flyspell-mouse-map)
-       (delq (assoc 'down-mouse-2 flyspell-mouse-map) flyspell-mouse-map)
-       (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
-       (define-key flyspell-mouse-map [mouse-3] #'undefined)))
-
 (defun leo-text-mode-hook-func ()
   (set-input-method "german-prefix")
   (column-number-mode 1)
@@ -62,6 +54,13 @@ Note: like `toggle-truncate-lines' just without message."
 (add-hook 'help-mode-hook
            '(lambda () 
               (column-number-mode 1)))
+
+;;
+;; markdown
+;;
+(autoload 'markdown-mode "markdown-mode.el"
+  "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist '("\\.md$" . markdown-mode))
 
 ;;
 ;; special stuff for Day One doentry files
