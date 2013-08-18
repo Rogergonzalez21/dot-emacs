@@ -28,9 +28,6 @@ Directories are inserted in the same buffer (like `dired-maybe-insert-subdir')"
 ;; (if (eq system-type 'darwin) <-- omit them opn windows as well for ipod.
 (setq dired-omit-files (concat dired-omit-files 
                                "\\|^\\.DS_Store$\\|^\\."))
-(dolist (ext '(".out" ".log"))
-   (add-to-list 'dired-omit-extensions ext))
-
 (if (not (eq system-type 'darwin))
     (setq dired-omit-files (concat dired-omit-files 
                                    "\\|^CVS$\\|^Root$\\|^Repository$\\|^Entries.Old$\\|^Entries.Log$\\|^Entries.Extra.Old$\\|^Entries.Extra$\\|^Entries$\\|^Template$")))

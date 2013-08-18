@@ -47,6 +47,10 @@ It determines what to do by inspecting the varaible `system-type'."
 (dolist (ext '(".pdf" ".log" ".dll" ".lib" ".ico" ".so"))
   (delete ext completion-ignored-extensions))
 
+(dolist (ext '(".out" ".log"))
+   (add-to-list 'completion-ignored-extensions ext))
+
+
 ;;
 ;; drag and drop of files
 ;;
