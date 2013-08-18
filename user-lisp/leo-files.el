@@ -40,8 +40,10 @@ It determines what to do by inspecting the varaible `system-type'."
 ;; enhance expand completion list
 ;; attention: this list is used to fill `dired-omit-extensions' as well!
 
-(dolist (ext '(".~pas" ".~dfm" ".~dpr" ".~bpg" ".~ddp" "~dsk" ".dcu" ".dpu"))
-  (add-to-list 'completion-ignored-extensions ext))
+;; delphi stuff can get deleted....
+;;(dolist (ext '(".~pas" ".~dfm" ".~dpr" ".~bpg" ".~ddp" "~dsk" ".dcu" ".dpu"))
+;;  (add-to-list 'completion-ignored-extensions ext))
+
 (dolist (ext '(".pdf" ".log" ".dll" ".lib" ".ico" ".so"))
   (delete ext completion-ignored-extensions))
 
@@ -51,7 +53,7 @@ It determines what to do by inspecting the varaible `system-type'."
 
 ;; special handling on macosx
 (when (eq window-system 'ns) 
-  ;; don't use ns-find-file, beacuse it can open new frames instead use my own function
+  ;; don't use ns-find-file, because it can open new frames instead use my own function
   (define-key global-map [ns-drag-file] 'leo-ns-open-files)
   (defun leo-ns-open-files ()
     "Open files in the list `ns-input-file'."
@@ -76,3 +78,4 @@ It determines what to do by inspecting the varaible `system-type'."
               ("-convert" "xml1" "-o" "-" "-")
               nil nil "bplist"])
   (jka-compr-update))
+
