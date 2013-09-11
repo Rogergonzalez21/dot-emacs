@@ -294,8 +294,8 @@
     (define-key map "s" 'leo-search-my-emacsfiles)
     (define-key map "m" 'man)
     (define-key map "f" 'leo-spell-switch-mode)    
-    (define-key map "u" 'rename-uniquely)
-    (define-key map "r" 'simple-rtm-mode)
+    (define-key map "r" 'rename-uniquely)    
+    (define-key map "n" 'deft-new-file-named)
     map)
   "Keymap for mode switching subcommands. (default bounds to C-x g.)")
 (fset 'leo-general-command-prefix-map leo-general-command-prefix-map)
@@ -346,7 +346,7 @@
 ;; shell
 ;;
 (load "leo-shell")
-(global-set-key "\ez" 'shell)
+(global-set-key "\ez" 'leo-shell)
 
 ;;
 ;; server

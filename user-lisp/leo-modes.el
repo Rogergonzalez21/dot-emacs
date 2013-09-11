@@ -43,6 +43,25 @@ Note: like `toggle-truncate-lines' just without message."
 ;;
 ;; text-mode
 ;;
+(quail-define-package
+ "leo-german-prefix-dq" "German" "DX>" t
+ "German (Deutsch) input method with prefix modifiers
+Key translation rules are:
+ \"A -> Ä ->   \"O -> Ö   \"U -> Ü   \"s -> ß
+Customisation: \"\" -> \"
+" nil t nil nil nil nil nil nil nil nil t)
+
+(quail-define-rules
+ ("\"A" ?Ä)
+ ("\"O" ?Ö)
+ ("\"U" ?Ü)
+ ("\"a" ?ä)
+ ("\"o" ?ö)
+ ("\"u" ?ü)
+ ("\"s" ?ß)
+ ("\"\"" ?\")
+)
+
 (defun leo-text-mode-hook-func ()
   (set-input-method "german-prefix")
   (column-number-mode 1)
@@ -61,6 +80,30 @@ Note: like `toggle-truncate-lines' just without message."
 (autoload 'markdown-mode "markdown-mode.el"
   "Major mode for editing Markdown files" t)
 (add-to-list 'auto-mode-alist '("\\.md$" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.markdown$" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.txt$" . markdown-mode))
+
+(defun leo-markdown-snippet (&optional output-buffer-name)
+  "special function to provide html snippet output"
+  (setq output-buffer-name (markdown output-buffer-name))
+  (with-current-buffer output-buffer-name
+    (set-buffer output-buffer-name)
+    (goto-char (point-min))
+    (html-mode))
+  output-buffer-name)
+
+(defun leo-markdown-snippet-other-window (&optional output-buffer-name)
+  " Run `markdown' on current buffer and display in other window"
+  (interactive)
+  (display-buffer (leo-markdown-snippet output-buffer-name)))
+
+(eval-after-load "markdown"
+    '(progn
+       (define-key markdown-mode-map "\C-c\C-cs" 'leo-markdown-snippet-other-window)))
+
+(defun leo-markdown-timestamp ()
+   (interactive)
+   (insert (format-time-string "%Y-%m-%d %H:%M:%S +0000")))
 
 ;;
 ;; special stuff for Day One doentry files

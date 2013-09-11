@@ -262,17 +262,42 @@ For seraching the file NAMES use something like:
   
 (defun leo-notes-remove-rubbish ()
   "This function deletes all rubbish from the whole buffer. It considers 
-as rubbish:
-\(1\) All lines ending with percent (\"%\"). It replaces each block of those 
-    consecutive lines with the string \"---\".
-\(2\) All white space at the beginning of all other lines."
+as rubbish: All lines ending with percent (\"%\"). It replaces each block of 
+those consecutive lines with the string \"---\"."
   (interactive)
   (goto-char (point-min))
   (replace-regexp "\\(^.*%$\\)+" "%@%")
   (goto-char (point-min))
-  (replace-regexp "\\(^%@%\\\n\\)+" "---\n")
-  (goto-char (point-min))
-  (replace-regexp "^\\([ 	]*\\)" ""))
+  (replace-regexp "\\(^%@%\\\n\\)+" "---\n"))
+
+(defun leo-notes-tidy-text (&optional unfill)
+  "This function tidies the whole text in the current buffer by:
+  
+\(1\) Converting \"%%\" into paragraph breaks (and deleting all \"%%\" 
+      at the beginning of lines)
+\(2\) Deleting all white space at the beginning of the lines
+\(3\) Filling the paragraphs.
+\(4\) Converting finally $$ into newlines.
+
+Filling is normally done with the fill-column variable, but if the optional UNFILL is non-nil, whole paragraphs become one line without line breaks."
+  (interactive "P")
+ (save-excursion
+   (goto-char (point-min))
+   (while (re-search-forward "^[ 	]*%%" nil t)
+     (replace-match ""))
+   (goto-char (point-min))
+   (while (re-search-forward "%%" nil t)
+     (replace-match "\n\n"))
+   (goto-char (point-min))
+   (goto-char (point-min))
+   (while (re-search-forward "^[ 	]+" nil t)
+     (replace-match ""))   
+   (let ((fill-column (if unfill
+                          most-positive-fixnum
+                        fill-column)))
+     (fill-region (point-min) (point-max)))
+   (while (re-search-forward "\\$\\$" nil t)
+     (replace-match "\n"))))
 
 ;;
 ;; deft (should replace notes stuff)
@@ -281,12 +306,12 @@ as rubbish:
 
 (setq deft-directory
       (cond ((eq system-type 'windows-nt)
-             "c:/home/Dropbox/AppSupport/Elements/deft")
+             "c:/home/Dropbox/notes/deft")
             (t 
-             "/Users/bridge/Dropbox/AppSupport/Elements/deft")))
+             "~/Dropbox/notes/deft")))
 
 (defun leo-deft-switch-and-filter-clear ()
-  "switch to deeft buffer and clear filter."
+  "switch to deft buffer and clear filter."
   (interactive)
   (deft)
   (deft-filter-clear))
