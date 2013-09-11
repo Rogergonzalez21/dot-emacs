@@ -1,4 +1,11 @@
 ;;
+;; themes
+;;
+(add-to-list 'custom-theme-load-path 
+             '"c:/home/emacs/site-lisp/color-theme-solarized") 
+;;(load-theme 'solarized-light t)
+
+;;
 ;; popwin
 ;;
 (require 'popwin)
