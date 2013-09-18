@@ -21,6 +21,7 @@
  '(eshell-prompt-function (lambda nil (if (= (user-uid) 0) "# " "& ")))
  '(eshell-prompt-regexp "^[^#$
 ]* ?[&#$] ")
+ '(fill-column 78)
  '(find-grep-options "-q -i")
  '(focus-follows-mouse nil)
  '(font-lock-verbose nil)
@@ -35,11 +36,9 @@
  '(inhibit-startup-screen t)
  '(initial-scratch-message "news: 
 ----
-
-* new global C-x g binding:  C-x g f does now 'leo-spell-switch-mode' (21-02-2013)
-* new global C-x g binding:  C-x g r does now 'rename-uniquely' (24-08-2012)
-* note: C-q can be reached via C-S-q (useful on mac!)
-* in locate buffer: C-x-4 c is bound to locate-find-directory-other-window (13-12-2010)
+* new global C-x g bindings: check with C-x g C-h (18-09-2013)
+* in locate buffer: k & f flush or keep lines (17-09-2013)
+* in locate buffer: C-x-4 c does locate-find-directory-other-window (13-12-2010)
 * in isearch: C-S-w is bound to `leo-isearch-yank-whole-word' (9-03-2010)
 * in isearch: C-v is bound to `leo-isearch-yank-symbol' (9-03-2010)
 * in dired `dired-kill-tree' is bound to E-k (23-12-2009)

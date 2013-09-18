@@ -67,16 +67,9 @@ this restricts the search to the basename part of the filename"
 ;; Correct dired-move-to-filename-regexp for locate-mode
 ;;
 (defadvice locate-mode (after correct-dired-move-var activate)
-  "Correct dired-move-to-filename-regexp for locate-mode"
-  (setq dired-move-to-filename-regexp
-	(concat "^."
-		(make-string (1- locate-filename-indentation) ?\ )))
-  (if (eq system-type 'windows-nt)
-      (setq default-directory "c:/"))
-  (setq revert-buffer-function nil))
+  "Correct dired-move-to-filename-regexp for locate-mode 
+and change key bindings."
 
-(defadvice locate-mode (after correct-dired-move-var activate)
-  "Correct dired-move-to-filename-regexp for locate-mode and change key bindings."
   (setq dired-move-to-filename-regexp
  	(concat "^."
  		(make-string (1- locate-filename-indentation) ?\ )))
@@ -85,8 +78,8 @@ this restricts the search to the basename part of the filename"
   (setq revert-buffer-function nil)
 
   ;; special key bindings
-  (define-key  locate-mode-map [return] 'dired-advertised-find-file)
-  (define-key  locate-mode-map [S-return] 'leo-dired-advertised-find-file)
+  (define-key  locate-mode-map [return] 'dired-find-file)
+  (define-key  locate-mode-map [S-return] 'leo-dired-find-file)
   (define-key  locate-mode-map "\C-c\C-d"  'leo-locate-choose-db)
   (define-key  locate-mode-map "\C-c\C-b"  'leo-locate-toggle-basename-only)
   (define-key  locate-mode-map "L"  'leo-locate-with-filter)
@@ -102,11 +95,36 @@ this restricts the search to the basename part of the filename"
   ;; so use build-in dired-do-shell-command
   (define-key locate-mode-map "!"       'dired-do-shell-command))
 
+;;
+;; Convert output
+;; (gets called in locate-do-setup replacement)
+;;
+(defun leo-locate-convert-output-system-dependend ()
+  "Convert output from the locate command to system dependend paths"
+  (goto-char (point-min))
+  (let ((inhibit-read-only t))
+    (if (eq system-type 'windows-nt)
+        (while (re-search-forward "/c/" nil t)
+          (replace-match "c:/" nil nil)))))
 
+;;
+;; goto first filename line
+;;
+(defun leo-locate-goto-first-filename-line ()
+  (interactive)
+  (goto-char (point-min))
+  (goto-char
+   (next-single-property-change (point) 'dired-filename nil nil)))
+    
 ;;
 ;; overwrite locate-do-setup for better not found msg & correct default dir
 ;;
-(defun leo-locate-do-setup (search-string)
+(defun leo-locate-convert-output-and-do-setup (search-string)
+  "Replacement for locate-do-setup with better not-found msg and
+correct default dir.
+Does converting of output to system dependend paths as well."
+  (leo-locate-convert-output-system-dependend)
+
   (goto-char (point-min))
   (save-excursion
     (let* ((db-err-text (if locate-fcodes-file
@@ -148,14 +166,6 @@ this restricts the search to the basename part of the filename"
       ))
   (goto-char (point-min)))
 
-(defun leo-locate-convert-output ()
-  "Convert output from the locate command to system dependend paths"
-  (goto-char (point-min))
-  (let ((inhibit-read-only t))
-    (if (eq system-type 'windows-nt)
-        (while (re-search-forward "/c/" nil t)
-          (replace-match "C:/" nil nil)))))
-    
 (defun leo-locate-dired-dont-omit ()
   ;; empty --> omit mode does not get switched on
   )
@@ -171,11 +181,12 @@ this restricts the search to the basename part of the filename"
     nil
     current-prefix-arg))
 
-  (add-hook 'locate-post-command-hook 'leo-locate-convert-output)
-
-  (flet ((pop-to-buffer (BUFFER) (switch-to-buffer BUFFER))
-         (locate-do-setup (search-string) (leo-locate-do-setup search-string))
-         (leo-dired-manage-omit-mode() (leo-locate-dired-dont-omit)))
+  (flet ((pop-to-buffer (BUFFER) 
+                        (switch-to-buffer BUFFER))
+         (locate-do-setup (search-string) 
+                          (leo-locate-convert-output-and-do-setup search-string))
+         (leo-dired-manage-omit-mode() 
+                                    (leo-locate-dired-dont-omit)))
     (locate search-string filter arg)))
 
 ;;
@@ -203,7 +214,7 @@ this restricts the search to the basename part of the filename"
        current-prefix-arg))
 
      (let ((inhibit-read-only t))
-       (goto-char (point-min))
+       (leo-locate-goto-first-filename-line)
        (keep-lines filter)))     
 
 (defun leo-locate-flush-filter (filter &optional arg)

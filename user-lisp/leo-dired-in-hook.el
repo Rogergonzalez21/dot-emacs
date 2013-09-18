@@ -13,14 +13,14 @@
   (dired-maybe-insert-subdir dirname switches)
   (current-buffer))
 
-(defun leo-dired-advertised-find-file ()
+(defun leo-dired-find-file ()
   "In Dired, visit the file or directory named on this line.
 Directories are inserted in the same buffer (like `dired-maybe-insert-subdir')"
   (interactive)
   ;; Bind `find-file-run-dired' so that the command works on directories
   ;; too, independent of the user's setting.
   (let ((find-directory-functions 'leo-dired-maybe-insert-subdir-ff))
-    (dired-advertised-find-file)))
+    (dired-find-file)))
 
 ;;
 ;; omitting

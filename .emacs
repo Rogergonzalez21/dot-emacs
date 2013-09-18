@@ -64,16 +64,15 @@
 (setq backup-directory-alist 
       `(("." . ,leo-emacs-backup-dir)))
 
+;;
+;; git stuff
+;;
+(require 'magit)
 
 ;;
-;; my functions + info + ediff + deft
+;; small things fopr windows et al + info + ediff + deft
 ;;
 (load "leo-misc")
-
-;;
-;; rtm
-;;
-(load "leo-rtm")
 
 ;;
 ;; ls-lisp and cygwin stuff
@@ -290,7 +289,9 @@
 (defvar leo-general-command-prefix-map
   (let ((map (make-sparse-keymap)))
     (define-key map "c" 'calculator)
-    (define-key map "d" 'ediff-buffers)
+    (define-key map "d" 'ediff-current-file)
+    (define-key map "D" 'ediff-buffers)
+    (define-key map "g" 'magit-status)
     (define-key map "s" 'leo-search-my-emacsfiles)
     (define-key map "m" 'man)
     (define-key map "f" 'leo-spell-switch-mode)    

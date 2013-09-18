@@ -205,8 +205,8 @@ It inherits from `dired-move-to-filename-regexp' and  does just the grouping for
             (require 'dired-x)
             (load "leo-dired-in-hook.el")
 
-            (define-key dired-mode-map [return] 'leo-dired-advertised-find-file)
-            (define-key dired-mode-map [S-return] 'dired-advertised-find-file)
+            (define-key dired-mode-map [return] 'leo-dired-find-file)
+            (define-key dired-mode-map [S-return] 'dired-find-file)
             (define-key dired-mode-map "v" 'dired-display-file)
 
 	    (define-key dired-mode-map "\C-o" 'dired-omit-mode)

@@ -156,7 +156,7 @@ This function is derived from isearch-yank-line."
 (setq leo-diff-delphi-backup-file-name-handler-entry
       (cons '"\\.pas$\\|\\.dpr$" 'leo-diff-delphi-backup-file-handler))
 
-(push leo-diff-delphi-backup-file-name-handler-entry file-name-handler-alist)
+;;(push leo-diff-delphi-backup-file-name-handler-entry file-name-handler-alist)
 
 ;;
 ;; ediff

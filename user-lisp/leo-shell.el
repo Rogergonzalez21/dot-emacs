@@ -2,7 +2,6 @@
 ;; shell and comint stuff
 ;;
 (setq explicit-bash-args '("--noediting" "-i"))
-(setq explicit-fakecygpty-args '("bash" "--noediting"))
  
 ;; a few things to do on windows (cos default shell is "cmdproxy")
 (when (or (eq system-type 'windows-nt) (eq system-type 'cygwin))
@@ -12,8 +11,6 @@
   (setq shell-file-name "bash") ;; this should be the cygwin bash
   (setenv "SHELL" shell-file-name)
   (setq shell-completion-execonly nil) ;; so that shellscript without .exe work
-  ;;(setq shell-file-name "fakecygpty")
-  ;;(setq shell-file-name "c:/MinGW/msys/1.0/bin/bash.exe")
 )
 
 (defun leo-shell-mode-hook ()
@@ -26,9 +23,9 @@
 
 (add-hook 'shell-mode-hook 'leo-shell-mode-hook)
 
-(defun leo-comint-init-without-echo () 
-  (setq comint-process-echoes t)) 
-(add-hook 'comint-mode-hook 'leo-comint-init-without-echo) 
+;;(defun leo-comint-init-without-echo () 
+;;  (setq comint-process-echoes t)) 
+;;(add-hook 'comint-mode-hook 'leo-comint-init-without-echo) 
 
 ;;
 ;; functions for create new shell and switch to shell
