@@ -64,6 +64,31 @@ error is signaled."
         (buf-move-up)
       (buf-move-down))))
 
+;; Use ediff instead of diff in `save-some-buffers'
+(eval-after-load "files"
+  '(progn
+     (setcdr (assq ?d save-some-buffers-action-alist)
+             `(,(lambda (buf)
+                  (if (null (buffer-file-name buf))
+                      (message "Not applicable: no file")
+                    (add-hook 'ediff-after-quit-hook-internal
+                              'my-save-some-buffers-with-ediff-quit t)
+                    (save-excursion
+                      (set-buffer buf)
+                      (let ((enable-recursive-minibuffers t))
+                        (ediff-current-file)
+                        (recursive-edit))))
+                  ;; Return nil to ask about BUF again.
+                  nil)
+               ,(purecopy "view changes in this buffer")))
+
+     (defun my-save-some-buffers-with-ediff-quit ()
+       "Remove ourselves from the ediff quit hook, and
+return to the save-some-buffers minibuffer prompt."
+       (remove-hook 'ediff-after-quit-hook-internal
+                    'my-save-some-buffers-with-ediff-quit)
+       (exit-recursive-edit))))
+
 ;;
 ;; isearch improvements
 ;;
