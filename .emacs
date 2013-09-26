@@ -44,6 +44,9 @@
 (push (expand-file-name (concat leo-emacs-userroot-path "site-info/"))
       Info-default-directory-list)
 
+;; packages are going where they are seen on all systems
+(setq package-user-dir 
+      (expand-file-name (concat leo-emacs-userroot-path "site-lisp/elpa")))
 ;;
 ;; auto save and backup config
 ;;
@@ -289,6 +292,7 @@
 (defvar leo-general-command-prefix-map
   (let ((map (make-sparse-keymap)))
     (define-key map "c" 'calculator)
+    (define-key map "p" 'recompile)
     (define-key map "d" 'ediff-current-file)
     (define-key map "D" 'ediff-buffers)
     (define-key map "g" 'magit-status)
@@ -378,8 +382,9 @@
 ;;
 (require 'package)
 (add-to-list 'package-archives 
-    '("marmalade" .
-      "http://marmalade-repo.org/packages/"))
+             '("marmalade" . "http://marmalade-repo.org/packages/") t)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize t)
 
 
