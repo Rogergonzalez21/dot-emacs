@@ -5,7 +5,10 @@
 ;; enhancments for dired-do-shell-command
 ;;
 (setq dired-guess-shell-alist-user
-   (list (list "\\.jpe?g$" "extl_printtags" "exiftool -s -c \"%.6f\"")))
+   (list 
+    (list "\\.jpe?g$" "printimgtags" "exiftool -s -c \"%.6f\"")
+    (list "\\.pdf$" "\"showpdf")))
+    
 
 ;;(setq dired-guess-shell-alist-default nil)
 
