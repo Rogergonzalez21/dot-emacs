@@ -1,6 +1,6 @@
 .DS_Store
 site-info/*
-site-lisp/*  
+site-lisp/*
 dev/*
 shared-data/*
 *.elc
