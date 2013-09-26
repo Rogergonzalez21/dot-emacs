@@ -42,13 +42,19 @@ usual. This function can be used as a value of
 ;;
 ;; appereance of the frames
 ;;
-(setq large-mac 
+(setq leo-centric-frames t)
+(setq large-mac
       (and (eq window-system 'ns)
            (> (display-pixel-height) 1000)))
+(if (and large-mac leo-centric-frames)
+    (setq large-mac nil)
+  (setq leo-centric-frames nil)) ;; works only on large mac yet  
 
 (setq leo-max-frame-height
       (cond ((eq large-mac t)
              63)
+            ((eq leo-centric-frames t)
+             75)
             ((eq window-system 'ns)
              50)
             ((eq window-system 'w32)
@@ -60,6 +66,8 @@ usual. This function can be used as a value of
 (setq leo-max-frame-width
       (cond ((eq large-mac t)
              83)
+            ((eq leo-centric-frames t)
+             116)
             ((eq window-system 'ns)
              83)
             ((eq window-system 'w32)
@@ -71,6 +79,8 @@ usual. This function can be used as a value of
 (setq leo-min-frame-top 
       (cond ((eq large-mac t)
              467)
+            ((eq leo-centric-frames t)
+             289)
             ((eq window-system 'ns)
              25)
             ((eq window-system 'w32) 
@@ -82,6 +92,8 @@ usual. This function can be used as a value of
 (setq leo-min-frame-left
       (cond ((eq large-mac t)
              4)
+            ((eq leo-centric-frames t)
+             855)
             ((eq window-system 'ns)
              10)
             ((eq window-system 'w32)
@@ -95,6 +107,8 @@ usual. This function can be used as a value of
 (setq leo-inc-frame-left
       (cond ((eq large-mac t)
              622)
+            ((eq leo-centric-frames t)
+             855)
             ((eq window-system 'ns)
              400)
             ((eq window-system 'w32)
@@ -102,6 +116,13 @@ usual. This function can be used as a value of
             ((eq window-system 'x) 
              640)
             (t 0)))
+
+(setq leo-times-frame-top 1)
+
+(setq leo-times-frame-left
+      (cond ((eq leo-centric-frames t)
+             2)
+            (t 4)))
 
 ;;
 ;; set default- and initial-frame-alist
@@ -173,10 +194,11 @@ usual. This function can be used as a value of
 ;; the parameter-format is: 
 ;; '(left-start . top-start) '(left-step . top-step) '(left-times . top-times) 
 
+
 (setq leo-frames-default-positions
       (frames-make-positions (cons leo-min-frame-left leo-min-frame-top) 
 			     (cons leo-inc-frame-left leo-inc-frame-top)
-			     '(4 . 1)))
+			     (cons leo-times-frame-left leo-times-frame-top)))
 
 
 (defun leo-frames-frame-on-position (pos)
