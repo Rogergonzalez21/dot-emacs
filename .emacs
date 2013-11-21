@@ -1,3 +1,4 @@
+;;
 ;; leos .emacs 
 ;;
 ;; path settings
@@ -37,11 +38,16 @@
 (push (expand-file-name (concat leo-emacs-userroot-path "user-lisp"))
       load-path)
 
-;; info-path
+;;
+;; Info path stuff
+;;
+(setq leo-Info-main-directory 
+      (expand-file-name (concat leo-emacs-userroot-path "site-info/")))
+
 (when (eq system-type 'windows-nt)
   (push "c:/cygwin/usr/share/info"
 	Info-default-directory-list))
-(push (expand-file-name (concat leo-emacs-userroot-path "site-info/"))
+(push leo-Info-main-directory 
       Info-default-directory-list)
 
 ;; packages are going where they are seen on all systems
@@ -66,6 +72,32 @@
 
 (setq backup-directory-alist 
       `(("." . ,leo-emacs-backup-dir)))
+
+;;
+;; general helper (used in package management)
+;;
+(defun leo-add-to-front-of-list (list-var element)
+  "Add ELEMENT to the front of LIST after removing all other occurances of ELEMENT in LIST"
+  (let ((cleaned (delete element (symbol-value list-var))))
+    (set list-var (cons element cleaned))))
+
+;;
+;; package stuff
+;;
+(require 'package)
+(add-to-list 'package-archives 
+             '("marmalade" . "http://marmalade-repo.org/packages/") t)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+
+(add-hook 'after-init-hook 'leo-after-init-hook)
+(defun leo-after-init-hook ()
+  "After package initialisation."
+  (leo-add-to-front-of-list 
+   'Info-directory-list  leo-Info-main-directory)
+  ;;(ido-at-point-mode)
+  )
+
 
 ;;
 ;; git stuff
@@ -109,14 +141,21 @@
 ;;
 (require 'goto-chg)
 
-
 ;;
 ;; global key bindings
 ;;
+(global-set-key (kbd "C-/") 'set-mark-command)
+(global-set-key (kbd "C-a") 'mark-whole-buffer)
+(global-set-key [C-space] 'completion-at-point)
+
+(global-set-key (kbd "C-z") 'undo-only)
 (global-set-key [?\C-\S-z] 'goto-last-change)
+
 (global-set-key "\eg" 'goto-line)
 (global-set-key "\er" 'revert-buffer)
-(global-set-key [?\M-\C-r] 'replace-regexp)
+
+(global-set-key (kbd "C-S-r") 'replace-string)
+(global-set-key (kbd "M-C-r") 'replace-regexp)
 (global-set-key [?\C-\S-s] 'search-forward)
 (global-set-key [?\M-\C-\S-s] 'search-forward-regexp)
 
@@ -161,45 +200,30 @@
 
 
 ;;
-;; cua-lite and things like that
+;; modifier stuff
 ;;
 (when (eq system-type 'windows-nt)
+  (setq w32-pass-lwindow-to-system nil
+      w32-lwindow-modifier 'hyper) ; Left Windows key
   (setq w32-alt-is-meta nil))
 
-(require 'cua-lite)
-(defun leo-cua-lite-keys ()
-  "Bunch of stuff to run for cua-lite when keys are bound."
-  (global-set-key "\C-s" 'isearch-forward)
-  (global-set-key "\C-w" 'kill-region)
-  (global-set-key "\C-x\C-s" 'save-buffer)
-  (cua-lite-bind-both-motion-keys "C-<up>" 'scroll-down)
-  (cua-lite-bind-both-motion-keys "C-<down>" 'scroll-up)
-  (when (or (eq system-type 'darwin) (eq system-type 'windows-nt))
-    (cua-lite-bind-both-motion-keys "<A-left>" 'beginning-of-line)
-    (cua-lite-bind-both-motion-keys "<A-right>" 'end-of-line)  
-    (cua-lite-bind-both-motion-keys "<A-up>" 'beginning-of-buffer)
-    (cua-lite-bind-both-motion-keys "<A-down>" 'end-of-buffer))
-  (when (eq system-type 'cygwin)
-    (cua-lite-bind-both-motion-keys "<H-left>" 'beginning-of-line)
-    (cua-lite-bind-both-motion-keys "<H-right>" 'end-of-line)  
-    (cua-lite-bind-both-motion-keys "<H-up>" 'beginning-of-buffer)
-    (cua-lite-bind-both-motion-keys "<H-down>" 'end-of-buffer))
-
-  (when (eq system-type 'darwin)
-    (global-set-key [kp-delete] 'delete-char)
-    (global-set-key [S-kp-delete] 'kill-region)
-    (global-set-key [S-kp-insert] 'yank)
-    (global-set-key [C-kp-insert] 'kill-ring-save)
-))
-
-(setq cua-lite-bind-keys-hook '(leo-cua-lite-keys))
-(cua-lite 1)
-
 ;;
-;; global keys
+;; global navigation keys
 ;;
-(global-set-key (kbd "C-/") 'set-mark-command)
-(global-set-key [C-space] 'completion-at-point)
+(global-set-key (kbd "<C-up>") 'scroll-down-command)
+(global-set-key (kbd "<C-down>") 'scroll-up-command)
+
+(when (or (eq system-type 'darwin) (eq system-type 'windows-nt))
+  (global-set-key (kbd "<A-left>") 'beginning-of-line)
+  (global-set-key (kbd "<A-right>") 'end-of-line)  
+  (global-set-key (kbd "<A-up>") 'beginning-of-buffer)
+  (global-set-key (kbd "<A-down>") 'end-of-buffer))
+(when (eq system-type 'cygwin)
+  (global-set-key (kbd "<H-left>") 'beginning-of-line)
+  (global-set-key (kbd "<H-right>") 'end-of-line)  
+  (global-set-key (kbd "<H-up>") 'beginning-of-buffer)
+  (global-set-key (kbd "<H-down>") 'end-of-buffer))
+
 
 ;;
 ;; setting C-tab and C-S-tab (with special case for minibuffer)
@@ -296,7 +320,8 @@
     (define-key map "d" 'ediff-current-file)
     (define-key map "D" 'ediff-buffers)
     (define-key map "g" 'magit-status)
-    (define-key map "s" 'leo-search-my-emacsfiles)
+    (define-key map "e" 'leo-search-my-emacsfiles)
+    (define-key map "s" 'synonyms-no-read)
     (define-key map "m" 'man)
     (define-key map "f" 'leo-spell-switch-mode)    
     (define-key map "r" 'rename-uniquely)    
@@ -321,16 +346,22 @@
 (define-key global-map "\C-xm" 'leo-mode-switch-prefix-map)
 
 ;;
-;; spelling stuff
+;; natural languge stuff
 ;;
 (load "leo-spell")
 
+(require 'google-this)
+(google-this-mode)
 
 ;;
 ;; general mode things
 ;;
 (load "leo-modes")
 
+;;
+;; general mode things
+;;
+(load "leo-docmodes")
 
 ;;
 ;; web (html/php/javascript) things
@@ -376,16 +407,6 @@
 (setq savehist-file
       (concat leo-emacs-userdata-path ".emacs-history"))
 (savehist-load)
-
-;;
-;; package stuff
-;;
-(require 'package)
-(add-to-list 'package-archives 
-             '("marmalade" . "http://marmalade-repo.org/packages/") t)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
-(package-initialize t)
 
 
 ;; load temporary definitions if they exist.
