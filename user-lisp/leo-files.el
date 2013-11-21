@@ -6,6 +6,18 @@
 (modify-coding-system-alist 'file "leo-.*\\.el\\'" 'iso-latin-1-dos)
 
 ;;
+;; settings for trash deletion
+;;
+(setq delete-by-moving-to-trash t)
+(setq trash-directory
+      (cond
+       ((eq system-type 'windows-nt)
+        nil)
+       ((eq system-type 'darwin)
+        "~/.Trash/")
+       (t nil)))
+
+;;
 ;; path handling
 ;;
 (defun leo-path-convert-for-os (path)
@@ -40,14 +52,15 @@ It determines what to do by inspecting the varaible `system-type'."
 ;; enhance expand completion list
 ;; attention: this list is used to fill `dired-omit-extensions' as well!
 
-;; delphi stuff can get deleted....
-;;(dolist (ext '(".~pas" ".~dfm" ".~dpr" ".~bpg" ".~ddp" "~dsk" ".dcu" ".dpu"))
-;;  (add-to-list 'completion-ignored-extensions ext))
 
 (dolist (ext '(".pdf" ".log" ".dll" ".lib" ".ico" ".so"))
   (delete ext completion-ignored-extensions))
 
-(dolist (ext '(".out" ".log"))
+(dolist (ext '(".out" ".snm" ".nav"))
+   (add-to-list 'completion-ignored-extensions ext))
+
+;; biblatex stuff
+(dolist (ext '(".run.xml" ".bcf"))
    (add-to-list 'completion-ignored-extensions ext))
 
 
