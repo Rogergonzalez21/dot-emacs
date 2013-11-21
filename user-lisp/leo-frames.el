@@ -271,7 +271,7 @@ internal func for leo's frames managment"
         (width . 83)(height . 30))) 
 
 (setq special-display-regexps
-      (list "\\*Man .*" "\\*info\\*.*"))
+      (list "\\*Man .*" "\\*info\\*.*" "\\*help[R].*"))
 
 ;; kill these from same-window-buffer-names/same-window-regexps
 (setq same-window-regexps
