@@ -18,7 +18,21 @@
         (concat string (make-string add-len ? ))
       (substring string 0 len))))
 ;;
-;; some working functions for windows
+;; some working with windows
+;;
+;; ---------------------------------------------------------------------------
+;;
+;; avoid vertical splitting
+;;
+(setq split-width-threshold 9999)
+
+;;
+;;
+;;
+(winner-mode t)
+
+;;
+;; minimizing on Windows
 ;;
 (when (eq system-type 'windows-nt) 
   (defun leo-w32-restore-frame ()

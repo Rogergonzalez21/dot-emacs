@@ -221,7 +221,6 @@ It inherits from `dired-move-to-filename-regexp' and  does just the grouping for
             (define-key dired-mode-map "e" 'w32-integ-dired-explorer-open)
             (define-key dired-mode-map (kbd "\C-x 5 \C-m") 'leo-dired-find-file-other-frame) ;; delete it?
             (define-key dired-mode-map (kbd "C-x 5 o") 'leo-dired-find-file-other-frame)
-	    (define-key dired-mode-map "\C-d" 'leo-dired-do-flagged-recycle-delete)
 	    (define-key dired-mode-map "c" 'leo-dired-find-container)
 	    (define-key dired-mode-map "^" 'leo-dired-up-directory-kill-last-buffer)
 	    (define-key dired-mode-map "!" 'leo-dired-do-shell-command)
