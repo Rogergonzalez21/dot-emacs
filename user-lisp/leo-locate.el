@@ -34,7 +34,7 @@ this restricts the search to the basename part of the filename"
 
 (setq locate-command
       (cond ((eq system-type 'darwin)
-             "glocate")
+             "/usr/local/bin/glocate")
             (t
              "locate")))
 

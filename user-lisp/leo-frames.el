@@ -1,18 +1,11 @@
 ;;
-;; themes
-;;
-(add-to-list 'custom-theme-load-path 
-             '"c:/home/emacs/site-lisp/color-theme-solarized") 
-;;(load-theme 'solarized-light t)
-
-;;
 ;; popwin
 ;;
 (require 'popwin)
 (global-set-key (kbd "C-x C-p") popwin:keymap)
 
 ;;
-;; to restore specaildisplay-function with pop-win.el
+;; to restore special-display-function with pop-win.el
 ;;
 (defun leo-popwin:display-buffer (buffer-or-name &optional not-this-window)
   "Display BUFFER-OR-NAME, if possible, in a popup window, or as
@@ -28,7 +21,7 @@ usual. This function can be used as a value of
       (popwin:display-buffer buffer-or-name not-this-window))))
 
 ;;(setq display-buffer-function 'leo-popwin:display-buffer)
-;; TODO: delete leo=popwin:...
+;; TODO: delete leo-popwin:...
 
 ;;
 ;; apperance functions
@@ -42,7 +35,7 @@ usual. This function can be used as a value of
 ;;
 ;; appereance of the frames
 ;;
-(setq leo-centric-frames t)
+(setq leo-centric-frames nil)
 (setq large-mac
       (and (eq window-system 'ns)
            (> (display-pixel-height) 1000)))
@@ -52,9 +45,9 @@ usual. This function can be used as a value of
 
 (setq leo-max-frame-height
       (cond ((eq large-mac t)
-             63)
+             70)
             ((eq leo-centric-frames t)
-             75)
+             70)
             ((eq window-system 'ns)
              50)
             ((eq window-system 'w32)
@@ -65,7 +58,7 @@ usual. This function can be used as a value of
 
 (setq leo-max-frame-width
       (cond ((eq large-mac t)
-             83)
+             116)
             ((eq leo-centric-frames t)
              116)
             ((eq window-system 'ns)
@@ -78,7 +71,7 @@ usual. This function can be used as a value of
 
 (setq leo-min-frame-top 
       (cond ((eq large-mac t)
-             467)
+             289)
             ((eq leo-centric-frames t)
              289)
             ((eq window-system 'ns)
@@ -91,7 +84,7 @@ usual. This function can be used as a value of
 
 (setq leo-min-frame-left
       (cond ((eq large-mac t)
-             4)
+             0)
             ((eq leo-centric-frames t)
              855)
             ((eq window-system 'ns)
@@ -102,11 +95,22 @@ usual. This function can be used as a value of
              8)
             (t 0)))
 
-(setq leo-inc-frame-top 0)
+(setq leo-inc-frame-top 
+      (cond ((eq window-system 'ns)
+             (+ (- leo-min-frame-top) 22))
+            (t (- leo-min-frame-top ))))
+
+(setq leo-times-frame-top 
+      2)
+
+(setq leo-fuzzy-frame-top 
+      (max
+       (/ (abs leo-inc-frame-top) 2)
+       20 ))
 
 (setq leo-inc-frame-left
       (cond ((eq large-mac t)
-             622)
+             855)
             ((eq leo-centric-frames t)
              855)
             ((eq window-system 'ns)
@@ -117,12 +121,19 @@ usual. This function can be used as a value of
              640)
             (t 0)))
 
-(setq leo-times-frame-top 1)
-
 (setq leo-times-frame-left
-      (cond ((eq leo-centric-frames t)
+      (cond ((eq large-mac t)
+             3)
+            ((eq leo-centric-frames t)
              2)
+            ((eq window-system 'w32)
+             3)
             (t 4)))
+
+(setq leo-fuzzy-frame-left
+      (max
+       (/ (abs leo-inc-frame-left) 2)
+       20 ))
 
 ;;
 ;; set default- and initial-frame-alist
@@ -130,8 +141,6 @@ usual. This function can be used as a value of
 (setq default-frame-alist 
       ;; standard staff
       '((tool-bar-lines . 0)
-        (horizontal-scroll-bars . t)
-        ;;(window-system . x)
         ;; my staff:
         (background-color . "white")
         (foreground-color . "DarkBlue")
@@ -175,7 +184,7 @@ usual. This function can be used as a value of
 ;; the default-positions emacs chooses for frames
 ;; (the lists are generated with frames-make-positions.)
 ;;
-(defun frames-make-positions (pos-start pos-step pos-times)  
+(defun frames-make-positions-cascade (pos-start pos-step pos-times)  
   (let ((growl '())
         (left-start (car pos-start))
         (left-step (car pos-step))
@@ -191,48 +200,86 @@ usual. This function can be used as a value of
           )))
     (reverse growl)))
 
+;;
+;; tile frames left to right and then top to bottom (with overlapse!)
+;;
+;; the default-positions emacs chooses for frames
+;; (the lists are generated with frames-make-positions.)
+;;
+(defun frames-make-positions-tiled (pos-start pos-step pos-times)  
+  (let ((growl '())
+        (top-start (cdr pos-start))
+        (top-step (cdr  pos-step))
+        (top-times (cdr  pos-times)))
+    (dotimes (j top-times)
+      (let (
+            (left-start (car pos-start))
+            (left-step (car pos-step))
+            (left-times (car pos-times)))
+        (dotimes (i left-times)
+          (push (cons left-start top-start) growl)
+          (setq left-start (+ left-start left-step)))
+        (setq top-start (+ top-start top-step))))
+    (reverse growl)))
+
 ;; the parameter-format is: 
 ;; '(left-start . top-start) '(left-step . top-step) '(left-times . top-times) 
 
 
 (setq leo-frames-default-positions
-      (frames-make-positions (cons leo-min-frame-left leo-min-frame-top) 
+      (frames-make-positions-tiled (cons leo-min-frame-left leo-min-frame-top) 
 			     (cons leo-inc-frame-left leo-inc-frame-top)
 			     (cons leo-times-frame-left leo-times-frame-top)))
 
 
-(defun leo-frames-frame-on-position (pos)
-  "returns the first frame in list FRAMES with the position POS, otherwise nil.
+(defun leo-frames-is-frame-on-position-exact (frame pos)
+  (and
+   (equal 
+    (cdr (assq 'left (frame-parameters frame))) 
+    (car pos))
+   (equal 
+    (cdr (assq 'top (frame-parameters frame))) 
+    (cdr pos))))
 
-internal func for leo's frames managment"
-  (let ((framelist (frame-list)) 
-        frame)
-    (while (and (setq frame (pop framelist))                
-                (not (and
-                      (equal 
-                       (cdr (assq 'left (frame-parameters frame))) 
-                       (car pos))
-                      (equal 
-                       (cdr (assq 'top (frame-parameters frame))) 
-                       (cdr pos))))))
-    frame))
+(defun leo-frames-is-frame-on-position-fuzzy (frame pos)
+  "true if frame FRAME is on (or close enough to) position POS, else nil.
 
-(defun leo-frames-first-free-position (positions)
+internal function for leo's frames management"
+  (and
+   (< (abs (- 
+            (cdr (assq 'left (frame-parameters frame))) 
+            (car pos)))
+      leo-fuzzy-frame-left)      
+   (< (abs (- 
+            (cdr (assq 'top (frame-parameters frame))) 
+            (cdr pos)))
+      leo-fuzzy-frame-top)))
+
+
+(defun leo-frames-first-free-position (positions excluded-frame)
   "returns the first free position in POSITIONS, i.e. it returns the first position not taken by any visible frame in the alist of positions.
 
-internal func for leo's frames managment"
-  (if positions
+internal func for leo's frames management"
+  (let (frames-without-excluded
+        frame)    
+    (if positions
       (let ((pos (car positions)))
-        (if (leo-frames-frame-on-position pos)
-            (progn
-              (leo-frames-first-free-position (cdr positions))
-              )
-          pos))))
+        ;; remove excluded-frame (the newly created one which sits on (0.0) position)
+        (dolist (f (frame-list))
+          (if (not (equal f excluded-frame))
+              (setq frames-without-excluded (cons f frames-without-excluded))))     
+        ;; loop until...
+        (while (and (setq frame (pop frames-without-excluded))
+                    (not (leo-frames-is-frame-on-position-fuzzy frame pos))))          
+        (if frame
+            (leo-frames-first-free-position (cdr positions) excluded-frame)
+          pos)))))
+
 
 (defun leo-set-frame-position-from-list (the-frame the-positions)
   "does the set-frame-pos work for frame THE-FRAME and position alist THE-POSITIONS"
-  (let ((free-pos (leo-frames-first-free-position
-                   the-positions)))
+  (let ((free-pos 
+         (leo-frames-first-free-position the-positions the-frame)))
     (if (not free-pos)
         (setq free-pos (car the-positions)))
     (set-frame-position the-frame (car free-pos) (cdr free-pos))))
@@ -243,7 +290,7 @@ internal func for leo's frames managment"
             ))
 
 (defun leo-set-frame-from-index (index)
-  "set frame postion from index in default position list."
+  "set frame position from index in default position list."
   (interactive
    (if (and current-prefix-arg (not (consp current-prefix-arg)))
        (list (prefix-numeric-value current-prefix-arg))

@@ -79,7 +79,7 @@ error is signaled."
       (buf-move-down))))
 
 ;; Use ediff instead of diff in `save-some-buffers'
-(eval-after-load "files"
+(eval-after-load 'files
   '(progn
      (setcdr (assq ?d save-some-buffers-action-alist)
              `(,(lambda (buf)
@@ -339,24 +339,7 @@ Filling is normally done with the fill-column variable, but if the optional UNFI
      (replace-match "\n"))))
 
 ;;
-;; deft (should replace notes stuff)
-;;
-(require 'deft)
-
-(setq deft-directory
-      (cond ((eq system-type 'windows-nt)
-             "c:/home/Dropbox/notes/deft")
-            (t 
-             "~/Dropbox/notes/deft")))
-
-(defun leo-deft-switch-and-filter-clear ()
-  "switch to deft buffer and clear filter."
-  (interactive)
-  (deft)
-  (deft-filter-clear))
-
-;;
-;;
+;; process handling
 ;; 
 (defun leo-delete-process-interactive(p)
   (interactive `(,(completing-read "Kill proc: "

@@ -5,7 +5,7 @@
 ;; the basics: mode defintion etc
 (require 'python)
 
-(eval-after-load "python"
+(eval-after-load 'python
   '(progn
      (define-key python-mode-map "\C-c\C-c" 'leo-python-shell-send-buffer-with-args)
      ))
@@ -40,7 +40,7 @@ process buffer for a list of commands.)"
   dedicated)
 
 
-(defvar leo-python-args-to-send ""
+(defcustom leo-python-args-to-send ""
   "arguments for current buffer used by `python-shell-send-buffer-with-args'.")
 (make-variable-buffer-local 'leo-python-args-to-send)
 (put 'leo-python-args-to-send 'safe-local-variable #'stringp)
@@ -55,24 +55,27 @@ With prefix ARG allows to set the args string before sending the buffer."
        (list
         (read-string "Python arguments: " leo-python-args-to-send))
      (list leo-python-args-to-send)))
-  (display-buffer (process-buffer (python-shell-get-or-create-process)) t)
+  (if (python-shell-get-process)
+      (display-buffer (process-buffer (python-shell-get-or-create-process)) t))
   (setq leo-python-args-to-send args)
   (let ((buf-name (buffer-name))
         (largs (concat (buffer-name) " " args)) 
         (source-buffer (current-buffer)))
     (with-temp-buffer
       (insert-buffer-substring source-buffer)
-      (indent-code-rigidly (point-min) (point-max) python-indent-offset)
       (goto-char (point-min))
-      (insert "import sys; sys.argv = '''" largs "'''.split()\n")
+      (re-search-forward "^\\s-*import\\>"  nil t)
+      (backward-char 6)
+      (indent-rigidly (point) (point-max) python-indent-offset)
+      (insert "import sys,shlex; sys.argv=shlex.split('''" largs "''')\n")
       (insert "try:\n")
       (goto-char (point-max))
-      (insert "\nexcept SystemExit, e:\n    print \"Terminated  with exit code\", e\n")
-      (message (format "Run \"%s\" with args \"%s\"..." buf-name args))
-      (python-shell-send-buffer 1))))
+      (insert "\nexcept SystemExit, e:\n    if \"%s\" % e != '': print(\"Terminated with exit code %s\" % e)\n")
+      (with-temp-message (format "Run \"%s\" with args \"%s\"..." buf-name args)
+        (python-shell-send-buffer 1)))))
 
 (defun leo-python-shell-setup-mode-vars ()
-  "Setup variables for python shell mode, so that teh point is alwayas at the bottom."
+  "Setup variables for python shell mode, so that the point is alwayas at the bottom."
   (interactive)
   (setq comint-scroll-to-bottom-on-input t)
   (setq comint-scroll-show-maximum-output t))

@@ -5,13 +5,18 @@
  ;; If there is more than one, they won't work right.
  '(Man-notify-method (quote newframe))
  '(Man-width 70)
+ '(case-fold-search t)
  '(comint-input-ignoredups t)
  '(compilation-scroll-output (quote first-error))
  '(compilation-window-height 15)
- '(custom-safe-themes (quote ("eb90042bd42c41f7fe04f87faa2e17b72371e73f2be01288110dde88252aab9b" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" "fc5fcb6f1f1c1bc01305694c59a1a861b008c534cae8d0e48e4d5e81ad718bc6" default)))
+ '(custom-safe-themes
+   (quote
+    ("eb90042bd42c41f7fe04f87faa2e17b72371e73f2be01288110dde88252aab9b" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" "fc5fcb6f1f1c1bc01305694c59a1a861b008c534cae8d0e48e4d5e81ad718bc6" default)))
  '(cvs-auto-remove-handled (quote delayed))
+ '(deft-extension "md")
  '(deft-text-mode (quote markdown-mode))
  '(deft-use-filename-as-title t)
+ '(delete-by-moving-to-trash t)
  '(delete-old-versions t)
  '(dired-dnd-protocol-alist nil)
  '(dired-dwim-target nil)
@@ -25,19 +30,20 @@
 ]* ?[&#$] ")
  '(fill-column 78)
  '(find-grep-options "-q -i")
+ '(flyspell-large-region 1)
  '(focus-follows-mouse nil)
  '(font-lock-verbose nil)
- '(glasses-face (quote bold))
- '(glasses-separate-parentheses-p nil)
- '(glasses-separator "")
  '(gnus-play-startup-jingle t)
  '(history-delete-duplicates t)
  '(history-length 500)
+ '(horizontal-scroll-bar-mode nil)
  '(ido-max-dir-file-cache 20)
  '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
- '(initial-scratch-message "news: 
+ '(initial-scratch-message
+   "news: 
 ----
+* global binding: C-A o (on apple keyboard: Ctrl-Cmd o) overwrite-mode
 * new global C-x g bindings: check with C-x g C-h (18-09-2013)
 * in locate buffer: k & f flush or keep lines (17-09-2013)
 * in locate buffer: C-x-4 c does locate-find-directory-other-window (13-12-2010)
@@ -47,24 +53,96 @@
 
 ")
  '(ispell-dictionary "british")
- '(jde-key-bindings (list (cons "[? ?]" (quote leo-jde-save-compile-run)) (cons "[? ? ?]" (quote jde-run-menu-run-applet)) (cons "[? ? ?]" (quote jde-build)) (cons "[? ? ?]" (quote jde-compile)) (cons "[? ? ?]" (quote jde-debug)) (cons "[? ? ?]" (quote jde-find)) (cons "[? ? ?]" (quote jde-open-class-at-point)) (cons "[? ? ?]" (quote jde-bsh-run)) (cons "[? ? ?]" (quote jde-gen-println)) (cons "[? ? ?]" (quote jde-help-browse-jdk-doc)) (cons "[? ? ?]" (quote jde-save-project)) (cons "[? ? ?]" (quote jde-wiz-update-class-list)) (cons "[? ? ?]" (quote jde-run)) (cons "[? ? ?]" (quote speedbar-frame-mode)) (cons "[? ? ?]" (quote jde-jdb-menu-debug-applet)) (cons "[? ? ?]" (quote jde-help-symbol)) (cons "[? ? ?]" (quote jde-show-superclass-source)) (cons "[? ? ?]" (quote jde-open-class-at-point)) (cons "[? ? ?]" (quote jde-import-find-and-import)) (cons "[? ? ?e]" (quote jde-wiz-extend-abstract-class)) (cons "[? ? ?f]" (quote jde-gen-try-finally-wrapper)) (cons "[? ? ?i]" (quote jde-wiz-implement-interface)) (cons "[? ? ?j]" (quote jde-javadoc-autodoc-at-line)) (cons "[? ? ?o]" (quote jde-wiz-override-method)) (cons "[? ? ?t]" (quote jde-gen-try-catch-wrapper)) (cons "[? ? ?z]" (quote jde-import-all)) (cons "[? ? ?]" (quote jde-run-etrace-prev)) (cons "[? ? ?]" (quote jde-run-etrace-next)) (cons "[(control c) (control v) (control ?.)]" (quote jde-complete)) (cons "[(control c) (control v) ?.]" (quote jde-complete-in-line))))
+ '(jde-key-bindings
+   (list
+    (cons "[? ?]"
+          (quote leo-jde-save-compile-run))
+    (cons "[? ? ?]"
+          (quote jde-run-menu-run-applet))
+    (cons "[? ? ?]"
+          (quote jde-build))
+    (cons "[? ? ?]"
+          (quote jde-compile))
+    (cons "[? ? ?]"
+          (quote jde-debug))
+    (cons "[? ? ?]"
+          (quote jde-find))
+    (cons "[? ? ?]"
+          (quote jde-open-class-at-point))
+    (cons "[? ? ?]"
+          (quote jde-bsh-run))
+    (cons "[? ? ?]"
+          (quote jde-gen-println))
+    (cons "[? ? ?]"
+          (quote jde-help-browse-jdk-doc))
+    (cons "[? ? ?]"
+          (quote jde-save-project))
+    (cons "[? ? ?]"
+          (quote jde-wiz-update-class-list))
+    (cons "[? ? ?]"
+          (quote jde-run))
+    (cons "[? ? ?]"
+          (quote speedbar-frame-mode))
+    (cons "[? ? ?]"
+          (quote jde-jdb-menu-debug-applet))
+    (cons "[? ? ?]"
+          (quote jde-help-symbol))
+    (cons "[? ? ?]"
+          (quote jde-show-superclass-source))
+    (cons "[? ? ?]"
+          (quote jde-open-class-at-point))
+    (cons "[? ? ?]"
+          (quote jde-import-find-and-import))
+    (cons "[? ? ?e]"
+          (quote jde-wiz-extend-abstract-class))
+    (cons "[? ? ?f]"
+          (quote jde-gen-try-finally-wrapper))
+    (cons "[? ? ?i]"
+          (quote jde-wiz-implement-interface))
+    (cons "[? ? ?j]"
+          (quote jde-javadoc-autodoc-at-line))
+    (cons "[? ? ?o]"
+          (quote jde-wiz-override-method))
+    (cons "[? ? ?t]"
+          (quote jde-gen-try-catch-wrapper))
+    (cons "[? ? ?z]"
+          (quote jde-import-all))
+    (cons "[? ? ?]"
+          (quote jde-run-etrace-prev))
+    (cons "[? ? ?]"
+          (quote jde-run-etrace-next))
+    (cons "[(control c) (control v) (control ?.)]"
+          (quote jde-complete))
+    (cons "[(control c) (control v) ?.]"
+          (quote jde-complete-in-line))))
  '(kept-new-versions 3)
  '(kill-read-only-ok t)
  '(leo-locate-basename-only t)
  '(ls-lisp-verbosity (quote (links)))
  '(markdown-command "multimarkdown")
+ '(markdown-open-command "marked")
  '(pandoc-binary "c:/Users/broleo/AppData/Local/Pandoc/pandoc.exe")
  '(password-cache-expiry nil)
  '(recentf-initialize-file-name-history nil)
  '(recentf-keep-non-readable-files-flag t)
+ '(recentf-max-saved-items 10000)
  '(rtm-api-key "0434762e401f47c42df669d474ab84b5")
  '(rtm-api-shared-secret "4e81793b72bbba9c")
- '(safe-local-variable-values (quote ((dired-actual-switches . "-alhR") (dired-actual-switches . "-laht") (leo-dired-dont-omit . t) (dired-omit-mode . t) (dired-actual-switches . "-alR"))))
+ '(safe-local-variable-values
+   (quote
+    ((leo-python-args-to-send . "-v")
+     (dired-actual-switches . "-alhR")
+     (dired-actual-switches . "-laht")
+     (dired-actual-switches . "-alR")
+     (leo-dired-dont-omit . t))))
  '(savehist-autosave-interval 60)
  '(scroll-error-top-bottom t)
+ '(sql-oracle-program "C:/oracle/instantclient_11_2_64/sqlplus")
  '(sql-product (quote oracle))
  '(tex-fontify-script nil)
- '(tramp-remote-process-environment (quote ("LC_ALL=C" "TERM=dumb" "EMACS=t" "INSIDE_EMACS='24.1.50.1,tramp:2.2.6-pre'" "CDPATH=" "HISTORY=" "MAIL=" "MAILCHECK=" "MAILPATH=" "PAGER=\"\"" "autocorrect=" "correct=")))
+ '(tramp-remote-process-environment
+   (quote
+    ("LC_ALL=C" "TERM=dumb" "EMACS=t" "INSIDE_EMACS='24.1.50.1,tramp:2.2.6-pre'" "CDPATH=" "HISTORY=" "MAIL=" "MAILCHECK=" "MAILPATH=" "PAGER=\"\"" "autocorrect=" "correct=")))
  '(uniquify-buffer-name-style (quote post-forward) nil (uniquify))
  '(version-control t)
  '(visible-bell t))

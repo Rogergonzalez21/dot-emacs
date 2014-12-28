@@ -38,21 +38,36 @@
 (push (expand-file-name (concat leo-emacs-userroot-path "user-lisp"))
       load-path)
 
+;; exec-path
+;; add directories from $STORED_PATH or $PATH
+(let* ((paths (or (getenv "STORED_PATH") (getenv "PATH")))
+       (path-list (split-string paths path-separator)))
+  (dolist (item (reverse path-list))
+    (setq exec-path (add-to-list 'exec-path item))))
+
+
 ;;
 ;; Info path stuff
 ;;
+(require 'info)
+
 (setq leo-Info-main-directory 
       (expand-file-name (concat leo-emacs-userroot-path "site-info/")))
 
 (when (eq system-type 'windows-nt)
   (push "c:/cygwin/usr/share/info"
-	Info-default-directory-list))
+	Info-additional-directory-list))
 (push leo-Info-main-directory 
-      Info-default-directory-list)
+      Info-additional-directory-list)
 
 ;; packages are going where they are seen on all systems
 (setq package-user-dir 
       (expand-file-name (concat leo-emacs-userroot-path "site-lisp/elpa")))
+
+(setq trash-directory
+      (if (eq system-type 'darwin)
+          "~/.Trash"
+        nil))
 ;;
 ;; auto save and backup config
 ;;
@@ -81,34 +96,39 @@
   (let ((cleaned (delete element (symbol-value list-var))))
     (set list-var (cons element cleaned))))
 
-;;
-;; package stuff
+;; 
+;; package management
 ;;
 (require 'package)
-(add-to-list 'package-archives 
-             '("marmalade" . "http://marmalade-repo.org/packages/") t)
+;; (add-to-list 'package-archives 
+;;              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.milkbox.net/packages/") t)
 
-(add-hook 'after-init-hook 'leo-after-init-hook)
+;
+;; package inits 
+;; (.emacs configs from packages go here!)
+;;
 (defun leo-after-init-hook ()
   "After package initialisation."
   (leo-add-to-front-of-list 
    'Info-directory-list  leo-Info-main-directory)
-  ;;(ido-at-point-mode)
-  )
+  ;; (ido-at-point-mode)
+  ;; shell stuff
+  (require 'shell-command)
+  (shell-command-completion-mode))
 
-
-;;
-;; git stuff
-;;
-(require 'magit)
+(add-hook 'after-init-hook 'leo-after-init-hook)
 
 ;;
-;; small things fopr windows et al + info + ediff + deft
+;; small things for windows et al + info + ediff + notes
 ;;
 (load "leo-misc")
 
+;;
+;; deft
+;;
+(load "leo-deft")
 ;;
 ;; ls-lisp and cygwin stuff
 ;; 
@@ -141,20 +161,23 @@
 ;;
 (require 'goto-chg)
 
+
 ;;
 ;; global key bindings
 ;;
 (global-set-key (kbd "C-/") 'set-mark-command)
 (global-set-key (kbd "C-a") 'mark-whole-buffer)
-(global-set-key [C-space] 'completion-at-point)
+(global-set-key (kbd "C-SPC") 'completion-at-point)
+(global-set-key [?\A-v] 'yank)
+(global-set-key (kbd "A-C-o") 'overwrite-mode)
 
-(global-set-key (kbd "C-z") 'undo-only)
+(global-set-key (kbd "C-z") 'undo)
 (global-set-key [?\C-\S-z] 'goto-last-change)
 
 (global-set-key "\eg" 'goto-line)
 (global-set-key "\er" 'revert-buffer)
 
-(global-set-key (kbd "C-S-r") 'replace-string)
+(global-set-key (kbd "C-r") 'replace-string)
 (global-set-key (kbd "M-C-r") 'replace-regexp)
 (global-set-key [?\C-\S-s] 'search-forward)
 (global-set-key [?\M-\C-\S-s] 'search-forward-regexp)
@@ -317,15 +340,17 @@
   (let ((map (make-sparse-keymap)))
     (define-key map "c" 'calculator)
     (define-key map "p" 'recompile)
-    (define-key map "d" 'ediff-current-file)
-    (define-key map "D" 'ediff-buffers)
-    (define-key map "g" 'magit-status)
+    (define-key map "\C-p" 'compile)
+    (define-key map "D" 'ediff-current-file)
+    (define-key map "d" 'ediff-buffers)
     (define-key map "e" 'leo-search-my-emacsfiles)
-    (define-key map "s" 'synonyms-no-read)
+    (define-key map "f" 'leo-spell-toggle-mode)    
+    (define-key map "g" 'magit-status)
     (define-key map "m" 'man)
-    (define-key map "f" 'leo-spell-switch-mode)    
+    (define-key map "n" 'leo-deft-new-file-named)
     (define-key map "r" 'rename-uniquely)    
-    (define-key map "n" 'deft-new-file-named)
+    (define-key map "s" 'synonyms-no-read)
+    (define-key map "u" 'browse-url-at-point)
     map)
   "Keymap for mode switching subcommands. (default bounds to C-x g.)")
 (fset 'leo-general-command-prefix-map leo-general-command-prefix-map)
@@ -359,9 +384,10 @@
 (load "leo-modes")
 
 ;;
-;; general mode things
+;; text and prog mode things
 ;;
-(load "leo-docmodes")
+(load "leo-textmodes")
+(load "leo-progmodes")
 
 ;;
 ;; web (html/php/javascript) things
@@ -406,7 +432,7 @@
 (require 'savehist)
 (setq savehist-file
       (concat leo-emacs-userdata-path ".emacs-history"))
-(savehist-load)
+(savehist-mode 1)
 
 
 ;; load temporary definitions if they exist.

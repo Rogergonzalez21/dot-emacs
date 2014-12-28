@@ -7,26 +7,36 @@
 ;;
 (setq-default ispell-program-name "aspell")
 
-(defun leo-spell-switch-mode ()
+(defun leo-spell-toggle-mode ()
   (interactive)
   (if flyspell-mode
       (flyspell-mode -1)
     (flyspell-mode)
     (flyspell-buffer)))
 
-(defun leo-spell-switch-dictionary ()
-  (interactive)
-  (ispell-change-dictionary "deutsch"))
+(defun leo-spell-switch-local-dictionary ()
+  "Switch dictionary for Ispell.
+If the dictionary was \"deutsch\", switch to \"britsh\";
+if it was not \"deutsch\", switch to \"deutsch\".
 
-(eval-after-load "flyspell"
+Afterwards it spell checks the whole buffer."
+  (interactive)
+  (let ((olddict (or ispell-local-dictionary
+		      ispell-dictionary "default")))
+    (if (equal olddict "deutsch")
+        (ispell-change-dictionary "british")
+      (ispell-change-dictionary "deutsch"))
+    (flyspell-buffer)))
+    
+
+(eval-after-load 'flyspell
     '(progn
        (delq (assoc 'mouse-2 flyspell-mouse-map) flyspell-mouse-map)
        (delq (assoc 'down-mouse-2 flyspell-mouse-map) flyspell-mouse-map)
        (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
        (define-key flyspell-mouse-map [mouse-3] #'undefined)
        (define-key flyspell-mode-map [?\C-x (control ?\,)] 'flyspell-buffer)
-       (define-key flyspell-mode-map [?\C-x (control ?\.)] 'leo-spell-switch-dictionary)))
-
+       (define-key flyspell-mode-map [?\C-x (control ?\.)] 'leo-spell-switch-local-dictionary)))
 
 ;;
 ;; synonyms

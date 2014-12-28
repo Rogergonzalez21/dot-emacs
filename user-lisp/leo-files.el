@@ -60,7 +60,7 @@ It determines what to do by inspecting the varaible `system-type'."
    (add-to-list 'completion-ignored-extensions ext))
 
 ;; biblatex stuff
-(dolist (ext '(".run.xml" ".bcf"))
+(dolist (ext '(".run.xml" ".bcf" ".fdb_latexmk"))
    (add-to-list 'completion-ignored-extensions ext))
 
 

@@ -1,7 +1,7 @@
 ;;
 ;; general mode things
 ;;
-;;(setq default-major-mode 'text-mode)
+
 (setq kill-whole-line t)
 (delete-selection-mode 1)
 (when (eq system-type 'gnu/linux)
@@ -43,11 +43,7 @@ Note: like `toggle-truncate-lines' just without message."
 ;;
 ;; general stuff for programming modes
 ;;
-(defun leo-general-programming-stuff ()
-  (define-key c-mode-map [?\M-\C-\\] 'c-indent-line-or-region)
-  (setq c-basic-offset 4))
-
-(add-hook 'c-mode-common-hook 'leo-general-programming-stuff)
+;;(add-hook 'prog-mode-hook 'leo-general-programming-stuff)
 
 ;;
 ;; ruby mode

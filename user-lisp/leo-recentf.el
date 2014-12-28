@@ -6,7 +6,6 @@
       (concat leo-emacs-userdata-path ".recentf"))
 (setq recentf-auto-cleanup 'never)
 (recentf-mode 1)
-(setq recentf-max-saved-items 100)
 
 (defadvice recentf-save-list (around recentf-save-list-around activate)
        "Save recentf list to `recentf-save-file' only if writable."
