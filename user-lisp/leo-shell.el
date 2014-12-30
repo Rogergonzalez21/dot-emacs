@@ -39,9 +39,26 @@
 ;;  (setq comint-process-echoes t)) 
 ;;(add-hook 'comint-mode-hook 'leo-comint-init-without-echo) 
 
+;; function for re-reading history file
+
+(defun leo-shell-load-history ()
+  "Reload history (from file) when in shell buffer.
+
+Note: Please use this function only, when the shell is set to saving history after each command.
+In bash the expression `export PROMPT_COMMAND=\'history -a\'' does this."
+  (interactive)
+  (if (not (eq major-mode 'shell-mode))
+      (error "Not in shell buffer"))
+  (if (not (file-readable-p comint-input-ring-file-name))
+      (error "Cannot read history file %s"
+		      comint-input-ring-file-name))
+  (comint-read-input-ring)
+  (message "(Re-)loaded history"))
+
 ;;
 ;; functions for create new shell and switch to shell
 ;;
+
 (defun leo-shell-new-shell (&optional dir)
   "Run an inferior shell with directory DIR in a new buffer"
   (interactive
@@ -83,7 +100,7 @@
           (cond (not-first ;; when call with argument
                  default-directory)
                 ((null leo-shell-first-shell-default-directory) 
-                 ;; when fisrt shell default not set
+                 ;; when first shell default not set
                  default-directory)
                 (t ;; normally
                  leo-shell-first-shell-default-directory))))
