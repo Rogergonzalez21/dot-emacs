@@ -10,6 +10,9 @@
      (define-key python-mode-map "\C-c\C-c" 'leo-python-shell-send-buffer-with-args)
      ))
 
+(setq python-shell-interpreter "python3")
+;;(setq python-shell-interpreter "python")
+
 ;;  redefine run-python to normally not ask for anything (only with c-u c-u)
 ;;
 (defun run-python (cmd &optional dedicated show)
@@ -70,7 +73,7 @@ With prefix ARG allows to set the args string before sending the buffer."
       (insert "import sys,shlex; sys.argv=shlex.split('''" largs "''')\n")
       (insert "try:\n")
       (goto-char (point-max))
-      (insert "\nexcept SystemExit, e:\n    if \"%s\" % e != '': print(\"Terminated with exit code %s\" % e)\n")
+      (insert "\nexcept SystemExit as e:\n    if \"%s\" % e != '': print(\"Terminated with exit code %s\" % e)\n")
       (with-temp-message (format "Run \"%s\" with args \"%s\"..." buf-name args)
         (python-shell-send-buffer 1)))))
 
