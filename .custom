@@ -30,6 +30,7 @@
 ]* ?[&#$] ")
  '(fill-column 78)
  '(find-grep-options "-q -i")
+ '(find-ls-option (quote ("-exec ls -od {} +" . "-od")))
  '(flyspell-large-region 1)
  '(focus-follows-mouse nil)
  '(font-lock-verbose nil)
