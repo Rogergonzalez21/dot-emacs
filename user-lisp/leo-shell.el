@@ -32,7 +32,9 @@
   (local-set-key '[C-down] (lookup-key global-map [down]))
   (local-set-key '[up] 'comint-previous-input)
   (local-set-key '[down] 'comint-next-input)
-  (local-set-key '[(shift tab)] 'comint-previous-matching-input-from-input))
+  (local-set-key '[(shift tab)] 'comint-previous-matching-input-from-input)
+  (local-set-key (kbd "M-RET") 'leo-shell-resync-dirs))
+
 (add-hook 'shell-mode-hook 'leo-shell-mode-hook)
 
 ;;(defun leo-comint-init-without-echo () 
@@ -55,10 +57,79 @@ In bash the expression `export PROMPT_COMMAND=\'history -a\'' does this."
   (comint-read-input-ring)
   (message "(Re-)loaded history"))
 
+                                        ;
+;;
+;; hack for better handling of directories with spaces for directory syncing
+;; Note: this hack looses the abilty to track pushd/popd directories...
+;;
+
+;; dirs should only print the latest directory
+(setq shell-dirstack-query "command dirs +0")
+
+;; like shell-resync-dirs but parses the whole line as one directory
+(defun leo-shell-resync-dirs ()
+  "Like `shell-resync-dirs' but parses the whole line as one directory.
+
+Works in conjunction with a `shell-dirstack-query' value of \"dirs +0\").
+
+"
+  (interactive)
+  (let* ((proc (get-buffer-process (current-buffer)))
+	 (pmark (process-mark proc))
+	 (started-at-pmark (= (point) (marker-position pmark))))
+    (save-excursion
+      (goto-char pmark)
+      ;; If the process echoes commands, don't insert a fake command in
+      ;; the buffer or it will appear twice.
+      (unless comint-process-echoes
+	(insert shell-dirstack-query) (insert "\n"))
+      (sit-for 0)			; force redisplay
+      (comint-send-string proc shell-dirstack-query)
+      (comint-send-string proc "\n")
+      (set-marker pmark (point))
+      (let ((pt (point))
+	    (regexp
+	     (concat
+	      (if comint-process-echoes
+		  ;; Skip command echo if the process echoes
+		  (concat "\\(" (regexp-quote shell-dirstack-query) "\n\\)")
+		"\\(\\)")
+	      "\\(.+\n\\)")))
+	;; This extra newline prevents the user's pending input from spoofing us.
+	(insert "\n") (backward-char 1)
+	;; Wait for one line.
+	(while (not (looking-at regexp))
+	  (accept-process-output proc)
+	  (goto-char pt)))
+      (goto-char pmark) (delete-char 1) ; remove the extra newline
+      ;; That's the dirlist. grab it & parse it.
+      (let* ((dl (buffer-substring (match-beginning 2) (1- (match-end 2))))
+	     (dl-len (length dl))
+	     (ds '())			; new dir stack
+	     (i 0))
+	(while (< i dl-len)
+	  ;; regexp = optional whitespace, (non-whitespace), optional whitespace
+	  ;; (string-match "\\s *\\(\\S +\\)\\s *" dl i) ; pick off next dir
+          (string-match "\\(.*\\)" dl i) ; pick off the whole line as directory
+	  (setq ds (cons (concat comint-file-name-prefix
+				 (substring dl (match-beginning 1)
+					    (match-end 1)))
+			 ds))
+	  (setq i (match-end 0)))
+	(let ((ds (nreverse ds)))
+	  (with-demoted-errors "Couldn't cd: %s"
+	    (shell-cd (car ds))
+	    (setq shell-dirstack (cdr ds)
+		  shell-last-dir (car shell-dirstack))
+	    (shell-dirstack-message)))))
+    (if started-at-pmark (goto-char (marker-position pmark)))))
+
+;; For your typing convenience:
+(defalias 'dirs 'leo-shell-resync-dirs)
+
 ;;
 ;; functions for create new shell and switch to shell
 ;;
-
 (defun leo-shell-new-shell (&optional dir)
   "Run an inferior shell with directory DIR in a new buffer"
   (interactive
