@@ -30,7 +30,7 @@
 ]* ?[&#$] ")
  '(fill-column 78)
  '(find-grep-options "-q -i")
- '(find-ls-option (quote ("-exec ls -od {} +" . "-od")))
+ '(find-ls-option (quote ("-exec ls -ohd {} +" . "-ohd")))
  '(flyspell-large-region 1)
  '(focus-follows-mouse nil)
  '(font-lock-verbose nil)
@@ -48,10 +48,7 @@
 * new global C-x g bindings: check with C-x g C-h (18-09-2013)
 * in locate buffer: k & f flush or keep lines (17-09-2013)
 * in locate buffer: C-x-4 c does locate-find-directory-other-window (13-12-2010)
-* in isearch: C-S-w is bound to `leo-isearch-yank-whole-word' (9-03-2010)
-* in isearch: C-v is bound to `leo-isearch-yank-symbol' (9-03-2010)
 * in dired `dired-kill-tree' is bound to E-k (23-12-2009)
-
 ")
  '(ispell-dictionary "british")
  '(jde-key-bindings
@@ -122,7 +119,6 @@
  '(ls-lisp-verbosity (quote (links)))
  '(markdown-command "multimarkdown")
  '(markdown-open-command "marked")
- '(pandoc-binary "c:/Users/broleo/AppData/Local/Pandoc/pandoc.exe")
  '(password-cache-expiry nil)
  '(recentf-initialize-file-name-history nil)
  '(recentf-keep-non-readable-files-flag t)
@@ -131,15 +127,14 @@
  '(rtm-api-shared-secret "4e81793b72bbba9c")
  '(safe-local-variable-values
    (quote
-    ((leo-python-args-to-send . "-v")
+    ((python-shell-interpreter . "python")
+     (leo-python-args-to-send . "-v")
      (dired-actual-switches . "-alhR")
      (dired-actual-switches . "-laht")
      (dired-actual-switches . "-alR")
      (leo-dired-dont-omit . t))))
  '(savehist-autosave-interval 60)
  '(scroll-error-top-bottom t)
- '(sql-oracle-program "C:/oracle/instantclient_11_2_64/sqlplus")
- '(sql-product (quote oracle))
  '(tex-fontify-script nil)
  '(tramp-remote-process-environment
    (quote
