@@ -226,7 +226,14 @@ It inherits from `dired-move-to-filename-regexp' and  does just the grouping for
 	    (define-key dired-mode-map "!" 'leo-dired-do-shell-command)
 	    ))
 
-(add-hook 'dired-mode-hook 'leo-dired-manage-omit-mode)
+;;
+;; presetting omit
+;; note: used in leo-locate as well
+;;
 (defun leo-dired-manage-omit-mode ()
-  (dired-omit-mode 1))
-
+  (if (not (and (boundp 'leo-dired-dont-omit)
+                leo-dired-dont-omit))
+      (dired-omit-mode 1)
+    (dired-omit-mode 0)))
+    
+(add-hook 'dired-mode-hook 'leo-dired-manage-omit-mode)
