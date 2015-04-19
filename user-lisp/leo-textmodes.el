@@ -34,20 +34,23 @@
 
  
 (add-hook 'text-mode-hook
-           'leo-text-mode-hook-func)
+          'leo-text-mode-hook-func)
 
 (add-hook 'lisp-interaction-mode-hook
-           'leo-text-mode-hook-func)
+          'leo-text-mode-hook-func)
 
 (add-hook 'help-mode-hook
-           '(lambda () 
-              (column-number-mode 1)))
+          '(lambda () 
+             (column-number-mode 1)))
 
 ;;
 ;; markdown
 ;;
 (autoload 'markdown-mode "markdown-mode.el"
   "Major mode for editing Markdown files" t)
+
+(add-hook 'markdown-mode-hook
+          'leo-local-compile-keys) ;; defined in progmodes.el!
 
 (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
 
