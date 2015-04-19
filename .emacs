@@ -38,13 +38,19 @@
 (push (expand-file-name (concat leo-emacs-userroot-path "user-lisp"))
       load-path)
 
-;; exec-path
-;; add directories from $STORED_PATH or $PATH
+;;
+;; update environment variable PATH from STORED_PATH
+;; note: for command `shell-command'
+(if (getenv "STORED_PATH")
+    (setenv "PATH" (getenv "STORED_PATH")))
+
+;;
+;; exec-path: add directories from $STORED_PATH or $PATH
+;; note: for internal used executables like aspell et al
 (let* ((paths (or (getenv "STORED_PATH") (getenv "PATH")))
        (path-list (split-string paths path-separator)))
   (dolist (item (reverse path-list))
     (setq exec-path (add-to-list 'exec-path item))))
-
 
 ;;
 ;; Info path stuff
@@ -116,7 +122,11 @@
   ;; (ido-at-point-mode)
   ;; shell stuff
   (require 'shell-command)
-  (shell-command-completion-mode))
+  (shell-command-completion-mode)
+  ;;  bash-completion
+  (when (not (or (eq system-type 'windows-nt) (eq system-type 'cygwin)))
+    (require 'bash-completion)
+    (bash-completion-setup)))
 
 (add-hook 'after-init-hook 'leo-after-init-hook)
 
@@ -276,7 +286,13 @@
   'leo-switch-to-recent-buffer))
 (global-set-key [?\C-~] 'leo-buf-move-down-or-up)
 
+;;
+;; add some help bindings
+;;
 (define-key help-map "C" 'describe-current-coding-system)
+;; override standard binding to view-order-manuals with the none-Ctrl binding
+(define-key help-map (kbd "C-m") 'describe-mode)  
+
 
 
 ;;
@@ -386,8 +402,8 @@
 ;;
 ;; text and prog mode things
 ;;
-(load "leo-textmodes")
 (load "leo-progmodes")
+(load "leo-textmodes")
 
 ;;
 ;; web (html/php/javascript) things
