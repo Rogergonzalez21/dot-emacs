@@ -1,0 +1,5 @@
+syntax: glob
+.git
+.gitignore
+.DS_Store
+site-lisp/elpa/*
