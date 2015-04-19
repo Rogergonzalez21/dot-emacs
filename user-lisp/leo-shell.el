@@ -13,18 +13,6 @@
   (setq shell-completion-execonly nil) ;; so that shellscript without .exe work
 )
 
-;;  bash-completion
-(if (or (eq system-type 'windows-nt) (eq system-type 'cygwin))
-    ;; cygwin
-    (progn
-      ;;(require 'bash-completion)
-      ;;(setq bash-completion-prog "C:/cygwin/bin/bash") ;; path to cygwin bash
-      ;;(bash-completion-setup)
-      nil)
-  ;; normal
-  (require 'bash-completion)
-  (bash-completion-setup))
-
 
 (defun leo-shell-mode-hook ()
   "cursor keys get mapped"
