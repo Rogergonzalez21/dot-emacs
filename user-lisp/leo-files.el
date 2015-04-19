@@ -52,15 +52,16 @@ It determines what to do by inspecting the varaible `system-type'."
 ;; enhance expand completion list
 ;; attention: this list is used to fill `dired-omit-extensions' as well!
 
-
-(dolist (ext '(".pdf" ".log" ".dll" ".lib" ".ico" ".so"))
+;; leave .log in the ignore list
+;; (dolist (ext '(".pdf" ".log" ".dll" ".lib" ".ico" ".so"))
+(dolist (ext '(".pdf" ".dll" ".lib" ".ico" ".so"))
   (delete ext completion-ignored-extensions))
 
 (dolist (ext '(".out" ".snm" ".nav"))
    (add-to-list 'completion-ignored-extensions ext))
 
 ;; biblatex stuff
-(dolist (ext '(".run.xml" ".bcf" ".fdb_latexmk"))
+(dolist (ext '(".run.xml" ".bcf" ".fdb_latexmk" ".fls"))
    (add-to-list 'completion-ignored-extensions ext))
 
 
