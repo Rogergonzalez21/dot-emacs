@@ -49,3 +49,25 @@
 (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
 (add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
 (add-to-list 'interpreter-mode-alist '("lua" . lua-mode))
+
+;;
+;; makefile mode
+;;
+(defun leo-local-compile-keys ()
+  "modify local keymap for compile commands"  
+  (local-set-key (kbd "C-c C-g") 'compile)  
+  (local-set-key (kbd "C-c g") 'recompile)  
+  )
+(add-hook 'makefile-mode-hook 'leo-local-compile-keys)
+
+;; set auto0mode list: first delete old stuff, then add new stuff
+(dolist (val '('makefile-gmake-mode 'makefile-bsdmake-mode))
+  (rassq-delete-all val auto-mode-alist))
+
+(dolist (mapping '(("\\.mk\\'" . makefile-gmake-mode)
+               ("\\.make\\'" . makefile-gmake-mode)
+               ( "GNUmakefile\\'" . makefile-gmake-mode)
+               ( "[Mm]akefile\\'" . makefile-gmake-mode)
+               ( "make.*\\.incl$" . makefile-gmake-mode)))               
+  (add-to-list 'auto-mode-alist mapping))
+  
