@@ -58,16 +58,6 @@ With prefix ARG allows to set the args string before sending the buffer."
        (list
         (read-string "Python arguments: " leo-python-args-to-send))
      (list leo-python-args-to-send)))
-<<<<<<< Updated upstream
-  (if (python-shell-get-process)
-      (display-buffer (process-buffer (python-shell-get-or-create-process)) t))
-  (setq leo-python-args-to-send args)
-  (let ((buf-name (buffer-name))
-        (largs (concat (buffer-name) " " args)) 
-        (source-buffer (current-buffer)))
-    (with-temp-buffer
-      (insert-buffer-substring source-buffer)
-=======
 
   ;; show the python buffer
   (if (python-shell-get-process)
@@ -83,7 +73,6 @@ With prefix ARG allows to set the args string before sending the buffer."
       ; copy everything need from the script buffer
       (insert-buffer-substring source-buffer)
       (setq-local python-shell-interpreter interpreter)
->>>>>>> Stashed changes
       (goto-char (point-min))
       (re-search-forward "^\\s-*import\\>"  nil t)
       (backward-char 6)
