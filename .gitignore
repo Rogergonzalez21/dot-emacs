@@ -4,3 +4,5 @@ site-lisp/*
 dev/*
 shared-data/*
 *.elc
+/.hg/
+/.hgtimestamp
