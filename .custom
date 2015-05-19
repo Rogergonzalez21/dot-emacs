@@ -116,6 +116,7 @@
  '(kept-new-versions 3)
  '(kill-read-only-ok t)
  '(leo-locate-basename-only t)
+ '(locate-command "glocate")
  '(ls-lisp-verbosity (quote (links)))
  '(markdown-command "multimarkdown")
  '(markdown-open-command "marked")

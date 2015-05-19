@@ -40,3 +40,10 @@ Note: like `toggle-truncate-lines' just without message."
 			  (set-window-hscroll window 0)))
 		    nil t))))
 
+
+;;
+;; special modes
+;;
+
+;; magit
+ (setq magit-last-seen-setup-instructions "1.4.0")
