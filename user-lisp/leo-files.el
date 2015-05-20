@@ -3,7 +3,6 @@
 ;;
 (prefer-coding-system 'utf-8)
 (modify-coding-system-alist 'file "iSync\\.vcf\\'" 'utf-16)
-(modify-coding-system-alist 'file "leo-.*\\.el\\'" 'iso-latin-1-dos)
 
 ;;
 ;; settings for trash deletion
