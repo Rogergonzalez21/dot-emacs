@@ -54,31 +54,46 @@
 
 (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
 
-(defun leo-markdown-snippet (&optional output-buffer-name)
-  "special function to provide html snippet output"
+(defun leo-markdown-clean-snippet ()
+  "Clean the the html code in the current buffer.
+
+Does currently remove a <p>...</p> pair at the beginning of the buffer."
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (if (re-search-forward "\\`\\s-*<p>\\(.*?\\)</p>" nil t)
+        (replace-match "\\1")))))
+        
+(defun leo-markdown-make-snippet (output-buffer-name &optional noclean nocopy)
+  "Special function to provide html snippet output"
   (setq output-buffer-name (markdown output-buffer-name))
   (with-current-buffer output-buffer-name
-    (set-buffer output-buffer-name)
     (goto-char (point-min))
-    (html-mode))
+    (html-mode)
+    (when (not noclean)
+      (leo-markdown-clean-snippet))
+    (when (not nocopy)
+      (kill-new (buffer-string))
+      (message (format "Saved text of %s to kill ring" output-buffer-name))))
   output-buffer-name)
 
-(defun leo-markdown-snippet-other-window (&optional output-buffer-name)
-  " Run `markdown' on current buffer and display in other window"
-  (interactive)
-  (display-buffer (leo-markdown-snippet output-buffer-name)))
+(defun leo-markdown-copy-snippet-other-window (&optional arg)
+  "Run `markdown' on current buffer, clean (html) output up, display it 
+in other window and copy buffer to clipboard
 
-(defun leo-markdown-fontify-buffer-wiki-links-empty ()
-  "Empty replacement for `markdown-fontify-buffer-wiki-links` due to hanging bug."
-  (interactive))
+With  optional argument C-u do NOT call clean-up function 
+`leo-markdown-clean-snippet'."
+  (interactive "P")
+  (let ((resize-mini-windows nil) ;;; no output in echo area!
+        (noclean arg)) ;; no clean-up with C-u argument
+    (display-buffer (leo-markdown-make-snippet nil noclean))))
 
 (eval-after-load 'markdown-mode
     '(progn
        (define-key markdown-mode-map "\C-c\C-cs" 
-         'leo-markdown-snippet-other-window)
-       (fset 'markdown-fontify-buffer-wiki-links 
-             'leo-markdown-fontify-buffer-wiki-links-empty)))
-       
+         'leo-markdown-copy-snippet-other-window)))
 
 (defun leo-markdown-timestamp ()
    (interactive)
