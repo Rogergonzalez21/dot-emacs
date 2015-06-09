@@ -55,8 +55,8 @@
 ;;
 (defun leo-local-compile-keys ()
   "modify local keymap for compile commands"  
-  (local-set-key (kbd "C-c C-g") 'compile)  
-  (local-set-key (kbd "C-c g") 'recompile)  
+  (local-set-key (kbd "C-c C-p") 'compile)  
+  (local-set-key (kbd "C-c p") 'recompile)  
   )
 (add-hook 'makefile-mode-hook 'leo-local-compile-keys)
 
