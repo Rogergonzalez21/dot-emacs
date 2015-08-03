@@ -229,7 +229,7 @@
     map)
   "Keymap for find-file-at-point subcommands. (default bounds to C-x a.)")
 (fset 'leo-ffap-prefix-map leo-ffap-prefix-map)
-(define-key global-map "\C-xa" 'leo-ffap-prefix-map)
+(define-key global-map "\C-xp" 'leo-ffap-prefix-map)
 
 
 ;;
@@ -354,6 +354,7 @@
 ;;
 (defvar leo-general-command-prefix-map
   (let ((map (make-sparse-keymap)))
+    (define-key map "b" 'bury-buffer)    
     (define-key map "c" 'calculator)
     (define-key map "p" 'recompile)
     (define-key map "\C-p" 'compile)
@@ -371,6 +372,13 @@
   "Keymap for mode switching subcommands. (default bounds to C-x g.)")
 (fset 'leo-general-command-prefix-map leo-general-command-prefix-map)
 (define-key global-map "\C-xg" 'leo-general-command-prefix-map)
+
+;;
+;; url stuff (which might go in git version of emacs source browse-url.el
+;;
+(defun browse-url-chrome-macosx-browser (url &optional _new-window)
+  (interactive (browse-url-interactive-arg "URL: "))
+  (start-process (concat "open " url) nil "open" "-a" "Google Chrome" url))
 
 ;;
 ;; key bindings for  mode switching
