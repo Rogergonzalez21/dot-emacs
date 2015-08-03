@@ -5,6 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(Man-notify-method (quote newframe))
  '(Man-width 70)
+ '(browse-url-browser-function (quote browse-url-chrome-macosx-browser))
  '(case-fold-search t)
  '(comint-input-ignoredups t)
  '(compilation-scroll-output (quote first-error))
@@ -44,6 +45,8 @@
  '(initial-scratch-message
    "news: 
 ----
+* keep in mind internatial prefix C-x 8 (e.g. C-x 8 \" o for ö)
+* ffap bindings have moved to the C-x p prefix (so that abbrev binding like C-x a l work!)
 * in markdown buffer: C-c C-c s copies (html) output to clipboard
 * global binding: C-A o (on apple keyboard: Ctrl-Cmd o) overwrite-mode
 * global C-x g bindings: check with C-x g C-h (18-09-2013)
@@ -69,7 +72,9 @@ tips:
  '(leo-locate-basename-only t)
  '(locate-command "glocate")
  '(ls-lisp-verbosity (quote (links)))
+ '(magit-diff-options nil)
  '(markdown-command "multimarkdown")
+ '(markdown-footnote-location (quote immediately))
  '(markdown-open-command "marked")
  '(password-cache-expiry nil)
  '(recentf-initialize-file-name-history nil)
@@ -79,7 +84,8 @@ tips:
  '(rtm-api-shared-secret "4e81793b72bbba9c")
  '(safe-local-variable-values
    (quote
-    ((python-shell-interpreter . "python")
+    ((python-shell-interpreter . "python3")
+     (python-shell-interpreter . "python")
      (leo-python-args-to-send . "-v")
      (dired-actual-switches . "-alhR")
      (dired-actual-switches . "-laht")
