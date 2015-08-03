@@ -28,6 +28,7 @@
   ;;(set-input-method "german-prefix")
   (column-number-mode 1)
   (flyspell-mode 1)
+  (abbrev-mode 1)
   ;; smart tab
   (require 'smart-tab)
   (smart-tab-mode 1))
@@ -98,6 +99,10 @@ With  optional argument C-u do NOT call clean-up function
 (defun leo-markdown-timestamp ()
    (interactive)
    (insert (format-time-string "%Y-%m-%d %H:%M:%S +0000")))
+
+(defun leo-markdown-set-footnote-counter (cnt)
+  (interactive "nSet footnote counter to: ")
+  (setq markdown-footnote-counter cnt))
 
 ;;
 ;; special stuff for Day One doentry files
