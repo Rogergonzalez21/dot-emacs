@@ -84,7 +84,8 @@ tips:
  '(rtm-api-shared-secret "4e81793b72bbba9c")
  '(safe-local-variable-values
    (quote
-    ((python-shell-interpreter . "python3")
+    ((python-shell-virtualenv-path . /Users/hallo/\.virtualenvs/datascience)
+     (python-shell-interpreter . "python3")
      (python-shell-interpreter . "python")
      (leo-python-args-to-send . "-v")
      (dired-actual-switches . "-alhR")

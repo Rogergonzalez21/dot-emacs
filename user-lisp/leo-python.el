@@ -37,7 +37,7 @@ process buffer for a list of commands.)"
         (read-string "Run Python: " (python-shell-parse-command))
         (y-or-n-p "Make dedicated process? ")
         (= (prefix-numeric-value current-prefix-arg) 4))
-     (list (python-shell-parse-command) nil t)))
+     (list (python-shell-parse-command) t t)))
   (python-shell-make-comint
    cmd (python-shell-get-process-name dedicated) show)
   dedicated)
@@ -48,9 +48,45 @@ process buffer for a list of commands.)"
 (make-variable-buffer-local 'leo-python-args-to-send)
 (put 'leo-python-args-to-send 'safe-local-variable #'stringp)
 
+(defun leo-python-shell--save-temp-file-with-args (string &optional args)
+  (let* ((temporary-file-directory
+          (if (file-remote-p default-directory)
+              (concat (file-remote-p default-directory) "/tmp")
+            temporary-file-directory))
+         (temp-file-name (make-temp-file "py"))
+         (coding-system-for-write 'utf-8))
+    (with-temp-file temp-file-name
+      (insert "# -*- coding: utf-8 -*-\n") ;Not needed for Python-3.
+      ;; command line arguments go into argv!
+      (insert "import sys,shlex; sys.argv=shlex.split('''" args "''')\n")
+      (insert string)
+      (delete-trailing-whitespace))
+    temp-file-name))
+
+(defun leo-python-shell-send-region-with-args (start end nomain &optional args)
+  "Send the region delimited by START and END to inferior Python process."
+  (interactive "r")
+  (let* ((python--use-fake-loc
+          (or python--use-fake-loc (not buffer-file-name)))
+         (string (python-shell-buffer-substring start end nomain))
+         (process (python-shell-get-or-create-process))
+         (_ (string-match "\\`\n*\\(.*\\)" string)))
+    (message "Sent: %s..." (match-string 1 string))
+    (let* ((temp-file-name (leo-python-shell--save-temp-file-with-args string args))
+           (file-name (or (buffer-file-name) temp-file-name)))
+      (python-shell-send-file file-name process temp-file-name t)
+      (unless python--use-fake-loc
+        (with-current-buffer (process-buffer process)
+          (compilation-fake-loc (copy-marker start) temp-file-name
+                                3)) ;; Not 1, because of the added lines coding+args)
+        ))))
+
+
 (defun leo-python-shell-send-buffer-with-args (&optional args)
   "Send the entire buffer to inferior Python process with the 
-args of string `leo-python-args-to-send'.
+args of string `leo-python-args-to-send'.  
+
+A \"if __name__ == '__main__':\" block is executed.
 
 With prefix ARG allows to set the args string before sending the buffer."
   (interactive 
@@ -66,23 +102,11 @@ With prefix ARG allows to set the args string before sending the buffer."
   ; save the (possibly new) arguments to `leo-python-args-to-send'.
   (setq leo-python-args-to-send args)
   (let ((buf-name (buffer-name))
-        (largs (concat (buffer-name) " " args)) 
-        (source-buffer (current-buffer))
-        (interpreter python-shell-interpreter))
-    (with-temp-buffer
-      ; copy everything need from the script buffer
-      (insert-buffer-substring source-buffer)
-      (setq-local python-shell-interpreter interpreter)
-      (goto-char (point-min))
-      (re-search-forward "^\\s-*import\\>"  nil t)
-      (backward-char 6)
-      (indent-rigidly (point) (point-max) python-indent-offset)
-      (insert "import sys,shlex; sys.argv=shlex.split('''" largs "''')\n")
-      (insert "try:\n")
-      (goto-char (point-max))
-      (insert "\nexcept SystemExit as e:\n    if \"%s\" % e != '': print(\"Terminated with exit code %s\" % e)\n")
-      (with-temp-message (format "Run \"%s\" with args \"%s\"..." buf-name args)
-        (python-shell-send-buffer 1)))))
+        (largs (concat (buffer-name) " " args)))
+    (with-temp-message (format "Run \"%s\" with args \"%s\"..." buf-name args)
+      (save-restriction
+        (widen)
+        (leo-python-shell-send-region-with-args (point-min) (point-max) nil largs)))))
 
 (defun leo-python-shell-setup-mode-vars ()
   "Setup variables for python shell mode, so that the point is alwayas at the bottom."
