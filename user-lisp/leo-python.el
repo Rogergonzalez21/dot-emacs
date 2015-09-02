@@ -11,7 +11,6 @@
      ))
 
 (setq python-shell-interpreter "python3")
-;;(setq python-shell-interpreter "python")
 
 ;;  redefine run-python to normally not ask for anything (only with c-u c-u)
 ;;
@@ -57,10 +56,14 @@ process buffer for a list of commands.)"
          (coding-system-for-write 'utf-8))
     (with-temp-file temp-file-name
       (insert "# -*- coding: utf-8 -*-\n") ;Not needed for Python-3.
-      ;; command line arguments go into argv!
-      (insert "import sys,shlex; sys.argv=shlex.split('''" args "''')\n")
       (insert string)
-      (delete-trailing-whitespace))
+      (delete-trailing-whitespace)
+      ;; now, AFTER inserting buffer content, insert command line magic
+      (goto-char (point-min))
+      (re-search-forward "^\\s-*import\\>"  nil t)
+      (backward-char 6)
+      ;; command line arguments go into argv!
+      (insert "import sys,shlex; sys.argv=shlex.split('''" args "''')\n"))
     temp-file-name))
 
 (defun leo-python-shell-send-region-with-args (start end nomain &optional args)
