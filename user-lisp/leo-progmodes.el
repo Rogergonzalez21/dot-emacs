@@ -60,7 +60,15 @@
   )
 (add-hook 'makefile-mode-hook 'leo-local-compile-keys)
 
-;; set auto0mode list: first delete old stuff, then add new stuff
+;;
+;; ask only for buffer under the current directory
+;;
+(setq compilation-save-buffers-predicate
+      (lambda ()
+        (string-prefix-p (if (stringp compilation-directory) compilation-directory "")
+                         (file-truename (buffer-file-name)))))
+
+;; set auto-mode list: first delete old stuff, then add new stuff
 (dolist (val '('makefile-gmake-mode 'makefile-bsdmake-mode))
   (rassq-delete-all val auto-mode-alist))
 
