@@ -66,6 +66,8 @@ process buffer for a list of commands.)"
       (insert "import sys,shlex; sys.argv=shlex.split('''" args "''')\n"))
     temp-file-name))
 
+(setq python--use-fake-loc nil)
+
 (defun leo-python-shell-send-region-with-args (start end nomain &optional args)
   "Send the region delimited by START and END to inferior Python process."
   (interactive "r")
