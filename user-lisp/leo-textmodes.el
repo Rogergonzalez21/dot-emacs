@@ -50,8 +50,12 @@
 (autoload 'markdown-mode "markdown-mode.el"
   "Major mode for editing Markdown files" t)
 
+(defun leo-markdown-mode-customisation ()
+  "modify local keymap for compile commands"
+  (leo-local-compile-keys))
+
 (add-hook 'markdown-mode-hook
-          'leo-local-compile-keys) ;; defined in progmodes.el!
+          'leo-markdown-mode-customisation) ;; defined in progmodes.el!
 
 (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
 
@@ -103,6 +107,21 @@ With  optional argument C-u do NOT call clean-up function
 (defun leo-markdown-set-footnote-counter (cnt)
   (interactive "nSet footnote counter to: ")
   (setq markdown-footnote-counter cnt))
+
+;; flyspell in markdown: \... constructs are not spellchecked
+(defun flyspell-ignore-tex-commands ()
+  "Function used for `flyspell-generic-check-word-predicate' to ignore stuff starting with \"http\" or \"https\"."
+  (save-excursion
+    (forward-whitespace -1)
+    (when (looking-at " ")  ;; needs more work:
+      (forward-char))       ;; does not do the right thing if expression is at the beginning of a line..
+    (not (or
+          (save-excursion (looking-at "@[a-z]*\\b"))
+          (save-excursion (looking-at ".*\\\\[a-z].*\\b"))
+             ))
+    ))
+
+(put 'markdown-mode 'flyspell-mode-predicate 'flyspell-ignore-tex-commands)
 
 ;;
 ;; special stuff for Day One doentry files

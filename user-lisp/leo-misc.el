@@ -244,7 +244,7 @@ Return the width of display's screen in pixels."
 (defcustom leo-my-emacsfiles-form 
       '(append (list (concat leo-emacs-userroot-path ".emacs") 
                      (concat leo-emacs-userroot-path ".custom"))
-               (file-expand-wildcards (concat leo-emacs-userroot-path "user-lisp/*.el"))               
+               (file-expand-wildcards (concat leo-emacs-userroot-path "user-lisp/[a-z]*.el"))               
                )
       "*A form with the files to be searched through by `leo-search-my-emacsfiles`."
       :type 'string

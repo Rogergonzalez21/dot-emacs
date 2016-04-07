@@ -21,6 +21,7 @@
  '(delete-old-versions t)
  '(dired-dnd-protocol-alist nil)
  '(dired-dwim-target nil)
+ '(dired-find-subdir t)
  '(dired-kept-versions 3)
  '(dired-listing-switches "-alh")
  '(dired-omit-size-limit 100000)
@@ -29,6 +30,10 @@
  '(eshell-prompt-function (lambda nil (if (= (user-uid) 0) "# " "& ")))
  '(eshell-prompt-regexp "^[^#$
 ]* ?[&#$] ")
+ '(filesets-data
+   (quote
+    (("dayone-entries"
+      (:pattern "~/Dropbox/AppSupport/Day One/Journal.dayone/entries" "^.+\\.doentry$")))))
  '(fill-column 78)
  '(find-grep-options "-q -i")
  '(find-ls-option (quote ("-exec ls -ohd {} +" . "-ohd")))
@@ -73,18 +78,21 @@ tips:
  '(locate-command "glocate")
  '(ls-lisp-verbosity (quote (links)))
  '(magit-diff-options nil)
- '(markdown-command "multimarkdown")
+ '(markdown-command "multimarkdown --nosmart --snippet")
  '(markdown-footnote-location (quote immediately))
+ '(markdown-indent-on-enter nil)
  '(markdown-open-command "marked")
  '(password-cache-expiry nil)
  '(recentf-initialize-file-name-history nil)
  '(recentf-keep-non-readable-files-flag t)
  '(recentf-max-saved-items 10000)
+ '(revert-without-query (quote ("bibliography.bib")))
  '(rtm-api-key "0434762e401f47c42df669d474ab84b5")
  '(rtm-api-shared-secret "4e81793b72bbba9c")
  '(safe-local-variable-values
    (quote
-    ((python-shell-virtualenv-path . /Users/hallo/\.virtualenvs/datascience)
+    ((python-shell-virtualenv-path)
+     (python-shell-virtualenv-path . /Users/hallo/\.virtualenvs/datascience)
      (python-shell-interpreter . "python3")
      (python-shell-interpreter . "python")
      (leo-python-args-to-send . "-v")
@@ -100,7 +108,7 @@ tips:
     ("LC_ALL=C" "TERM=dumb" "EMACS=t" "INSIDE_EMACS='24.1.50.1,tramp:2.2.6-pre'" "CDPATH=" "HISTORY=" "MAIL=" "MAILCHECK=" "MAILPATH=" "PAGER=\"\"" "autocorrect=" "correct=")))
  '(uniquify-buffer-name-style (quote post-forward) nil (uniquify))
  '(version-control t)
- '(visible-bell t))
+ '(visible-bell nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

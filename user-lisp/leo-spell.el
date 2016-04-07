@@ -26,7 +26,8 @@ Afterwards it spell checks the whole buffer."
     (if (equal olddict "deutsch")
         (ispell-change-dictionary "british")
       (ispell-change-dictionary "deutsch"))
-    (flyspell-buffer)))
+    (flyspell-buffer)
+    (message (format "Ispell dictionary is now: %s" ispell-local-dictionary))))
     
 
 (eval-after-load 'flyspell

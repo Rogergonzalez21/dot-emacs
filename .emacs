@@ -175,6 +175,7 @@
 ;;
 ;; global key bindings
 ;;
+(global-unset-key "\C-x\C-z")
 (global-set-key (kbd "C-/") 'set-mark-command)
 (global-set-key (kbd "C-a") 'mark-whole-buffer)
 (global-set-key (kbd "C-SPC") 'completion-at-point)
@@ -457,7 +458,6 @@
 (setq savehist-file
       (concat leo-emacs-userdata-path ".emacs-history"))
 (savehist-mode 1)
-
 
 ;; load temporary definitions if they exist.
 (load ".emacs-temp" t) 
