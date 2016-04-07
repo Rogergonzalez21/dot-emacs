@@ -16,10 +16,11 @@
 
 (defun leo-shell-mode-hook ()
   "cursor keys get mapped"
-  (local-set-key '[C-up] (lookup-key global-map [up]))
-  (local-set-key '[C-down] (lookup-key global-map [down]))
-  (local-set-key '[up] 'comint-previous-input)
-  (local-set-key '[down] 'comint-next-input)
+  ;; don't change the cursor up/down behaviour anymore
+  ;;(local-set-key '[C-up] (lookup-key global-map [up])) 
+  ;;(local-set-key '[C-down] (lookup-key global-map [down]))
+  ;;(local-set-key '[up] 'comint-previous-input)
+  ;;(local-set-key '[down] 'comint-next-input)
   (local-set-key '[(shift tab)] 'comint-previous-matching-input-from-input)
   (local-set-key (kbd "M-RET") 'leo-shell-resync-dirs))
 
@@ -197,7 +198,7 @@ be smart: if current window shows a shell buffer don't list that one."
                        nil)
                       ((= (length blist) 1) ;; when one shell buffer is there
                        (car blist))
-                      (t                 ;; else (when multipleshell buffers are there)
+                      (t                 ;; else (when multiple shell buffers are there)
                        (ido-completing-read "Shell:" blist nil t nil nil )))))
     (if bname
         (switch-to-buffer bname)
