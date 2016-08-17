@@ -126,7 +126,7 @@ With  optional argument C-u do NOT call clean-up function
 ;;
 ;; special stuff for Day One doentry files
 ;; Attention: They are in nxml mode, which is a PROG mode!!!
-;;
+;; Note: This can be deleted at some stage, because Day one V2 doesn't use doentry files anymore
 (defun leo-set-dayone-files-modes ()
   (nxml-mode))
 

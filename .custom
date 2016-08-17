@@ -30,10 +30,6 @@
  '(eshell-prompt-function (lambda nil (if (= (user-uid) 0) "# " "& ")))
  '(eshell-prompt-regexp "^[^#$
 ]* ?[&#$] ")
- '(filesets-data
-   (quote
-    (("dayone-entries"
-      (:pattern "~/Dropbox/AppSupport/Day One/Journal.dayone/entries" "^.+\\.doentry$")))))
  '(fill-column 78)
  '(find-grep-options "-q -i")
  '(find-ls-option (quote ("-exec ls -ohd {} +" . "-ohd")))
@@ -50,7 +46,8 @@
  '(initial-scratch-message
    "news: 
 ----
-* keep in mind internatial prefix C-x 8 (e.g. C-x 8 \" o for ö)
+* use M-s in ido completion to go into \"merge mode\" (searching through latest dirs)
+* keep in mind international prefix C-x 8 (e.g. C-x 8 \" o for ö)
 * ffap bindings have moved to the C-x p prefix (so that abbrev binding like C-x a l work!)
 * in markdown buffer: C-c C-c s copies (html) output to clipboard
 * global binding: C-A o (on apple keyboard: Ctrl-Cmd o) overwrite-mode
