@@ -49,7 +49,7 @@ usual. This function can be used as a value of
             ((eq leo-centric-frames t)
              70)
             ((eq window-system 'ns)
-             46) ;; larger makes the window by one line SMALLER! %-(
+             46) ;; larger doesn't make the window bigger! %-(
             ((eq window-system 'w32)
              60)
             ((eq window-system 'x)
@@ -280,16 +280,18 @@ internal func for leo's frames management"
 
 (defun leo-set-frame-position-from-list (the-frame the-positions)
   "does the set-frame-pos work for frame THE-FRAME and position alist THE-POSITIONS"
-  (let ((free-pos 
+  (let ((next-free-pos
          (leo-frames-first-free-position the-positions the-frame)))
-    (if (not free-pos)
-        (setq free-pos (car the-positions)))
-    (set-frame-position the-frame (car free-pos) (cdr free-pos))))
+    (if (not next-free-pos)
+        (setq next-free-pos (car the-positions)))    
+    (set-frame-position the-frame (car next-free-pos) (cdr next-free-pos))))
 
-(add-hook 'after-make-frame-functions
-          (lambda (arg)
-            (leo-set-frame-position-from-list arg leo-frames-default-positions)
-            ))
+(defun leo-after-make-frame-func (the-frame)
+  (let ((is-free (frame-parameter the-frame 'free)))
+    (if (not is-free)
+        (leo-set-frame-position-from-list the-frame leo-frames-default-positions))))
+
+(add-hook 'after-make-frame-functions 'leo-after-make-frame-func)
 
 (defun leo-set-frame-from-index (index)
   "set frame position from index in default position list."
@@ -398,3 +400,4 @@ The initial frame is defined by its title/name as \"main - emacs\"."
       (prin1 (assq elt (frame-parameters)))
       ;;(terpri)
       )))
+
