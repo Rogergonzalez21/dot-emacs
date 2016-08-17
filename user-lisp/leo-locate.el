@@ -2,6 +2,7 @@
 ;; locate
 ;;
 (require 'locate)
+(require 'cl-lib)
 
 (defcustom leo-locate-dbdir 
   (cond ((eq system-type 'windows-nt)
@@ -26,7 +27,7 @@ this restricts the search to the basename part of the filename"
 
 (defcustom leo-locate-custom-args "--max-database-age 1"
   "*custom arguments for locate"
-  :type 'boolean
+  :type 'string
   :group 'leos
   :group 'locate)
 
@@ -181,12 +182,9 @@ Does converting of output to system dependend paths as well."
     nil
     current-prefix-arg))
 
-  (flet ((pop-to-buffer (BUFFER) 
-                        (switch-to-buffer BUFFER))
-         (locate-do-setup (search-string) 
-                          (leo-locate-convert-output-and-do-setup search-string))
-         (leo-dired-manage-omit-mode() 
-                                    (leo-locate-dired-dont-omit)))
+  (cl-letf (((symbol-function 'pop-to-buffer) #'switch-to-buffer)
+            ((symbol-function 'locate-do-setup) #'leo-locate-convert-output-and-do-setup)
+            ((symbol-function 'leo-dired-manage-omit-mode) #'leo-locate-dired-dont-omit))
     (locate search-string filter arg)))
 
 ;;
