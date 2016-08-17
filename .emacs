@@ -70,10 +70,6 @@
 (setq package-user-dir 
       (expand-file-name (concat leo-emacs-userroot-path "site-lisp/elpa")))
 
-(setq trash-directory
-      (if (eq system-type 'darwin)
-          "~/.Trash"
-        nil))
 ;;
 ;; auto save and backup config
 ;;
@@ -117,8 +113,13 @@
 ;;
 (defun leo-after-init-hook ()
   "After package initialisation."
-  (leo-add-to-front-of-list 
-   'Info-directory-list  leo-Info-main-directory)
+  (if Info-directory-list
+      ;; Info-directory-list already initalised (emacs 24ff)
+      (leo-add-to-front-of-list
+       'Info-directory-list  leo-Info-main-directory)
+    ;; Info-directory-list not yet initalised (emacs 23)
+    (leo-add-to-front-of-list
+     'Info-default-directory-list  leo-Info-main-directory))
   ;; (ido-at-point-mode)
   ;; shell stuff
   (require 'shell-command)

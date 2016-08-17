@@ -7,14 +7,13 @@
 ;;
 ;; settings for trash deletion
 ;;
-(setq delete-by-moving-to-trash t)
 (setq trash-directory
-      (cond
-       ((eq system-type 'windows-nt)
-        nil)
-       ((eq system-type 'darwin)
-        "~/.Trash/")
-       (t nil)))
+      (cond ((eq system-type 'darwin)
+             "~/.Trash")
+            ((eq system-type 'gnu/linux)
+             "~/.local/share/Trash/")
+            (t
+             nil)))
 
 ;;
 ;; path handling
