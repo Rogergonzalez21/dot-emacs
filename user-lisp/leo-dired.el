@@ -199,6 +199,7 @@ It inherits from `dired-move-to-filename-regexp' and  does just the grouping for
 ;;
 ;; things to do at dired startup
 ;;
+(add-hook 'dired-mode-hook 'auto-revert-mode)
 (add-hook 'dired-load-hook
 	  (lambda ()
             (require 'dired-sort-menu)

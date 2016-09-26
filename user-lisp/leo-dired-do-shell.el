@@ -6,7 +6,7 @@
 ;;
 (setq dired-guess-shell-alist-user
    (list 
-    (list "\\(^\\|/\\)NUL$" "nuldel.sh")
+    (list "\\(^\\|/\\)NUL$" "nuldel")
     (list "\\.jpe?g$" "printimgtags" "exiftool -s -c \"%.6f\"")
     (list "\\.pdf$" "showpdf")))
     
