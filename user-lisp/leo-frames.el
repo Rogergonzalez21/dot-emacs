@@ -1,3 +1,7 @@
+;; snippets to make the frame sfull height on Macbook
+;; (set-frame-height nil 755 nil t)
+;; (`frame-pixel-height; is set in custom)
+
 ;;
 ;; popwin
 ;;
