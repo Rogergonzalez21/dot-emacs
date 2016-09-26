@@ -2,13 +2,29 @@
 ;; general stuff for programming modes
 ;;
 (defun leo-prog-mode-hook-func ()
-  ;;(column-number-mode 1)
   (flyspell-prog-mode)
   ;; smart tab
   (require 'smart-tab)
   (smart-tab-mode 1))
 
 (add-hook 'prog-mode-hook 'leo-prog-mode-hook-func)
+
+;;
+;; ado mode for Stata
+;; 
+
+(push (expand-file-name (concat leo-emacs-userroot-path "site-lisp/ado-mode/lisp"))
+      load-path)
+(require 'ado-mode)
+(add-hook 'ado-mode-hook 'leo-prog-mode-hook-func)
+
+;; to set the keybinding of original ado-mode correctly
+(define-key ado-mode-map (kbd "C-c p") 'ado-send-command-to-stata)
+(define-key ado-mode-map (kbd "ESC <C-return>") 'ado-send-buffer-to-stata)
+;; my typical "compile" progmode key bindings
+(define-key ado-mode-map (kbd "M-RET") 'ado-send-command-to-stata) 
+(define-key ado-mode-map (kbd "C-c C-p") 'ado-send-buffer-to-stata)
+
 
 ;;
 ;; ruby mode
