@@ -50,15 +50,61 @@
 (autoload 'markdown-mode "markdown-mode.el"
   "Major mode for editing Markdown files" t)
 
+(setq markdown-open-command
+      (cond ((eq system-type 'darwin)
+             "marked")
+            (t
+             nil)))
+
 (defun leo-markdown-mode-customisation ()
   "modify local keymap for compile commands"
-  (leo-local-compile-keys))
+  (leo-local-compile-keys)
+  (local-set-key (kbd "C-c C-c v") 'leo-markdown-view)
+  (local-set-key (kbd "C-c C-c s") 'leo-markdown-copy-snippet-other-window))
 
 (add-hook 'markdown-mode-hook
           'leo-markdown-mode-customisation) ;; defined in progmodes.el!
 
 (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
 
+;;
+;; preview stuff
+;;
+(defun leo-markdown-preview ()
+  ;; mainly for windows where theer is no Marked
+  "Run `markdown-command' on the current buffer and view output in browser.
+
+Like `markdown-preview', just with title taken from md buffer name."
+  (interactive)
+  (let ((title (or (buffer-name) markdown-output-buffer-name)))
+    (message (format "Opening %s..." title))
+    (browse-url-of-buffer
+     (leo-markdown-standalone markdown-output-buffer-name title))))
+
+(defun leo-markdown-standalone (&optional output-buffer-name title)
+  "Special function to provide standalone HTML output.
+
+Like `markdown-standalone', just separate title parameter."
+  (setq output-buffer-name (markdown output-buffer-name))
+  (with-current-buffer output-buffer-name
+    (set-buffer output-buffer-name)
+    (unless (markdown-output-standalone-p)
+      (markdown-add-xhtml-header-and-footer title))
+    (goto-char (point-min))
+    (html-mode))
+  output-buffer-name)
+
+(defun leo-markdown-view ()
+  "Call either `markdown-open' or  `(leo-)markdown-preview', depending
+whether `markdown-open-command' command is set."
+  (interactive)
+  (if markdown-open-command
+      (markdown-open)
+    (leo-markdown-preview)))
+
+;;
+;; make snippet (for pasting into stackoverflow etc)
+;;
 (defun leo-markdown-clean-snippet ()
   "Clean the the html code in the current buffer.
 
@@ -95,11 +141,6 @@ With  optional argument C-u do NOT call clean-up function
         (noclean arg)) ;; no clean-up with C-u argument
     (display-buffer (leo-markdown-make-snippet nil noclean))))
 
-(eval-after-load 'markdown-mode
-    '(progn
-       (define-key markdown-mode-map "\C-c\C-cs" 
-         'leo-markdown-copy-snippet-other-window)))
-
 (defun leo-markdown-timestamp ()
    (interactive)
    (insert (format-time-string "%Y-%m-%d %H:%M:%S +0000")))
@@ -122,13 +163,3 @@ With  optional argument C-u do NOT call clean-up function
     ))
 
 (put 'markdown-mode 'flyspell-mode-predicate 'flyspell-ignore-tex-commands)
-
-;;
-;; special stuff for Day One doentry files
-;; Attention: They are in nxml mode, which is a PROG mode!!!
-;; Note: This can be deleted at some stage, because Day one V2 doesn't use doentry files anymore
-(defun leo-set-dayone-files-modes ()
-  (nxml-mode))
-
-(add-to-list 'auto-mode-alist '("\\.doentry$" . leo-set-dayone-files-modes))
-
