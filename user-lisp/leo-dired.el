@@ -34,14 +34,23 @@ works best if `dired-dwim-target' is NOT set."
 (define-key minibuffer-local-filename-completion-map [?\M-\C-g] 'leo-dired-dwim-yank)
 
 ;;
-;; functions using the find command
+;; customisations to the find command
 ;;
-(when (eq system-type 'windows-nt) 
- (setq find-ls-option (quote ("-exec ls -lGd {} \\;" . "-lGd")))
-)
+(setq find-ls-option
+      (cond ((eq system-type 'windows-nt)
+             '("-exec ls -ld {} \\;" . "-ld"))
+            (t
+             '("-exec ls -ohd {} +" . "-ohd"))))
+
+;; make the (obsolete) ".dired" file not used in *Find* buffers
+(defun leo-remove-dired-local-variables-file (orig-fun &rest args)
+  (let ((dired-local-variables-file nil))
+    (apply orig-fun args)))
+
+(advice-add 'find-dired :around #'leo-remove-dired-local-variables-file)
 
 ;;;###autoload
-(defun find-iname-dired (dir pattern)
+(defun leo-find-iname-dired (dir pattern)
   "Search DIR recursively for files matching the globbing pattern PATTERN,
 and run dired on those files.
 PATTERN is a shell wildcard (not an Emacs regexp) and need not be quoted.
@@ -51,6 +60,33 @@ The command run (after changing into DIR) is
   (interactive
    "DFind-name (directory): \nsFind-iname (filename wildcard): ")
   (find-dired dir (concat "-iname '" pattern "'")))
+
+(defun leo-find-grep-dired-globbed (dir file-glob regexp)
+  "Find files in DIR matching FILE-glob and containing a regexp REGEXP and 
+output them in Dired.
+The command run (after changing into DIR) is
+
+  find . \\( -type f -iname FILE-GLOB -exec `grep-program' `find-grep-options' \\
+    -e REGEXP {} \\; \\) -ls
+
+where the car of the variable `find-ls-option' specifies what to
+use in place of \"-ls\" as the final argument."
+  (interactive "DFind-grep (directory): \nsFind-grep (file glob, e.g. '*.txt'): \nsFind-grep (grep regexp): ")
+  (find-dired dir
+	      (concat "-type f -iname "
+                      (shell-quote-argument file-glob)
+                      " -exec "
+                      grep-program
+                      " "
+                      find-grep-options
+                      " -e "
+		      (shell-quote-argument regexp)
+		      " "
+		      (shell-quote-argument "{}")
+		      " "
+		      ;; Doesn't work with "+".
+		      (shell-quote-argument ";"))))
+
 
 ;; finds all items from the last 24 hours except dot files
 (defun leo-find-since-yesterday (dir)
@@ -199,42 +235,47 @@ It inherits from `dired-move-to-filename-regexp' and  does just the grouping for
 ;;
 ;; things to do at dired startup
 ;;
-(add-hook 'dired-mode-hook 'auto-revert-mode)
+(defun leo-dired-mode-keys ()
+  (define-key dired-mode-map [return] 'leo-dired-find-file)
+  (define-key dired-mode-map [S-return] 'dired-find-file)
+  (define-key dired-mode-map "v" 'dired-display-file)
+
+  (define-key dired-mode-map "\C-o" 'dired-omit-mode)
+  (define-key dired-mode-map "\C-t" 'leo-dired-omit-unmarked-files)
+  (define-key dired-mode-map "\C-p" 'leo-toggle-ls-lisp-verbosity)
+  (define-key dired-mode-map [?\C-\S-r] 'dired-sort-menu-toggle-recursive)
+  (define-key dired-mode-map "w" 'leo-dired-copy-filename-as-kill)
+  (define-key dired-mode-map "W" 'dired-copy-filename-as-kill)
+  (define-key dired-mode-map "k" 'leo-dired-kill-subdir-go-up)
+  (define-key dired-mode-map "K" 'dired-do-kill-lines)
+  (define-key dired-mode-map "\ek" 'dired-kill-tree)
+  (define-key dired-mode-map "e" 'w32-integ-dired-explorer-open)
+  (define-key dired-mode-map (kbd "\C-x 5 \C-m") 'leo-dired-find-file-other-frame) ;; delete it?
+  (define-key dired-mode-map (kbd "C-x 5 o") 'leo-dired-find-file-other-frame)
+  (define-key dired-mode-map "c" 'leo-dired-find-container)
+  (define-key dired-mode-map "^" 'leo-dired-up-directory-kill-last-buffer)
+  (define-key dired-mode-map "!" 'leo-dired-do-shell-command))
+  
 (add-hook 'dired-load-hook
 	  (lambda ()
             (require 'dired-sort-menu)
             (require 'dired-x)
             (load "leo-dired-in-hook.el")
-
-            (define-key dired-mode-map [return] 'leo-dired-find-file)
-            (define-key dired-mode-map [S-return] 'dired-find-file)
-            (define-key dired-mode-map "v" 'dired-display-file)
-
-	    (define-key dired-mode-map "\C-o" 'dired-omit-mode)
-	    (define-key dired-mode-map "\C-t" 'leo-dired-omit-unmarked-files)
-	    (define-key dired-mode-map "\C-p" 'leo-toggle-ls-lisp-verbosity)
-            (define-key dired-mode-map [?\C-\S-r] 'dired-sort-menu-toggle-recursive)
-            (define-key dired-mode-map "w" 'leo-dired-copy-filename-as-kill)
-            (define-key dired-mode-map "W" 'dired-copy-filename-as-kill)
-            (define-key dired-mode-map "k" 'leo-dired-kill-subdir-go-up)
-            (define-key dired-mode-map "K" 'dired-do-kill-lines)
-            (define-key dired-mode-map "\ek" 'dired-kill-tree)
-            (define-key dired-mode-map "e" 'w32-integ-dired-explorer-open)
-            (define-key dired-mode-map (kbd "\C-x 5 \C-m") 'leo-dired-find-file-other-frame) ;; delete it?
-            (define-key dired-mode-map (kbd "C-x 5 o") 'leo-dired-find-file-other-frame)
-	    (define-key dired-mode-map "c" 'leo-dired-find-container)
-	    (define-key dired-mode-map "^" 'leo-dired-up-directory-kill-last-buffer)
-	    (define-key dired-mode-map "!" 'leo-dired-do-shell-command)
-	    ))
+            (leo-dired-mode-keys)))
 
 ;;
 ;; presetting omit
 ;; note: used in leo-locate as well
 ;;
 (defun leo-dired-manage-omit-mode ()
-  (if (not (and (boundp 'leo-dired-dont-omit)
-                leo-dired-dont-omit))
-      (dired-omit-mode 1)
-    (dired-omit-mode 0)))
-    
+  (when (boundp 'dired-omit-files)
+    (if (not (and (boundp 'leo-dired-dont-omit)
+                  leo-dired-dont-omit))
+        (dired-omit-mode 1)
+      (dired-omit-mode 0))))
+
+;;
+;; things to do when dired-mode is switched on
+;;
+(add-hook 'dired-mode-hook 'auto-revert-mode)
 (add-hook 'dired-mode-hook 'leo-dired-manage-omit-mode)

@@ -3,7 +3,7 @@
 ;;
 (require 'recentf)
 (setq recentf-save-file
-      (concat leo-emacs-userdata-path ".recentf"))
+      (concat user-emacs-directory ".recentf"))
 (setq recentf-auto-cleanup 'never)
 (recentf-mode 1)
 

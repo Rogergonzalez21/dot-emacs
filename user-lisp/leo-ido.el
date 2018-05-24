@@ -8,7 +8,7 @@
 (setq ido-default-buffer-method 'selected-window)
 (setq ido-confirm-unique-completion t)
 (setq ido-save-directory-list-file
-      (concat leo-emacs-userdata-path 
+      (concat user-emacs-directoryS 
               (cond ((eq system-type 'windows-nt)
                      ".ido.last_nt")
                     (t

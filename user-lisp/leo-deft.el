@@ -11,9 +11,11 @@
   :group 'deft)
 
 (setq deft-directory
-      (expand-file-name "~/Dropbox/notes/deft"))
+      (expand-file-name "~/notes/deft"))
 (setq leo-deft-done-directory
-      (expand-file-name "~/Dropbox/notes/deft/_done"))
+      (expand-file-name "~/notes/deft/_done"))
+
+(setq deft-default-extension "md")
 
 (defun leo-deft-switch-and-filter-clear ()
   "switch to deft buffer and clear filter."

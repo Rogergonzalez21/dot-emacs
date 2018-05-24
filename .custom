@@ -4,40 +4,49 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(Man-notify-method (quote newframe))
- '(Man-width 70)
- '(browse-url-browser-function (quote browse-url-chrome-macosx-browser))
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
+ '(ansi-color-names-vector
+   ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9" "white"])
+ '(auto-revert-verbose nil)
  '(case-fold-search t)
  '(comint-input-ignoredups t)
  '(compilation-scroll-output (quote first-error))
  '(compilation-window-height 15)
+ '(custom-enabled-themes (quote (tsdh-light)))
  '(custom-safe-themes
    (quote
-    ("eb90042bd42c41f7fe04f87faa2e17b72371e73f2be01288110dde88252aab9b" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" "fc5fcb6f1f1c1bc01305694c59a1a861b008c534cae8d0e48e4d5e81ad718bc6" default)))
+    ("ecb9fe1d5b165a35499191a909b2b5710a52935614058b327a39bfbbb07c7dc8" "e35505a8cdb1eddfb691aee75b2b3b42c16f05c9b42026015ed982b3f4ccb651" "eb90042bd42c41f7fe04f87faa2e17b72371e73f2be01288110dde88252aab9b" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" "fc5fcb6f1f1c1bc01305694c59a1a861b008c534cae8d0e48e4d5e81ad718bc6" default)))
  '(cvs-auto-remove-handled (quote delayed))
  '(deft-extension "md")
+ '(deft-markdown-mode-title-level 1)
  '(deft-text-mode (quote markdown-mode))
  '(deft-use-filename-as-title t)
+ '(deft-use-filter-string-for-filename t)
  '(delete-by-moving-to-trash t)
  '(delete-old-versions t)
+ '(dired-auto-revert-buffer (quote dired-directory-changed-p))
  '(dired-dnd-protocol-alist nil)
  '(dired-dwim-target nil)
  '(dired-find-subdir t)
  '(dired-kept-versions 3)
  '(dired-listing-switches "-alh")
  '(dired-omit-size-limit 100000)
+ '(dired-omit-verbose nil)
  '(dired-recursive-copies (quote always))
  '(dired-recursive-deletes (quote top))
  '(eshell-prompt-function (lambda nil (if (= (user-uid) 0) "# " "& ")))
  '(eshell-prompt-regexp "^[^#$
 ]* ?[&#$] ")
- '(fill-column 78)
+ '(filesets-data
+   (quote
+    (("dayone-entries"
+      (:pattern "~/Dropbox/AppSupport/Day One/Journal.dayone/entries" "^.+\\.doentry$")))))
  '(find-grep-options "-q -i")
- '(find-ls-option (quote ("-exec ls -ohd {} +" . "-ohd")))
- '(flyspell-large-region 1)
  '(focus-follows-mouse nil)
  '(font-lock-verbose nil)
- '(frame-resize-pixelwise t)
  '(gnus-play-startup-jingle t)
+ '(helm-multi-files-toggle-locate-binding "C-c C-l")
  '(history-delete-duplicates t)
  '(history-length 500)
  '(horizontal-scroll-bar-mode nil)
@@ -47,9 +56,10 @@
  '(initial-scratch-message
    "news: 
 ----
-* use M-s in ido completion to go into \"merge mode\" (searching through latest dirs)
+* in helm TAB does (if anything) only completion while C-z opens the actions list
+* use M-r in shell-mode to select an earlier input via helm (16-AUG-2017)
 * keep in mind international prefix C-x 8 (e.g. C-x 8 \" o for ö)
-* ffap bindings have moved to the C-x p prefix (so that abbrev binding like C-x a l work!)
+* ffap bindings moved to C-x p prefix (so that abbrev binding like C-x a l work!)
 * in markdown buffer: C-c C-c s copies (html) output to clipboard
 * global binding: C-A o (on apple keyboard: Ctrl-Cmd o) overwrite-mode
 * global C-x g bindings: check with C-x g C-h (18-09-2013)
@@ -70,15 +80,22 @@ tips:
      (`jump-to-register').
 ")
  '(ispell-dictionary "british")
+ '(ispell-extra-args nil)
  '(kept-new-versions 3)
+ '(kill-do-not-save-duplicates t)
  '(kill-read-only-ok t)
  '(leo-locate-basename-only t)
- '(locate-command "glocate")
  '(ls-lisp-verbosity (quote (links)))
- '(markdown-command "multimarkdown --nosmart --snippet")
+ '(magit-diff-options nil)
+ '(manual-program "moreman")
+ '(markdown-command "multimarkdown")
+ '(markdown-content-type "utf8")
  '(markdown-footnote-location (quote immediately))
  '(markdown-indent-on-enter nil)
- '(markdown-open-command "marked")
+ '(max-mini-window-height 3)
+ '(package-selected-packages
+   (quote
+    (smart-tab flymd elpy ein edit-indirect lorem-ipsum tango-plus-theme bash-completion deft real-auto-save dash discover git-commit helm-core magit-popup with-editor markdown-mode+ markdown-toc magit async helm)))
  '(password-cache-expiry nil)
  '(recentf-initialize-file-name-history nil)
  '(recentf-keep-non-readable-files-flag t)
@@ -88,11 +105,10 @@ tips:
  '(rtm-api-shared-secret "4e81793b72bbba9c")
  '(safe-local-variable-values
    (quote
-    ((python-shell-virtualenv-path)
-     (python-shell-virtualenv-path . /Users/hallo/\.virtualenvs/datascience)
+    ((eval auto-fill-mode t)
+     (python-shell-virtualenv-path)
      (python-shell-interpreter . "python3")
      (python-shell-interpreter . "python")
-     (leo-python-args-to-send . "-v")
      (dired-actual-switches . "-alhR")
      (dired-actual-switches . "-laht")
      (dired-actual-switches . "-alR")
@@ -100,9 +116,12 @@ tips:
  '(savehist-autosave-interval 60)
  '(scroll-error-top-bottom t)
  '(tex-fontify-script nil)
+ '(tramp-default-method "plink")
  '(tramp-remote-process-environment
    (quote
     ("LC_ALL=C" "TERM=dumb" "EMACS=t" "INSIDE_EMACS='24.1.50.1,tramp:2.2.6-pre'" "CDPATH=" "HISTORY=" "MAIL=" "MAILCHECK=" "MAILPATH=" "PAGER=\"\"" "autocorrect=" "correct=")))
+ '(undo-limit 200000)
+ '(undo-strong-limit 300000)
  '(uniquify-buffer-name-style (quote post-forward) nil (uniquify))
  '(version-control t)
  '(visible-bell nil))

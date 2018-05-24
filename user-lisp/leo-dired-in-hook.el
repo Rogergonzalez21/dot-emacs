@@ -1,5 +1,5 @@
 ;;
-;; dired functions (are loaded in dired hook)
+;; dired functions (are loaded in dired load hook)
 ;;
 ;; ---------------------------------------------------------------------------
 
@@ -25,12 +25,12 @@ Directories are inserted in the same buffer (like `dired-maybe-insert-subdir')"
 ;;
 ;; omitting
 ;;
-;; (if (eq system-type 'darwin) <-- omit them opn windows as well for ipod.
-(setq dired-omit-files (concat dired-omit-files 
+(when (boundp 'dired-omit-files)
+  (setq dired-omit-files (concat dired-omit-files 
                                "\\|^\\.DS_Store$\\|^\\."))
-(if (not (eq system-type 'darwin))
+  (if (eq system-type 'windows-nt)
     (setq dired-omit-files (concat dired-omit-files 
-                                   "\\|^CVS$\\|^Root$\\|^Repository$\\|^Entries.Old$\\|^Entries.Log$\\|^Entries.Extra.Old$\\|^Entries.Extra$\\|^Entries$\\|^Template$")))
+                                   "\\|^CVS$\\|^Root$\\|^Repository$\\|^Entries.Old$\\|^Entries.Log$\\|^Entries.Extra.Old$\\|^Entries.Extra$\\|^Entries$\\|^Template$"))))
 
 (defun leo-dired-omit-unmarked-files  (&optional arg)
   "In Dired omit all unmarked files.  With an prefix arg omit the marked files.

@@ -14,17 +14,39 @@
 )
 
 
-(defun leo-shell-mode-hook ()
+(defun leo-shell-keys ()
   "cursor keys get mapped"
-  ;; don't change the cursor up/down behaviour anymore
-  ;;(local-set-key '[C-up] (lookup-key global-map [up])) 
-  ;;(local-set-key '[C-down] (lookup-key global-map [down]))
-  ;;(local-set-key '[up] 'comint-previous-input)
-  ;;(local-set-key '[down] 'comint-next-input)
+  ;; change the cursor up/down behaviour to normal shell
+  (local-set-key '[C-up] (lookup-key global-map [up])) 
+  (local-set-key '[C-down] (lookup-key global-map [down]))
+  (local-set-key '[up] 'comint-previous-input)
+  (local-set-key '[down] 'comint-next-input)
   (local-set-key '[(shift tab)] 'comint-previous-matching-input-from-input)
+  (local-set-key (kbd "M-r") 'helm-comint-input-ring)
   (local-set-key (kbd "M-RET") 'leo-shell-resync-dirs))
 
+(add-hook 'shell-mode-hook 'leo-shell-keys)
+
+;;
+;; dirtrack-mode
+;;
+(defcustom leo-shell-dirtrack-regexp ""
+  ;; sample string for .custom: "\\(?:/[a-z0-9:@]*ncisdevgc01:\\)"
+  ;; has to be entered in customize buffer as `\(?:/[a-z0-9:@]*ncisdevgc01:\)'
+  "*Regexp matching the TRAMP directory paths for (remote) shells
+which should have `dir-track-mode' enabled. (Note: These remote
+shells must have their prompt set containsing the full TRAMP
+path.)"
+      :type 'string
+      :group 'leos
+      :group 'shell)
+
+(defun leo-shell-mode-hook ()
+  (if (string-match leo-shell-dirtrack-regexp default-directory)
+        (dirtrack-mode 1)))
+
 (add-hook 'shell-mode-hook 'leo-shell-mode-hook)
+
 
 ;;(defun leo-comint-init-without-echo () 
 ;;  (setq comint-process-echoes t)) 
@@ -203,12 +225,3 @@ be smart: if current window shows a shell buffer don't list that one."
     (if bname
         (switch-to-buffer bname)
       (leo-shell-new-shell-maybe-first new))))
-
-
-;;
-;; eshell stuff
-;;
-
-(setq eshell-directory-name 
-      (concat leo-emacs-shareddata-path "eshell"))
-;; eshell-prompt-function and eshell-prompt-regexp are set in .custom

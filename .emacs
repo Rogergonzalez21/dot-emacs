@@ -5,18 +5,8 @@
 ;;
 (cd "~")
 
-(setq leo-emacs-userroot-path
+(setq leo-user-emacs-lisp-dir
       (file-name-directory (or load-file-name buffer-file-name)))
-
-(setq leo-emacs-shareddata-path 
-      (concat leo-emacs-userroot-path "shared-data/"))
-
-(setq leo-emacs-userdata-path 
-      "~/.emacsdata/")
-;; even tually we might try to get ride off leo-emacs-userdata-path completely
-;; and replace it with user-emacs-directory... 
-(setq user-emacs-directory
-      leo-emacs-userdata-path)
 
 (setq leo-emacs-archivedata-path
       "~/archive/emacs/")
@@ -24,33 +14,24 @@
 ;; custom file for easy customization settings
 ;; attention: this file has to be _loaded_ as well (at the end of this file)
 (setq custom-file 
-      (concat leo-emacs-userroot-path ".custom"))
+      (concat leo-user-emacs-lisp-dir ".custom"))
 
 ;; abbrevs file
 (setq abbrev-file-name
-      (concat leo-emacs-userroot-path "abbrev_defs"))
+      (concat leo-user-emacs-lisp-dir "abbrev_defs"))
 
 ;; load-path
-(push (expand-file-name leo-emacs-userroot-path)
+(push (expand-file-name leo-user-emacs-lisp-dir)
       load-path)
-(push (expand-file-name (concat leo-emacs-userroot-path "site-lisp"))
+(push (expand-file-name (concat leo-user-emacs-lisp-dir "site-lisp"))
       load-path)
-(push (expand-file-name (concat leo-emacs-userroot-path "user-lisp"))
+(push (expand-file-name (concat leo-user-emacs-lisp-dir "user-lisp"))
       load-path)
 
 ;;
-;; update environment variable PATH from STORED_PATH
-;; note: for command `shell-command'
-(if (getenv "STORED_PATH")
-    (setenv "PATH" (getenv "STORED_PATH")))
-
+;; rearrange the path environment variable emacs uses (to launch unix tools)
 ;;
-;; exec-path: add directories from $STORED_PATH or $PATH
-;; note: for internal used executables like aspell et al
-(let* ((paths (or (getenv "STORED_PATH") (getenv "PATH")))
-       (path-list (split-string paths path-separator)))
-  (dolist (item (reverse path-list))
-    (setq exec-path (add-to-list 'exec-path item))))
+(load "leo-PATH")
 
 ;;
 ;; Info path stuff
@@ -58,17 +39,14 @@
 (require 'info)
 
 (setq leo-Info-main-directory 
-      (expand-file-name (concat leo-emacs-userroot-path "site-info/")))
+      (expand-file-name (concat leo-user-emacs-lisp-dir "site-info/")))
 
-(when (eq system-type 'windows-nt)
-  (push "c:/cygwin/usr/share/info"
-	Info-additional-directory-list))
 (push leo-Info-main-directory 
       Info-additional-directory-list)
 
 ;; packages are going where they are seen on all systems
 (setq package-user-dir 
-      (expand-file-name (concat leo-emacs-userroot-path "site-lisp/elpa")))
+      (expand-file-name (concat leo-user-emacs-lisp-dir "site-lisp/elpa")))
 
 ;;
 ;; auto save and backup config
@@ -101,11 +79,13 @@
 ;; 
 ;; package management
 ;;
-(require 'package)
-;; (add-to-list 'package-archives 
-;;              '("marmalade" . "http://marmalade-repo.org/packages/") t)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(when (>= emacs-major-version 24)    
+  (require 'package)
+  ;; (add-to-list 'package-archives 
+  ;;              '("marmalade" . "http://marmalade-repo.org/packages/") t)
+  (add-to-list 'package-archives
+               '("melpa" . "http://melpa.milkbox.net/packages/") t)
+  (package-initialize))
 
 ;
 ;; package inits 
@@ -113,17 +93,16 @@
 ;;
 (defun leo-after-init-hook ()
   "After package initialisation."
+  (load "leo-helm")
   (if Info-directory-list
       ;; Info-directory-list already initalised (emacs 24ff)
-      (leo-add-to-front-of-list
+      (leo-add-to-front-of-list 
        'Info-directory-list  leo-Info-main-directory)
     ;; Info-directory-list not yet initalised (emacs 23)
-    (leo-add-to-front-of-list
-     'Info-default-directory-list  leo-Info-main-directory))
+    (leo-add-to-front-of-list 
+     'Info-default-directory-list  leo-Info-main-directory)) 
   ;; (ido-at-point-mode)
   ;; shell stuff
-  (require 'shell-command)
-  (shell-command-completion-mode)
   ;;  bash-completion
   (when (not (or (eq system-type 'windows-nt) (eq system-type 'cygwin)))
     (require 'bash-completion)
@@ -160,7 +139,7 @@
 ;;
 ;; ido stuff
 ;;
-(load "leo-ido")
+;;(load "leo-ido")
 
 ;;
 ;; locate stuff
@@ -196,9 +175,9 @@
 
 ;;
 (global-set-key "\C-x\C-t" 'toggle-truncate-lines)
-(global-set-key "\C-\\" 'ido-switch-buffer)
-(global-set-key "\C-xd" 'leo-ido-dired)
-(global-set-key "\C-x\C-w" 'leo-unmapped-write-file)
+(global-set-key "\C-\\" 'helm-buffers-list) ;;ido-switch-buffer)
+;;(global-set-key "\C-xd" 'leo-ido-dired) ;; uncomment ido
+;;(global-set-key "\C-x\C-w" 'leo-unmapped-write-file) ;; uncomment ido
 (global-set-key "\C-x\C-a" 'ffap)
 
 (global-set-key "\C-^" 'enlarge-window)
@@ -242,6 +221,12 @@
       w32-lwindow-modifier 'hyper) ; Left Windows key
   (setq w32-alt-is-meta nil))
 
+;;(when (eq window-system 'mac)
+(when (or (eq window-system 'ns) (eq window-system 'mac))
+  (setq mac-function-modifier (quote control))
+  (setq mac-option-modifier (quote meta))
+  (setq mac-command-modifier (quote alt)))
+
 ;;
 ;; global navigation keys
 ;;
@@ -258,6 +243,11 @@
   (global-set-key (kbd "<H-right>") 'end-of-line)  
   (global-set-key (kbd "<H-up>") 'beginning-of-buffer)
   (global-set-key (kbd "<H-down>") 'end-of-buffer))
+(when (eq system-type 'gnu/linux)
+  (global-set-key (kbd "<M-left>") 'beginning-of-line)
+  (global-set-key (kbd "<M-right>") 'end-of-line)  
+  (global-set-key (kbd "<M-up>") 'beginning-of-buffer)
+  (global-set-key (kbd "<M-down>") 'end-of-buffer))
 
 
 ;;
@@ -283,9 +273,7 @@
 (define-key minibuffer-local-map [C-tab] 'leo-other-window-backward)
 (define-key minibuffer-local-must-match-map [C-tab] 'leo-other-window-backward)
 
-(global-set-key [?\C-`] (if (functionp 'leo-ido-switch-to-recent-buffer)
-    'leo-ido-switch-to-recent-buffer
-  'leo-switch-to-recent-buffer))
+(global-set-key [?\C-`]  'leo-switch-to-recent-buffer) ;;(if (functionp 'leo-ido-switch-to-recent-buffer)
 (global-set-key [?\C-~] 'leo-buf-move-down-or-up)
 
 ;;
@@ -300,10 +288,13 @@
 ;;
 ;; frames
 ;; 
+(setq frame-title-format
+      (concat  "%b - emacs@" (system-name)))
+
 (global-set-key "\M-`" 'other-frame)
 
 ;; mac aqua stuff
-(when (eq window-system 'ns)
+(when (or (eq window-system 'ns) (eq window-system 'mac))
   (setq ns-command-modifier 'alt)
   (global-set-key [?\A-`] 'other-frame)
   (global-set-key [?\A-w] 'delete-frame))  
@@ -375,6 +366,10 @@
 (fset 'leo-general-command-prefix-map leo-general-command-prefix-map)
 (define-key global-map "\C-xg" 'leo-general-command-prefix-map)
 
+;; Set shortcut for next match in my emacs files search
+;; Note: overwrites in emacs 25 binding to `xref-pop-marker-stack'
+(global-set-key "\e," 'tags-loop-continue)
+
 ;;
 ;; url stuff (which might go in git version of emacs source browse-url.el
 ;;
@@ -388,7 +383,6 @@
 (defvar leo-mode-switch-prefix-map
   (let ((map (make-sparse-keymap)))
     (define-key map "n" 'normal-mode)
-    (define-key map "h" 'html-helper-mode)
     (define-key map "p" 'php-mode)
     (define-key map "t" 'text-mode)
     map)
@@ -418,7 +412,7 @@
 ;;
 ;; web (html/php/javascript) things
 ;;
-(load "leo-html")
+;;(load "leo-html")
 
 ;;
 ;; lisp mode
@@ -444,8 +438,9 @@
 ;;does not work under cygwin
 (when (eq system-type 'windows-nt)
   (setq server-auth-dir
-        (concat leo-emacs-userdata-path "server/")))
+        (concat user-emacs-directory "server/")))
 (server-start)
+
 
 ;;
 ;; java, cedet and jdee
@@ -457,8 +452,11 @@
 ;;
 (require 'savehist)
 (setq savehist-file
-      (concat leo-emacs-userdata-path ".emacs-history"))
+      (concat user-emacs-directory ".emacs-history"))
 (savehist-mode 1)
+
+;;(require 'discover)
+;;(global-discover-mode 1)
 
 ;; load temporary definitions if they exist.
 (load ".emacs-temp" t) 

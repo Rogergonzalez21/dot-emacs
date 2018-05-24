@@ -242,9 +242,9 @@ Return the width of display's screen in pixels."
 ;; search function for my emacs files
 ;;
 (defcustom leo-my-emacsfiles-form 
-      '(append (list (concat leo-emacs-userroot-path ".emacs") 
-                     (concat leo-emacs-userroot-path ".custom"))
-               (file-expand-wildcards (concat leo-emacs-userroot-path "user-lisp/[a-z]*.el"))               
+      '(append (list (concat leo-user-emacs-lisp-dir ".emacs") 
+                     (concat leo-user-emacs-lisp-dir ".custom"))
+               (file-expand-wildcards (concat leo-user-emacs-lisp-dir "user-lisp/[a-z]*.el"))               
                )
       "*A form with the files to be searched through by `leo-search-my-emacsfiles`."
       :type 'string
@@ -255,10 +255,10 @@ Return the width of display's screen in pixels."
 Stops when a match is found.
 To continue searching for next match, use command \\[tags-loop-continue].
 
-For seraching the file NAMES use something like:
+For searching the file NAMES use something like:
 
 (dolist (file (eval leo-my-emacsfiles-form))
-  (serach-the-string-and-do--something file))
+  (search-the-string-and-do--something file))
 "
   (interactive "sSearch emacs user files (regexp): ")
   (tags-search regexp leo-my-emacsfiles-form))
@@ -299,44 +299,80 @@ For seraching the file NAMES use something like:
   (interactive)
   (switch-to-buffer "*Messages*"))
   
+(defun leo-notes-remove-and-tidy (&optional wrap-fill)
+  "Calls `leo-notes-remove-rubbish' then `leo-notes-tidy-text'"
+  (interactive)
+  (leo-notes-remove-rubbish)
+  (leo-notes-tidy-text wrap-fill))
+
 (defun leo-notes-remove-rubbish ()
   "This function deletes all rubbish from the whole buffer. It considers 
-as rubbish: All lines ending with percent (\"%\"). It replaces each block of 
-those consecutive lines with the string \"---\"."
+as rubbish: All lines ending with a percent comment (\"//%\"). It replaces 
+each block of those consecutive lines with the string \"%@@\"."
   (interactive)
+  ;; fold rubbish lines into first marker lines
   (goto-char (point-min))
-  (replace-regexp "\\(^.*%$\\)+" "%@%")
+  (while (re-search-forward "^.*//%$" nil t)
+    (replace-match "%@%"))
+  ;; remove empty lines BEFORE lines with first marker ONLY
   (goto-char (point-min))
-  (replace-regexp "\\(^%@%\\\n\\)+" "---\n"))
+  (while (re-search-forward "\\(^\\s-*\\\n\\)+%@%\\\n" nil t)
+    (replace-match ""))
+  (goto-char (point-min))
+  ;; fold multiple lines with first markers into lines with second marker
+  (while (re-search-forward "\\(^%@%\\\n\\)+" nil t)
+    (replace-match "%@@\n"))
+  )
 
-(defun leo-notes-tidy-text (&optional unfill)
+(defun leo-notes-tidy-text (&optional wrap-fill)
   "This function tidies the whole text in the current buffer by:
-  
-\(1\) Converting \"%%\" into paragraph breaks (and deleting all \"%%\" 
-      at the beginning of lines)
-\(2\) Deleting all white space at the beginning of the lines
-\(3\) Filling the paragraphs.
-\(4\) Converting finally $$ into newlines.
 
-Filling is normally done with the fill-column variable, but if the optional UNFILL is non-nil, whole paragraphs become one line without line breaks."
+\(1\) removing java comment char sequences (\"/*\" and \"*/\").
+\(2\) convert $$ and  $% into paragraph breaks or (markdown) line breaks
+\(3\) remove beginning whitespace
+\(4\) filling paragraphs
+
+Filling is normally done so that whole paragraphs become one line 
+without line breaks. But if the optional WRAP-FILL is non-nil, the
+paragraphs are filled with he local `fill-column'."
   (interactive "P")
- (save-excursion
-   (goto-char (point-min))
-   (while (re-search-forward "^[ 	]*%%" nil t)
-     (replace-match ""))
-   (goto-char (point-min))
-   (while (re-search-forward "%%" nil t)
-     (replace-match "\n\n"))
-   (goto-char (point-min))
-   (goto-char (point-min))
-   (while (re-search-forward "^[ 	]+" nil t)
-     (replace-match ""))   
-   (let ((fill-column (if unfill
-                          most-positive-fixnum
-                        fill-column)))
-     (fill-region (point-min) (point-max)))
-   (while (re-search-forward "\\$\\$" nil t)
-     (replace-match "\n"))))
+  (save-excursion
+    ;; remove first marker if any
+    (goto-char (point-min))
+    (when (looking-at "%@@\n")
+      (replace-match ""))
+    ;; remove java comments
+    (goto-char (point-min))
+    (while (re-search-forward "\\(/\\*[ 	]*\\)\\|\\([ 	]*\\*/\\)" nil t)
+      (replace-match ""))
+    ;; make $$ and $% into paragraph or line breaks
+    (goto-char (point-min))
+    (while (re-search-forward "\\$\\$" nil t)
+      (replace-match "\n\n"))
+    (goto-char (point-min))
+    (while (re-search-forward "\\$%" nil t)
+      (replace-match "  \n"))
+    ;; remove beginning white space
+    (goto-char (point-min))
+    (while (re-search-forward "^[ 	]+" nil t)
+      (replace-match ""))   
+    ;; inserting newlines before and after snippets )for paragraph-filling)
+    (goto-char (point-min))
+    (while (re-search-forward "^%@@$" nil t)
+      (replace-match "\n@@%\n\n"))   
+    ;; folding consequtive newlines in one
+    (goto-char (point-min))
+    (while (re-search-forward "^\\\n\\(\\\n\\)*" nil t)
+      (replace-match "\n"))   
+    ;; filling the paragraphs
+    (let ((fill-column (if (not wrap-fill)
+                           most-positive-fixnum
+                         fill-column)))
+      (fill-region (point-min) (point-max)))
+    ;; converting marker into ---
+    (goto-char (point-min))
+    (while (re-search-forward "^@@%\\(\\\n\\)*" nil t)
+      (replace-match "---\n"))))
 
 ;;
 ;; process handling

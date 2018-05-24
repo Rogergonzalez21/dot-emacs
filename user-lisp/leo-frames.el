@@ -1,32 +1,3 @@
-;; snippets to make the frame sfull height on Macbook
-;; (set-frame-height nil 755 nil t)
-;; (`frame-pixel-height; is set in custom)
-
-;;
-;; popwin
-;;
-(require 'popwin)
-(global-set-key (kbd "C-x C-p") popwin:keymap)
-
-;;
-;; to restore special-display-function with pop-win.el
-;;
-(defun leo-popwin:display-buffer (buffer-or-name &optional not-this-window)
-  "Display BUFFER-OR-NAME, if possible, in a popup window, or as
-usual. This function can be used as a value of
-`display-buffer-function'."
-  (interactive "BDisplay buffer:\n")
-  ;; `special-display-p' returns either t or a list of frame
-  ;; parameters to pass to `special-display-function'.
-  (let ((pars (special-display-p name-of-buffer)))
-    (if (and pars special-display-function)
-        (funcall special-display-function
-                 buffer (if (listp pars) pars))
-      (popwin:display-buffer buffer-or-name not-this-window))))
-
-;;(setq display-buffer-function 'leo-popwin:display-buffer)
-;; TODO: delete leo-popwin:...
-
 ;;
 ;; apperance functions
 ;;
@@ -53,11 +24,11 @@ usual. This function can be used as a value of
             ((eq leo-centric-frames t)
              70)
             ((eq window-system 'ns)
-             46) ;; larger doesn't make the window bigger! %-(
+             40) ;; larger makes the window by one line SMALLER! %-(
             ((eq window-system 'w32)
-             60)
+             61)
             ((eq window-system 'x)
-             65)
+             58)
             (t 50)))
 
 (setq leo-max-frame-width
@@ -68,9 +39,9 @@ usual. This function can be used as a value of
             ((eq window-system 'ns)
              85)
             ((eq window-system 'w32)
-             83)
+             91)
             ((eq window-system 'x)
-             83)
+             91)
             (t 83)))
 
 (setq leo-min-frame-top 
@@ -81,9 +52,9 @@ usual. This function can be used as a value of
             ((eq window-system 'ns)
              23)
             ((eq window-system 'w32) 
-             207)
+             80)
             ((eq window-system 'x) 
-             230)
+             36)
             (t 0)))
 
 (setq leo-min-frame-left
@@ -96,12 +67,14 @@ usual. This function can be used as a value of
             ((eq window-system 'w32)
              0)
             ((eq window-system 'x) 
-             8)
+             11)
             (t 0)))
 
 (setq leo-inc-frame-top 
       (cond ((eq window-system 'ns)
              (+ (- leo-min-frame-top) 22))
+            ((eq window-system 'x) 
+             leo-min-frame-top)
             (t (- leo-min-frame-top ))))
 
 (setq leo-times-frame-top 
@@ -120,9 +93,9 @@ usual. This function can be used as a value of
             ((eq window-system 'ns)
              641)
             ((eq window-system 'w32)
-             640)
+             961)
             ((eq window-system 'x) 
-             640)
+             961)
             (t 0)))
 
 (setq leo-times-frame-left
@@ -133,6 +106,8 @@ usual. This function can be used as a value of
             ((eq window-system 'ns)
              2)
             ((eq window-system 'w32)
+             3)
+            ((eq window-system 'x) 
              3)
             (t 4)))
 
@@ -157,9 +132,9 @@ usual. This function can be used as a value of
       (cond ((eq window-system 'ns)
              (append default-frame-alist '((font . "-apple-Monaco-medium-normal-normal-*-12-*-*-*-m-0-iso10646-1"))))
             ((eq window-system 'w32)
-             (append default-frame-alist '((font . "-outline-Courier New-normal-r-normal-normal-12-90-96-96-c-*-iso8859-1"))))
+             (append default-frame-alist '((font . "-outline-Courier New-normal-normal-normal-mono-16-*-*-*-c-*-fontset-auto1"))))
             ((eq window-system 'x)
-             (append default-frame-alist '((font . "-bitstream-Bitstream Vera Sans Mono-normal-normal-normal-*-12-*-*-*-m-0-iso10646-1"))))
+             (append default-frame-alist '((font . "-bitstream-Courier 10 Pitch-normal-normal-normal-*-*-150-*-*-m-0-iso10646-1"))))
             (t default-frame-alist)))
 
 ;; change default-frame-alist according to leo's dimension vars 
@@ -171,10 +146,15 @@ usual. This function can be used as a value of
 (if (eq (user-uid) 0)
     (leo-appearance-root))
 
-(setq frame-title-format "%b - emacs")
-; initial frame set up
+(setq frame-title-format
+      (concat  "%b - emacs@" (system-name)))
+
+;; setup for initial frame 
 (setq initial-frame-alist 
-      (append '((name . "main - emacs") (top . 1) (left . 1)) default-frame-alist))
+      (append '((top . 1) (left . 1))
+                default-frame-alist))
+(add-to-list 'initial-frame-alist
+             (cons 'name (concat "main - emacs@" (system-name))))
 
 
 ;; change initial-frame-alist according to leo's position vars 
@@ -284,18 +264,16 @@ internal func for leo's frames management"
 
 (defun leo-set-frame-position-from-list (the-frame the-positions)
   "does the set-frame-pos work for frame THE-FRAME and position alist THE-POSITIONS"
-  (let ((next-free-pos
+  (let ((free-pos 
          (leo-frames-first-free-position the-positions the-frame)))
-    (if (not next-free-pos)
-        (setq next-free-pos (car the-positions)))    
-    (set-frame-position the-frame (car next-free-pos) (cdr next-free-pos))))
+    (if (not free-pos)
+        (setq free-pos (car the-positions)))
+    (set-frame-position the-frame (car free-pos) (cdr free-pos))))
 
-(defun leo-after-make-frame-func (the-frame)
-  (let ((is-free (frame-parameter the-frame 'free)))
-    (if (not is-free)
-        (leo-set-frame-position-from-list the-frame leo-frames-default-positions))))
-
-(add-hook 'after-make-frame-functions 'leo-after-make-frame-func)
+(add-hook 'after-make-frame-functions
+          (lambda (arg)
+            (leo-set-frame-position-from-list arg leo-frames-default-positions)
+            ))
 
 (defun leo-set-frame-from-index (index)
   "set frame position from index in default position list."

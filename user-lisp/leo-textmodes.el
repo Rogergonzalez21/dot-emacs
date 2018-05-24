@@ -1,31 +1,31 @@
 ;;
 ;; things for document modes
 ;;
-(require `real-auto-save)
+(require 'real-auto-save)
 
 ;;
 ;; text-mode
 ;;
-;; (quail-define-package
-;;  "leo-german-prefix-dq" "German" "DX>" t
-;;  "German (Deutsch) input method with prefix modifiers
-;; Key translation rules are:
-;;  :A -> Ä ->   :O -> Ö   :U -> Ü   :s -> ß
-;; Customisation: \"\" -> \"
-;; " nil t nil nil nil nil nil nil nil nil t)
+(quail-define-package
+ "leo-german-prefix-colon" "German" "DX>" t
+ "German (Deutsch) input method with colon as prefix modifier
+Key translation rules are:
+ :A -> Ä ->   :O -> Ö   :U -> Ü   :s -> ß   :: -> :
+" nil t nil nil nil nil nil nil nil nil t)
 
-;; (quail-define-rules
-;;  (":A" ?Ä)
-;;  (":O" ?Ö)
-;;  (":U" ?Ü)
-;;  (":a" ?ä)
-;;  (":o" ?ö)
-;;  (":u" ?ü)
-;;  (":s" ?ß)
-;; )
+(quail-define-rules
+ (":A" ?Ä)
+ (":O" ?Ö)
+ (":U" ?Ü)
+ (":a" ?ä)
+ (":o" ?ö)
+ (":u" ?ü)
+ (":s" ?ß)
+ ("::" ?:)
+ )
 
 (defun leo-text-mode-hook-func ()
-  ;;(set-input-method "german-prefix")
+  (set-input-method "leo-german-prefix-colon")
   (column-number-mode 1)
   (flyspell-mode 1)
   (abbrev-mode 1)
@@ -43,6 +43,12 @@
 (add-hook 'help-mode-hook
           '(lambda () 
              (column-number-mode 1)))
+
+(defun leo-erase-local-display-table ()
+  (interactive)
+  (if buffer-display-table
+      (setq leo-buffer-display-table-backup buffer-display-table))
+  (setq buffer-display-table nil))
 
 ;;
 ;; markdown
@@ -163,3 +169,13 @@ With  optional argument C-u do NOT call clean-up function
     ))
 
 (put 'markdown-mode 'flyspell-mode-predicate 'flyspell-ignore-tex-commands)
+
+;;
+;; special stuff for Day One doentry files
+;; Attention: They are in nxml mode, which is a PROG mode!!!
+;;
+(defun leo-set-dayone-files-modes ()
+  (nxml-mode))
+
+(add-to-list 'auto-mode-alist '("\\.doentry$" . leo-set-dayone-files-modes))
+

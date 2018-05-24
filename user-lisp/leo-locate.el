@@ -2,13 +2,13 @@
 ;; locate
 ;;
 (require 'locate)
-(require 'cl-lib)
+;;(require 'cl-lib) ;; no need to load this in emacs 25
 
 (defcustom leo-locate-dbdir 
   (cond ((eq system-type 'windows-nt)
-         "c:/cygwin/usr/local/var/")
+         "c:/software/cygwin/var/locate/")
         ((eq system-type 'cygwin)
-         "/usr/local/var/")
+         "/var/locate/")
         ((eq system-type 'darwin)
          "/usr/local/var/locate/")
         (t 
@@ -25,7 +25,11 @@ this restricts the search to the basename part of the filename"
   :group 'leos
   :group 'locate)
 
-(defcustom leo-locate-custom-args "--max-database-age 1"
+(defcustom leo-locate-custom-args 
+  (cond ((eq system-type 'gnu/linux)
+         "")
+        (t 
+         "--max-database-age 1"))
   "*custom arguments for locate"
   :type 'string
   :group 'leos
@@ -36,6 +40,8 @@ this restricts the search to the basename part of the filename"
 (setq locate-command
       (cond ((eq system-type 'darwin)
              "/usr/local/bin/glocate")
+            ((eq system-type 'windows-nt)
+             "C:/software/cygwin/bin/locate.exe")
             (t
              "locate")))
 
